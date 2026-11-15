@@ -199,6 +199,7 @@ cd frontend && npm test                # (planlanan)
 | 1 | PostgreSQL ile Qdrant arasında tutarlılık: Sayfa silinince vektörü kalabiliyor, her otomatik kayıtta embedding çağırmak pahalı | Sürüm işaretli indeksleme: düzenleme bitince tek seferlik, yeniden denemeli ve idempotent işleme; aramada PostgreSQL doğrulaması | ADR-005 |
 | 2 | Claude'un embedding modeli yok | Sohbet ve embedding sağlayıcıları ayrı port'lar; embedding için ayrı sağlayıcı | ADR-006 |
 | 3 | İlk doküman taslağı aşırı mühendislik içeriyordu (ayrı iş tablosu, ORM eşlemesi vb.) | Gözden geçirmede sadeleştirildi; gerekçeler ADR'lerde | ai-log |
+| 4 | İlk SonarQube analizinde güvenlik derecesi **C** çıktı: CI'daki bağımlılık kurulumu paketlerin kurulum betiklerini çalıştırabiliyor ve kilitli sürümlerden sapabiliyordu | Kurulum `--locked --no-build`, komutlar `--frozen --no-sync` yapıldı; kalite kapısı **A** ile geçti | PR #1 |
 
 ## 12. Ders Kriterlerinin Karşılanması
 

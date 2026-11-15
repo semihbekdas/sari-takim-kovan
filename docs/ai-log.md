@@ -74,3 +74,13 @@
 - **Sonuç:** `.github/workflows/ci.yml`, `sonar-project.properties`, README rozetleri. SonarQube Cloud organizasyonu/projesi ve `SONAR_TOKEN` secret'ı Semih tarafından tarayıcıdan oluşturuldu.
 - **Kararlar:** SonarQube'un önerdiği örnek workflow yerine testleri ve kapsamı da içeren tek bir CI işi yazıldı. Action'lar güvenlik için sürüm etiketi yerine sabit commit SHA ile kullanıldı. "Automatic Analysis" kapatıldı (CI analiziyle çakışır).
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-16 — İlk SonarQube analizi: güvenlik C → A
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5) + SonarQube Cloud
+- **Ne oldu?** PR #1'in ilk analizinde kod koşulları geçti (kapsam %97.2, tekrar %0) ama **güvenlik derecesi C** olduğu için kalite kapısı kırmızı yandı.
+- **Yapay zekanın hatası:** Yazdığı CI dosyasında `uv sync` paketlerin kurulum betiklerini çalıştırabiliyordu (`githubactions:S8541`), `uv run` adımları kilitli sürümlerden sapabiliyordu (`S8544`). Ayrıca `lifespan` içinde `yield` sonrası temizlik `try/finally` ile korunmamıştı (`python:S9152`).
+- **Düzeltme:** `uv sync --locked --no-build --no-install-project`, `uv run --frozen --no-sync`, kod kaynaktan (`PYTHONPATH=src`) çalıştırıldı; `lifespan` `try/finally` ile sarıldı.
+- **Sonuç:** Kalite kapısı geçti: güvenilirlik, güvenlik ve bakım kolaylığı **A**, kapsam %97.2, 0 açık bulgu. CI'da gerçek PostgreSQL ile 21/21 test.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
