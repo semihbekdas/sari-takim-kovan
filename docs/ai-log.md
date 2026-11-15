@@ -52,3 +52,25 @@
 - **Aşırı mühendislik olarak sadeleştirilenler:** ayrı `index_jobs` outbox tablosu → sayfa satırında sürüm işareti; SQLAlchemy ORM + eşleme → SQLAlchemy Core; unit of work kaldırıldı; kardeş sayfa sıralaması (`position`) ve maksimum derinlik kuralı kaldırıldı; parçalamadaki örtüşme ve özel kurallar kaldırıldı; MSW kaldırıldı; 10 uçtan uca test → 3 duman testi (Should); sohbet oturumu Must'tan Should'a; favori/ikon Won't.
 - **Bizim müdahalemiz:** Kararları ekip verdi: teslim 25 Aralık / hedef 20 Aralık, hafta sonu toplantıları, public repo, bulut dil modeli, çöp kutusunun Should olması, takım adı "Sarı Takım". ✍️ Dokümanları okuyunca yaptığınız ek düzeltmeleri buraya ekleyin.
 - **Ders çıkarımı:** Yapay zekanın ilk ürettiği tasarım "doğru ama fazla" olabiliyor. Kısıtları (süre, ekip, bütçe) açıkça verip çıktıyı aşırı mühendislik açısından ayrıca sorgulamak gerekiyor.
+
+### 2026-11-16 — Backend iskeleti (İP-C altyapı payı)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** Katmanlı backend iskeletini kurmak: proje yapılandırması (uv), katman klasörleri, import-linter sözleşmeleri, ayarlar, JSON loglama + `request_id`, tek hata formatı, sağlık uç noktaları ve testleri.
+- **Prompt (özet):** "Hocanın isterlerine bak, her şey hazırsa benim görevime başla." (Görev: docs/PLAN.md § 4, Sprint 1.)
+- **Sonuç:** `backend/` klasörü. 20 test geçti (1 Docker testi Docker kapalı olduğu için atlandı), kapsam %96, ruff + mypy (strict) + import-linter (4/4 sözleşme) temiz.
+- **Yapay zekanın hataları / eksikleri ve düzeltmeleri:**
+  - İlk taslakta henüz kullanılmayan yapay zeka ve vektör port'ları da vardı → "kullanılmayan kod commit'lenmez" kuralına aykırı ve kapsamı %0 gösteriyordu → kaldırıldı; ilk kullanan özellikle (Sprint 2) eklenecek.
+  - Eşlemesi unutulmuş bir hata tipi 500 ile kendi mesajını döndürüyordu → iç ayrıntı sızdırmasın diye "beklenmeyen hata" gibi ele alındı, testi eklendi.
+  - Eski kütüphane yolları uyarı veriyordu (`httpx` → `httpx2`, `testcontainers.postgres` → `testcontainers.community.postgres`) → güncellendi.
+  - mypy test modülünü iki farklı adla buluyordu, ruff test fonksiyonunu fazla karmaşık buldu → yapılandırma ve test düzeni düzeltildi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK *(kodu okuyunca değiştirdiğin veya sorduğun şeyler)*
+- **Ders çıkarımı:** Otomatik kontroller (lint, tip, mimari, kapsam) yapay zekanın gözden kaçırdığı sorunları hemen yakaladı.
+
+### 2026-11-16 — CI (GitHub Actions) ve SonarQube Cloud
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** Her PR'da lint, biçim, tip, mimari kurallar, testler ve kapsamı çalıştıran CI; analizin SonarQube Cloud'a gönderilmesi.
+- **Sonuç:** `.github/workflows/ci.yml`, `sonar-project.properties`, README rozetleri. SonarQube Cloud organizasyonu/projesi ve `SONAR_TOKEN` secret'ı Semih tarafından tarayıcıdan oluşturuldu.
+- **Kararlar:** SonarQube'un önerdiği örnek workflow yerine testleri ve kapsamı da içeren tek bir CI işi yazıldı. Action'lar güvenlik için sürüm etiketi yerine sabit commit SHA ile kullanıldı. "Automatic Analysis" kapatıldı (CI analiziyle çakışır).
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK

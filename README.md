@@ -4,12 +4,10 @@
 
 **Sarı Takım** · Yapay Zeka Destekli Yazılım Geliştirme dersi dönem projesi · Proje kodu **P0007 – Bilgi Tabanı (Notion Clone + Anlamsal Arama)** · Teslim: **25 Aralık 2026**
 
-<!-- Kod iskeleti kurulunca eklenecek:
-![CI](https://github.com/<kullanici>/sari-takim-kovan/actions/workflows/ci.yml/badge.svg)
-![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=<key>&metric=alert_status)
--->
+[![CI](https://github.com/semihbekdas/sari-takim-kovan/actions/workflows/ci.yml/badge.svg)](https://github.com/semihbekdas/sari-takim-kovan/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=semihbekdas_sari-takim-kovan&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)
 
-> **Durum:** 📝 Planlama (Sprint 0). Bu README her sprint sonunda güncellenir; henüz uygulanmamış bölümler *(planlanan)* olarak işaretlidir.
+> **Durum:** 🛠️ Geliştirme, Sprint 1 (backend iskeleti, CI ve SonarQube Cloud). Bu README her sprint sonunda güncellenir; henüz uygulanmamış bölümler *(planlanan)* olarak işaretlidir.
 
 ---
 
@@ -138,21 +136,22 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 ## 8. Kurulum ve Çalıştırma
 
-> *(planlanan; kod iskeleti Sprint 1'de eklenecek)*
+> Backend iskeleti hazır. `docker compose`, Alembic ve frontend adımları ilgili işler bitince geçerli olacak *(planlanan)*.
 
 **Gereksinimler:** Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node.js 22 LTS. Yerel yapay zeka modeli **gerekmez**.
 
 ```bash
 git clone https://github.com/<kullanici>/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
-docker compose up -d                 # PostgreSQL + Qdrant
+docker compose up -d                 # PostgreSQL + Qdrant (planlanan)
 
 cd backend
-uv sync
-uv run alembic upgrade head
-uv run uvicorn kovan.main:app --reload
+uv sync                              # Python 3.12 yoksa uv kendisi indirir
+uv run alembic upgrade head          # (planlanan)
+uv run uvicorn kovan.main:create_app --factory --reload
+# API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
 
-cd ../frontend
+cd ../frontend                       # (planlanan)
 npm install
 npm run dev                          # http://localhost:5173
 ```
@@ -172,7 +171,12 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 | RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5, MRR |
 
 ```bash
-cd backend && uv run pytest --cov      # (planlanan)
+cd backend
+uv run pytest --cov                    # testler + kapsam (Docker yoksa entegrasyon testleri atlanır)
+uv run ruff check . && uv run ruff format --check .   # lint + biçim
+uv run mypy                            # tip kontrolü (strict)
+uv run lint-imports                    # mimari katman kuralları
+
 cd frontend && npm test                # (planlanan)
 ```
 
@@ -180,7 +184,8 @@ cd frontend && npm test                # (planlanan)
 
 ## 10. Kod Kalitesi ve Güvenlik
 
-- **SonarQube Cloud:** Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
+- **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
+- **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 - **ruff, mypy, eslint:** CI'da zorunlu.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
@@ -223,8 +228,8 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | Üye | İş paketi | Sorumluluk |
 | --- | --- | --- |
 | Umut | İP-A Sayfalar & Editör | docker-compose + frontend iskeleti; sayfa API'si, sayfa ağacı, editör, otomatik kaydetme, silme, `@` bağlantısı |
-| Özlem | İP-B Kimlik, İçerik & Arama | CI + SonarQube Cloud; kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime araması |
-| Semih | İP-C Yapay Zeka | Backend iskeleti; yapay zeka adaptörleri, Qdrant, indeksleme, anlamsal arama, "Sayfalarına Sor" |
+| Özlem | İP-B Kimlik, İçerik & Arama | Kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime ve anlamsal arama |
+| Semih | İP-C Yapay Zeka | Backend iskeleti, CI + SonarQube Cloud; yapay zeka adaptörleri, Qdrant, indeksleme, "Sayfalarına Sor" |
 | Herkes | Ortak | Değerlendirme seti ve embedding karşılaştırması, güvenlik gözden geçirmesi, README, sunum |
 
 ## 14. Doküman Haritası

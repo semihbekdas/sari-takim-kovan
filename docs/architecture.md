@@ -79,7 +79,7 @@ flowchart TB
 | `api` | Router'lar, Pydantic şemaları, hata → HTTP eşlemesi, `current_user` | `application`, `domain` | `infrastructure` |
 | `main.py` | Composition root: yapılandırmaya göre adaptörleri seçip servislere bağlar | Hepsi | — |
 
-**Port arayüzleri** (`application/ports.py`, Python `Protocol`):
+**Port arayüzleri** (`application/ports/` paketi, alan başına bir modül, Python `Protocol`). Her port, onu ilk kullanan özellikle birlikte eklenir:
 `UserRepository`, `PageRepository`, `LinkRepository`, `VectorIndex`, `EmbeddingProvider`, `ChatModel`, `PasswordHasher`, `TokenService`, `Clock` · *(Should)* `ChatHistoryRepository`
 
 **Denetim:** import-linter sözleşmeleri ([mimari-secimi.md § 7](mimari-secimi.md#7-uyumu-nasıl-kanıtlayacağız)), CI'da zorunlu.
@@ -92,7 +92,8 @@ kovan/
 │   ├── src/kovan/
 │   │   ├── domain/          users.py, pages.py, content.py, links.py, errors.py
 │   │   ├── application/
-│   │   │   ├── ports.py
+│   │   │   ├── ports/         system.py (ReadinessProbe), ileride users.py, pages.py, ai.py, vector.py …
+│   │   │   ├── health.py      ReadinessService
 │   │   │   ├── auth_service.py, page_service.py, link_service.py,
 │   │   │   ├── search_service.py, chat_service.py, indexing_service.py
 │   │   │   └── chunking.py, prompting.py        (saf fonksiyonlar)
@@ -104,6 +105,8 @@ kovan/
 │   │   │   └── index_loop.py
 │   │   ├── api/             routers/, schemas/, errors.py, deps.py, middleware.py
 │   │   ├── config.py        pydantic-settings
+│   │   ├── container.py     servislerin tutulduğu kap (API buradan okur)
+│   │   ├── logging_config.py JSON loglama (structlog)
 │   │   ├── cli.py           reindex, token raporu
 │   │   └── main.py          composition root
 │   ├── migrations/          Alembic

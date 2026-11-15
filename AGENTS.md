@@ -56,12 +56,14 @@ backend/src/kovan/
 - **Commit veya push yapma.** Değişiklikleri kullanıcı inceler ve kendi hesabından commit'ler. Commit tarihleriyle asla oynama.
 - İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, `docs/ai-log.md`'ye ne yazılmalı.
 
-## Komutlar (kod iskeleti kurulunca geçerli olacak)
+## Komutlar
 
 ```bash
-docker compose up -d                      # postgres, qdrant
-cd backend && uv run pytest               # testler (fake yapay zeka)
-uv run ruff check . && uv run mypy src    # lint + tip
+cd backend
+uv run pytest --cov                       # testler (fake yapay zeka; Docker yoksa entegrasyon testleri atlanır)
+uv run ruff check . && uv run ruff format --check .
+uv run mypy                               # strict tip kontrolü
 uv run lint-imports                       # mimari kontrol
-cd frontend && npm test && npm run lint
+uv run uvicorn kovan.main:create_app --factory --reload
+cd frontend && npm test && npm run lint   # (frontend iskeleti gelince)
 ```
