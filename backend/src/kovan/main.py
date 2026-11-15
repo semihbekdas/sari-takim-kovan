@@ -31,8 +31,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        yield
-        engine.dispose()
+        try:
+            yield
+        finally:
+            engine.dispose()
 
     app = FastAPI(
         title="Kovan API",
