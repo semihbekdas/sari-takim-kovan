@@ -6,7 +6,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 ## Bağlam
 
-- 3 kişilik ekip (ikisi elektronik bölümünden), ~5 haftalık geliştirme süresi (hedef 20 Aralık), ders projesi ölçeğinde trafik.
+- 3 kişilik ekip, ~5 haftalık geliştirme süresi (hedef 20 Aralık), ders projesi ölçeğinde trafik.
 - Ders kriterleri: **mimari uyum**, **test edilebilirlik**, **okunabilirlik**, **teknik borç (Sonar A)**.
 - Kodun büyük kısmı yapay zeka ajanlarıyla üretilecek; ajanların tutarlı ve denetlenebilir bir yapıya ihtiyacı var.
 - Dış bağımlılıklar: bulut LLM ve embedding API'leri, Qdrant, PostgreSQL. Testte bunların taklit edilebilmesi gerekiyor.

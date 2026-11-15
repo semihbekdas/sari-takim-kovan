@@ -8,7 +8,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 - Notion klonunun en zor parçası **blok tabanlı editör**dür (`/` menüsü, sürükle-bırak bloklar, iç içe listeler, satır içi stiller). Sıfırdan yazmak projenin tamamını yiyebilir.
 - Sayfalar arası bağlantı için editörde özel bir satır içi öğe (`@` ile sayfa bahsetme) gerekiyor.
-- Ekibin frontend deneyimi sınırlı; kod yapay zeka desteğiyle yazılacak. Yaygın ve iyi belgelenmiş teknolojiler ajanların daha doğru kod üretmesini sağlar.
+- Kod, dersin yaklaşımına uygun olarak yapay zeka ajanlarıyla birlikte yazılacak. Yaygın ve iyi belgelenmiş teknolojiler ajanların daha doğru kod üretmesini sağlar.
 
 ## Karar
 

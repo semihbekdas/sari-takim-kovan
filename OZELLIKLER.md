@@ -157,5 +157,5 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 - [ ] **Sohbet modeli ve sağlayıcı**: Claude mı, GPT mi, Gemini mi? Fiyat karşılaştırması [ADR-006](docs/adr/ADR-006-llm-saglayici.md)'da. Kod hepsini destekleyecek; yalnızca `.env` değişir.
 - [ ] **Embedding sağlayıcısı**: Claude'un embedding modeli yok. OpenAI `text-embedding-3-small`, BAAI `bge-m3` ve Voyage `voyage-4-lite` Sprint 2'de Türkçe notlarla küçük bir karşılaştırmayla denenip en iyisi seçilecek (ADR-006).
 - [ ] API anahtarlarının yönetimi: Sağlayıcı panelinde ortak bir organizasyon/proje, harcama limiti, herkesin kendi anahtarı (KURALLAR § 8).
-- [ ] İş paketlerinin kişilere dağıtımı ([docs/PLAN.md](docs/PLAN.md)).
+- [x] İş paketlerinin kişilere dağıtımı: eşit dağıtıldı ([docs/PLAN.md](docs/PLAN.md) § 3).
 - [ ] İsim "Kovan" kalsın mı?

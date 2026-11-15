@@ -8,7 +8,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 - Ders rehberi P0007 için **"Python (FastAPI) veya .NET backend + Qdrant"** öneriyor.
 - Projenin kalbi RAG; derste RAG örnekleri (lesson07/08) Python + `qdrant-client` + `openai` istemcisi ile yazıldı.
-- Ekipte iki üye elektronik bölümünden; Python, C#'a göre bu üyeler için daha tanıdık ve okunması kolay.
+- Python okunması kolay, ekipteki herkesin ortak kullanabileceği ve RAG/yapay zeka ekosisteminde en yaygın dil.
 - Sunumda herkesin koda hakim olması gerekiyor.
 
 ## Karar
@@ -19,7 +19,7 @@ Backend **Python 3.12** ve **FastAPI** ile yazılır. Destekleyici kütüphanele
 
 | Alternatif | Neden seçilmedi |
 | --- | --- |
-| **.NET 10 + ASP.NET Core** | Hocanın örneklerinin çoğu .NET; mimari örnekler güçlü. Ancak RAG ekosistemi ve ekibin aşinalığı Python'da daha iyi; iki dil (C# + TS) yerine Python + TS öğrenme yükü daha az. |
+| **.NET 10 + ASP.NET Core** | Hocanın örneklerinin çoğu .NET; mimari örnekler güçlü. Ancak RAG ekosistemi Python'da daha güçlü; iki dil (C# + TS) yerine Python + TS ile ilerlemek ekibin öğrenme yükünü azaltır. |
 | **Node.js (Express/Nest)** | Frontend ile aynı dil avantajı var ama RAG/embedding araçları ve ders örnekleri Python'da. |
 | **Django** | Yerleşik ORM ve admin güçlü ama "batteries included" yapı, katman ayrımımızı (ADR-001) zorlaştırır; API odaklı projede FastAPI daha hafif. |
 

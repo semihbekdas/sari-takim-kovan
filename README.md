@@ -222,9 +222,10 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 
 | Üye | İş paketi | Sorumluluk |
 | --- | --- | --- |
-| *(isim)* | İP-A Sayfalar | *(dağıtım yapılınca doldurulacak)* |
-| *(isim)* | İP-B Bağlantılar & İndeksleme | |
-| *(isim)* | İP-C Kimlik & Yapay Zeka | |
+| Umut | İP-A Sayfalar & Editör | docker-compose + frontend iskeleti; sayfa API'si, sayfa ağacı, editör, otomatik kaydetme, silme, `@` bağlantısı |
+| Özlem | İP-B Kimlik, İçerik & Arama | CI + SonarQube Cloud; kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime araması |
+| Semih | İP-C Yapay Zeka | Backend iskeleti; yapay zeka adaptörleri, Qdrant, indeksleme, anlamsal arama, "Sayfalarına Sor" |
+| Herkes | Ortak | Değerlendirme seti ve embedding karşılaştırması, güvenlik gözden geçirmesi, README, sunum |
 
 ## 14. Doküman Haritası
 

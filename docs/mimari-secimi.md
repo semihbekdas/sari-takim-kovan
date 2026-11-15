@@ -44,7 +44,7 @@ Buradan çıkardığımız sonuç: Puanı getiren şey mimarinin "gösterişli" 
 
 | Girdi | Durum | Mimariye etkisi |
 | --- | --- | --- |
-| Ekip | 3 kişi, ikisi elektronik bölümünden | Az kavram, kolay öğrenilen yapı |
+| Ekip | 3 kişi | Az kavram, herkesin hızla öğrenebileceği yapı |
 | Süre | Bugün 13 Kasım; hedef bitiş **20 Aralık** (~5 hafta), teslim 25 Aralık | Tören (boilerplate) minimum |
 | Kod üretimi | Çoğunlukla yapay zeka ajanlarıyla | Net, yazılı, otomatik denetlenen kurallar |
 | Trafik | Ders projesi, birkaç kullanıcı | Ölçeklenebilirlik/elastikiyet önemsiz |

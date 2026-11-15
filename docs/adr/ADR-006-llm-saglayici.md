@@ -71,7 +71,7 @@ Fazla abartmadan, 3 aday tek bir küçük betikle denenir:
 2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve 20 soru (test-strategy § 6).
 3. **Betik:** `eval/compare_embeddings.py`. Qdrant gerekmez; parçaları her modelle embed edip kosinüs benzerliğini bellekte hesaplar.
 4. **Ölçüt:** Hit@5 ve MRR. Fark %5'ten azsa **en basit olan** seçilir (ek adaptör gerektirmeyen).
-5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2, yarım gün.
+5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2–3; ekip birlikte yapar (her üye bir adayı dener).
 6. Sonuç tablosu README'ye ve bu ADR'ye yazılır. Bu tablo sunumda da "veriye dayalı karar" örneği olur.
 
 ### Açık karar (ekip)
