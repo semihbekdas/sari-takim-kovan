@@ -18,6 +18,9 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      # Proje paketi kurulmaz (derleme betiği çalışmaz); kod doğrudan kaynaktan import edilir.
+      PYTHONPATH: src
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -28,23 +31,26 @@ jobs:
           working-directory: backend
           enable-cache: true
 
+      # Güvenlik: Yalnızca uv.lock'taki sabit sürümler (--locked), yalnızca hazır paketler
+      # (--no-build: hiçbir paketin kurulum betiği çalıştırılmaz). Sonraki adımlar ortamı
+      # yeniden çözmez veya kurmaz (--frozen --no-sync).
       - name: Bağımlılıkları kur
-        run: uv sync --locked
+        run: uv sync --locked --no-build --no-install-project
 
       - name: Lint (ruff)
-        run: uv run ruff check .
+        run: uv run --frozen --no-sync ruff check .
 
       - name: Biçim (ruff format)
-        run: uv run ruff format --check .
+        run: uv run --frozen --no-sync ruff format --check .
 
       - name: Tip kontrolü (mypy)
-        run: uv run mypy
+        run: uv run --frozen --no-sync mypy
 
       - name: Mimari kurallar (import-linter)
-        run: uv run lint-imports
+        run: uv run --frozen --no-sync lint-imports
 
       - name: Testler + kapsam
-        run: uv run pytest --cov --cov-report=xml:coverage.xml --cov-report=term
+        run: uv run --frozen --no-sync pytest --cov --cov-report=xml:coverage.xml --cov-report=term
 
       - name: SonarQube Cloud analizi
         uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
