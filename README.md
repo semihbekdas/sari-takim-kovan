@@ -78,7 +78,7 @@ api ──► application ──► domain
 infrastructure (PostgreSQL, Qdrant, yapay zeka API'leri, güvenlik, indeksleme)
 ```
 
-**Neden?** 3 kişilik ekip ve ~5 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
+**Neden?** 3 kişilik ekip ve ~4 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
 
 ## 5. Teknolojiler
 
@@ -224,7 +224,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 - Plan, sprintler, iş paketleri, riskler, skor kartı: **[docs/PLAN.md](docs/PLAN.md)**
 - Ekip çalışma kuralları: **[KURALLAR.md](KURALLAR.md)**
 - Takım: **Sarı Takım** · Repo: `sari-takim-kovan`
-- Toplantılar: hafta sonu · Hedef bitiş: 20 Aralık · Teslim: 25 Aralık
+- Toplantılar: hafta sonu · Kod dondurma: 13 Aralık · Teslim: 25 Aralık
 
 | Üye | İş paketi | Sorumluluk |
 | --- | --- | --- |

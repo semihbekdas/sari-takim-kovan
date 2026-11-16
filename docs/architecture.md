@@ -12,7 +12,7 @@
 | 1 | **Test edilebilirlik** | Ders kriteri; yapay zekanın yazdığı kodun doğruluğunu testler kanıtlar | Port/adapter arayüzleri, fake LLM/embedding, Testcontainers |
 | 2 | **Okunabilirlik / bakım kolaylığı** | Ders kriteri (Sonar A); 3 kişi ve 3 ajan aynı kod tabanında | Katman kuralları, kod kuralları, import-linter, Sonar |
 | 3 | **Güvenlik** | Kişisel notlar hassas; RAG ve bulut API yeni riskler getirir | `owner_id` izolasyonu, httpOnly JWT, prompt injection önlemleri, anahtar yönetimi |
-| 4 | **Basitlik** | 3 kişi, ~5 hafta; gereksiz karmaşıklık borçtur (Bölüm 8) | Modüler monolit, tek süreç |
+| 4 | **Basitlik** | 3 kişi, ~4 hafta; gereksiz karmaşıklık borçtur (Bölüm 8) | Modüler monolit, tek süreç |
 | 5 | **Maliyet kontrolü** | Bulut LLM/embedding API'leri ücretli | Düzenleme bitince indeksleme, sınırlı bağlam, token loglama |
 | 6 | **Dayanıklılık** | Bulut API yavaş/kapalı olabilir | Yeniden deneme, 503 ile zarif hata |
 
