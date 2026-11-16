@@ -92,7 +92,7 @@ kovan/
 │   ├── src/kovan/
 │   │   ├── domain/          users.py, pages.py, content.py, links.py, errors.py
 │   │   ├── application/
-│   │   │   ├── ports/         system.py (ReadinessProbe), ileride users.py, pages.py, ai.py, vector.py …
+│   │   │   ├── ports/         system.py (ReadinessProbe), ai.py (EmbeddingProvider, ChatModel), ileride users.py, pages.py, vector.py …
 │   │   │   ├── health.py      ReadinessService
 │   │   │   ├── auth_service.py, page_service.py, link_service.py,
 │   │   │   ├── search_service.py, chat_service.py, indexing_service.py
@@ -100,7 +100,7 @@ kovan/
 │   │   ├── infrastructure/
 │   │   │   ├── db/          tablo tanımları (SQLAlchemy Core), repository'ler
 │   │   │   ├── vector/      Qdrant adaptörü
-│   │   │   ├── ai/          anthropic_chat.py, openai_compatible.py, fake.py
+│   │   │   ├── ai/          anthropic_chat.py, openai_compatible.py, fake.py, errors.py, factory.py
 │   │   │   ├── security/    jwt.py, argon2.py
 │   │   │   └── index_loop.py
 │   │   ├── api/             routers/, schemas/, errors.py, deps.py, middleware.py
@@ -252,7 +252,8 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `EMBEDDING_PROVIDER` | `fake` \| `openai_compatible` | Embedding sağlayıcısı |
 | `EMBEDDING_BASE_URL` / `EMBEDDING_MODEL` / `EMBEDDING_DIM` | `https://api.openai.com/v1` / `text-embedding-3-small` / `1536` | Model değişirse `reindex --all` gerekir |
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `EMBEDDING_API_KEY` | *(gizli)* | Asla commit'lenmez; embedding sağlayıcısı OpenAI değilse `EMBEDDING_API_KEY` kullanılır |
-| `RAG_TOP_K` / `SEARCH_MIN_SCORE` / `CHAT_MAX_TOKENS` | `6` / `0.35` / `800` | Değerlendirme setiyle ayarlanır |
+| `RAG_TOP_K` / `SEARCH_MIN_SCORE` | `6` / `0.35` | Değerlendirme setiyle ayarlanır |
+| `CHAT_MAX_TOKENS` / `CHAT_EFFORT` / `AI_TIMEOUT_SECONDS` | `4096` / `low` / `30` | Cevap üst sınırı (Claude'da düşünme token'ları dahil), Claude effort seviyesi, istek zaman aşımı |
 | `INDEX_SETTLE_SECONDS` | `10` | Düzenleme bittikten sonra indeksleme beklemesi |
 | `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez |
 

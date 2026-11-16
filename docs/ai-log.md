@@ -84,3 +84,15 @@
 - **Sonuç:** Kalite kapısı geçti: güvenilirlik, güvenlik ve bakım kolaylığı **A**, kapsam %97.2, 0 açık bulgu. CI'da gerçek PostgreSQL ile 21/21 test.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
+
+### 2026-11-16 — Yapay zeka adaptörleri ve fake mod (İP-C)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** ADR-006'daki port'lar (`EmbeddingProvider`, `ChatModel`) ve adaptörleri: Claude (resmi `anthropic` SDK), OpenAI uyumlu API'ler (OpenAI, Gemini, OpenRouter/bge-m3) ve API anahtarı gerektirmeyen fake mod; ayarlara göre doğru adaptörü kuran fabrika.
+- **Sonuç:** `backend/src/kovan/infrastructure/ai/`, `application/ports/ai.py`. Adaptörler gerçek SDK'larla ama internete çıkmadan (sahte HTTP katmanı) test edildi; 44 test, kapsam %98.
+- **Kararlar:**
+  - Claude için modelin reddetmesi (refusal) durumunda sunucu taraflı yedek model (`fallbacks="default"`) açık; desteklemeyen modellerde yok sayılır.
+  - Claude'da düşünme kapatılamadığı için maliyet `CHAT_EFFORT=low` ile kontrol ediliyor; `CHAT_MAX_TOKENS` düşünme token'larını da kapsadığı için 800 → 4096 yapıldı.
+  - SDK sürümleri ezberden değil, kurulu paketin kaynak kodundan doğrulandı (`anthropic` 2.x, `openai` 3.x; ikisi de `httpx2` kullanıyor).
+- **Yapay zekanın hataları ve düzeltmeleri:** `.env`'de boş bırakılan `CHAT_EFFORT=` uygulamanın açılmasını engelleyecekti → boş değerler "ayarlanmamış" sayıldı, testi eklendi. Claude mesaj tipleri için mypy belirsizlik hatası → açık tiplerle düzeltildi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
