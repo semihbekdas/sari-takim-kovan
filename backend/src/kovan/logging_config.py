@@ -7,6 +7,7 @@ import logging
 import sys
 
 import structlog
+from structlog.tracebacks import ExceptionDictTransformer
 
 
 def configure_logging(level: str) -> None:
@@ -17,7 +18,9 @@ def configure_logging(level: str) -> None:
             structlog.contextvars.merge_contextvars,
             structlog.processors.add_log_level,
             structlog.processors.TimeStamper(fmt="iso", utc=True),
-            structlog.processors.dict_tracebacks,
+            # Hatanın tipi, mesajı ve satırları loglanır; yerel değişkenler loglanmaz, çünkü
+            # şifre, API anahtarı veya istek içeriği taşıyabilirler (KURALLAR.md § 8).
+            structlog.processors.ExceptionRenderer(ExceptionDictTransformer(show_locals=False)),
             structlog.processors.JSONRenderer(ensure_ascii=False),
         ],
         wrapper_class=structlog.make_filtering_bound_logger(numeric_level),
