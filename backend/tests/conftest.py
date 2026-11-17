@@ -6,12 +6,12 @@ from fastapi.testclient import TestClient
 
 from kovan.config import Settings
 from kovan.main import create_app
-from tests.fakes import UNREACHABLE_DATABASE_URL
+from tests.fakes import make_test_settings
 
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(database_url=UNREACHABLE_DATABASE_URL, log_level="WARNING")
+    return make_test_settings()
 
 
 @pytest.fixture
