@@ -3,7 +3,7 @@
 from typing import Any
 
 import pytest
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
 from kovan.application.errors import ApplicationError, AuthenticationError, ExternalServiceError
@@ -49,6 +49,11 @@ def _bug() -> None:
 @_test_router.get("/unmapped")
 def _unmapped() -> None:
     raise ApplicationError(SECRET_DETAIL, code="UNMAPPED")
+
+
+@_test_router.get("/http-server-error/{status}")
+def _http_server_error(status: int) -> None:
+    raise HTTPException(status_code=status, detail=SECRET_DETAIL)
 
 
 @_test_router.get("/validation")
@@ -102,6 +107,17 @@ def test_error_type_without_status_mapping_is_treated_as_internal_error(
     error_client: TestClient,
 ) -> None:
     response = error_client.get("/_test/unmapped")
+
+    assert response.status_code == 500
+    assert _error_of(response)["code"] == "INTERNAL_ERROR"
+    assert SECRET_DETAIL not in response.text
+
+
+@pytest.mark.parametrize("status", [500, 503])
+def test_http_exception_with_server_status_does_not_leak_detail(
+    error_client: TestClient, status: int
+) -> None:
+    response = error_client.get(f"/_test/http-server-error/{status}")
 
     assert response.status_code == 500
     assert _error_of(response)["code"] == "INTERNAL_ERROR"
