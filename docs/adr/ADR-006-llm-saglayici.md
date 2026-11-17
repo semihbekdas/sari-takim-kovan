@@ -28,7 +28,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 | `FakeChatModel`, `FakeEmbeddingProvider` | — | Testler ve **fake çalışma modu** |
 
 3. **Varsayılan mod `fake`** (`CHAT_PROVIDER=fake`, `EMBEDDING_PROVIDER=fake`): Anahtarsız çalışır; testler, CI ve günlük geliştirme bu modda. Gerçek yapay zeka `.env`'ye anahtar ve sağlayıcı girilince devreye girer.
-4. Dış servis hataları (zaman aşımı 30 sn, 429, 5xx, bağlantı hatası) SDK'ların kendi yeniden denemesinden sonra `ExternalServiceError`'a çevrilir → API'de **503**, indeksleme döngüsünde yeniden deneme (ADR-005). Model güvenlik nedeniyle cevap vermeyi reddederse (`stop_reason == "refusal"`) kullanıcıya "Bu soruya cevap üretilemedi" mesajı döner.
+4. Dış servis hataları (zaman aşımı `AI_TIMEOUT_SECONDS` = 30 sn, 429, 5xx, bağlantı hatası) SDK'nın tek yeniden denemesinden sonra (en kötü durumda ~60 sn) `ExternalServiceError`'a çevrilir → API'de **503**, indeksleme döngüsünde yeniden deneme (ADR-005). Model güvenlik nedeniyle cevap vermeyi reddederse (`stop_reason == "refusal"`) kullanıcıya "Bu soruya cevap üretilemedi" mesajı döner.
 5. Embedding modeli değişirse vektör boyutu değişebilir → `EMBEDDING_DIM` güncellenir ve `reindex --all` çalıştırılır.
 6. Token kullanımı her çağrıda loglanır (Should, US-16).
 
@@ -48,7 +48,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 
 **Örnek:** Geliştirme + demo boyunca 500 soru → Opus 5.5 ≈ $11, Sonnet 5.5 ≈ $5.5, Haiku 5.5 ≈ $0.3.
 
-Claude 5.5 modelleriyle ilgili uygulama notları: Opus 5.5'te düşünme kapatılamaz; maliyet/gecikme `effort` ayarıyla (sohbet için `low`) yönetilir. Kullanılan modele göre Anthropic'in reddetme (refusal) durumları için önerdiği yedek model (fallback) ayarı kod yazılırken eklenecek.
+Claude 5.5 modelleriyle ilgili uygulama notları: Opus 5.5'te düşünme kapatılamaz; maliyet/gecikme `effort` ayarıyla (sohbet için `low`) yönetilir. Kullanılan modele göre Anthropic'in reddetme (refusal) durumları için önerdiği yedek model (fallback) ayarı `infrastructure/ai/anthropic_chat.py`'de açıktır (`fallbacks="default"`).
 
 ### Embedding modeli (metin → vektör)
 

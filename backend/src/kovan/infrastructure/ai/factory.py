@@ -1,4 +1,4 @@
-"""Ayarlara göre doğru yapay zeka adaptörünü kurar (composition root'tan çağrılır).
+"""Ayarlara göre doğru yapay zeka adaptörünü kurar.
 
 Varsayılan "fake" moddur: API anahtarı olmadan da uygulama ve testler çalışır.
 """
@@ -16,19 +16,25 @@ from kovan.infrastructure.ai.openai_compatible import (
     OpenAICompatibleEmbeddingProvider,
 )
 
+# SDK'lar varsayılan olarak 2 kez yeniden dener; zaman aşımında kullanıcı ~3 × AI_TIMEOUT_SECONDS
+# beklerdi. Bir yeniden deneme geçici hataya yeter; indeksleme zaten kendi yeniden denemesini yapar.
+SDK_MAX_RETRIES = 1
+
 
 def build_chat_model(settings: Settings) -> ChatModel:
     if settings.chat_provider == "anthropic":
         client = anthropic.Anthropic(
-            api_key=_require(settings.anthropic_api_key, "ANTHROPIC_API_KEY"),
+            api_key=_require(settings.chat_api_key, "CHAT_API_KEY"),
             timeout=settings.ai_timeout_seconds,
+            max_retries=SDK_MAX_RETRIES,
         )
         return AnthropicChatModel(client, model=settings.chat_model, effort=settings.chat_effort)
     if settings.chat_provider == "openai_compatible":
         openai_client = openai.OpenAI(
-            api_key=_require(settings.openai_api_key, "OPENAI_API_KEY"),
+            api_key=_require(settings.chat_api_key, "CHAT_API_KEY"),
             base_url=settings.chat_base_url or None,
             timeout=settings.ai_timeout_seconds,
+            max_retries=SDK_MAX_RETRIES,
         )
         return OpenAICompatibleChatModel(openai_client, model=settings.chat_model)
     return FakeChatModel()
@@ -36,11 +42,11 @@ def build_chat_model(settings: Settings) -> ChatModel:
 
 def build_embedding_provider(settings: Settings) -> EmbeddingProvider:
     if settings.embedding_provider == "openai_compatible":
-        key = settings.embedding_api_key or settings.openai_api_key
         client = openai.OpenAI(
-            api_key=_require(key, "EMBEDDING_API_KEY veya OPENAI_API_KEY"),
+            api_key=_require(settings.embedding_api_key, "EMBEDDING_API_KEY"),
             base_url=settings.embedding_base_url,
             timeout=settings.ai_timeout_seconds,
+            max_retries=SDK_MAX_RETRIES,
         )
         return OpenAICompatibleEmbeddingProvider(
             client, model=settings.embedding_model, dimension=settings.embedding_dim

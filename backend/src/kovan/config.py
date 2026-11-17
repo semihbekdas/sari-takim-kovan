@@ -33,16 +33,16 @@ class Settings(BaseSettings):
     embedding_base_url: str = "https://api.openai.com/v1"
     embedding_model: str = "text-embedding-3-small"
     embedding_dim: int = 1536
-    anthropic_api_key: SecretStr | None = None
-    openai_api_key: SecretStr | None = None
+    # Anahtarlar sağlayıcıya göre değil göreve göre adlandırılır: Her anahtar yalnızca kendi
+    # sağlayıcısına gönderilir (başka bir sağlayıcının anahtarına düşülmez).
+    chat_api_key: SecretStr | None = None
     embedding_api_key: SecretStr | None = None
     ai_timeout_seconds: float = 30.0
 
     @field_validator(
         "chat_base_url",
         "chat_effort",
-        "anthropic_api_key",
-        "openai_api_key",
+        "chat_api_key",
         "embedding_api_key",
         mode="before",
     )
