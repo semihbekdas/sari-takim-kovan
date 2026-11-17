@@ -140,8 +140,8 @@ Must aşamasında sohbet **durumsuzdur** (her soru bağımsız). Sohbet geçmiş
 | **R-07** | Güncelleme, istemcinin gönderdiği `version` güncel sürüme eşitse yapılır (iyimser kilitleme). | `Page.update` | 409 | Must |
 | **R-08** | Silinen sayfa **alt sayfalarıyla birlikte** silinmiş işaretlenir; ağaçta, aramada, sohbette ve geri bağlantılarda görünmez. (Should: çöp kutusundan geri alınınca hepsi geri gelir.) | `PageService.delete/restore` | — | Must |
 | **R-09** | Bağlantılar içerikten türetilir; yalnızca aynı kullanıcının sayfalarına verilebilir; sayfanın kendine verdiği bağlantı yok sayılır. | `LinkService` | Geçersiz hedef yok sayılır | Must |
-| **R-10** | İçeriği veya görünürlüğü değiştiren her işlem `version`'ı artırır ve sayfayı "indeksleme bekliyor" durumuna sokar (`indexed_version ≠ version`). İndeks, düzenleme **en az 10 sn durduktan sonra** güncellenir. | `PageService`, `IndexingService` | — | Must |
-| **R-11** | Başarısız indeksleme en fazla **5** kez denenir (bekleme: `5 × 2^deneme` sn). 5. başarısızlıkta durum `FAILED` olur; sayfa tekrar düzenlenince sayaç sıfırlanır. | `IndexingService` | — | Must |
+| **R-10** | İçeriği veya görünürlüğü değiştiren her işlem `version`'ı artırır ve sayfayı "indeksleme bekliyor" durumuna sokar (`indexed_version IS DISTINCT FROM version`; hiç indekslenmemiş sayfada `indexed_version` NULL'dır). İndeks, düzenleme **en az 10 sn durduktan sonra** güncellenir. | `PageService`, `IndexingService` | — | Must |
+| **R-11** | Başarısız indeksleme en fazla **5** kez denenir (bekleme: `5 × 2^n` sn, n = o ana kadarki başarısız deneme sayısı → 5, 10, 20, 40 sn). 5. başarısızlıkta durum `FAILED` olur; sayfa tekrar düzenlenince sayaç ve bekleme sıfırlanır. | `IndexingService` | — | Must |
 | **R-12** | Her arama ve vektör sorgusu kullanıcının `owner_id`'si ile filtrelenir. | `SearchService`, `VectorIndex` | — | Must |
 | **R-13** | Sohbet cevabı yalnızca getirilen parçalara dayanır ve kaynak gösterir; eşik üstü parça yoksa dil modeli **çağrılmadan** "bulamadım" cevabı verilir. | `ChatService` | — | Must |
 

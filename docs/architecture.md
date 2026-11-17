@@ -137,15 +137,20 @@ sequenceDiagram
     participant S as PageService
     participant DB as PostgreSQL
     FE->>S: PUT /pages/{id} {title, content, version}
-    S->>S: PageContent doğrula (R-06), sürüm kontrolü (R-07)
+    S->>S: PageContent doğrula (R-06)
     S->>DB: BEGIN
-    S->>DB: UPDATE pages SET content, plain_text, version = version+1,<br/>index_attempts = 0, index_error = NULL, updated_at = now()
-    S->>DB: page_links'i içerikten yeniden yaz (R-09)
-    S->>DB: COMMIT
-    S-->>FE: 200 {version, index_status: "PENDING"}
+    S->>DB: UPDATE pages SET title, content, plain_text, version = version+1,<br/>index_attempts = 0, index_error = NULL, index_retry_at = NULL, updated_at = now()<br/>WHERE id = :id AND owner_id = :owner AND version = :istemcinin_surumu
+    alt 0 satır güncellendi
+        S->>DB: ROLLBACK
+        S-->>FE: 409 VERSION_CONFLICT (R-07) · sayfa yoksa 404
+    else 1 satır güncellendi
+        S->>DB: page_links'i içerikten yeniden yaz (R-09)
+        S->>DB: COMMIT
+        S-->>FE: 200 Page (yeni version, index_status: "PENDING")
+    end
 ```
 
-Sürüm uyuşmazsa **409**; frontend "Bu sayfa başka bir sekmede değişti" uyarısı gösterir. Kayıt sırasında **hiçbir dış API çağrılmaz**, bu yüzden kayıt hızlıdır ve yapay zeka servisi kapalıyken de çalışır.
+Sürüm kontrolü `UPDATE`'in kendi koşuludur (iyimser kilitleme): Aynı sayfa iki sekmeden aynı anda kaydedilirse yalnızca biri geçer, diğeri **409** alır; frontend "Bu sayfa başka bir sekmede değişti" uyarısı gösterir. Kontrol `UPDATE`'ten ayrı yapılsaydı iki kayıt da kontrolü geçip biri diğerini sessizce ezebilirdi. Kayıt sırasında **hiçbir dış API çağrılmaz**, bu yüzden kayıt hızlıdır ve yapay zeka servisi kapalıyken de çalışır.
 
 ### 5.2 İndeksleme döngüsü — [ADR-005](adr/ADR-005-surum-isaretli-indeksleme.md)
 
@@ -156,7 +161,7 @@ sequenceDiagram
     participant E as EmbeddingProvider
     participant Q as Qdrant
     loop her 5 sn
-        L->>DB: indexed_version ≠ version VE updated_at ≤ now-10sn<br/>VE index_attempts < 5 VE (index_retry_at boş veya geçmiş) olan ≤10 sayfa
+        L->>DB: indexed_version IS DISTINCT FROM version VE updated_at ≤ now-10sn<br/>VE index_attempts < 5 VE (index_retry_at boş veya geçmiş) olan ≤10 sayfa
         loop her sayfa (sırayla)
             alt sayfa silinmiş
                 L->>Q: page_id'ye ait noktaları sil
@@ -166,18 +171,19 @@ sequenceDiagram
                 L->>Q: page_id'nin noktalarını sil + yeni noktaları yaz
             end
             alt başarılı
-                L->>DB: indexed_version = okunan sürüm, index_attempts = 0
+                L->>DB: indexed_version = okunan sürüm, index_attempts = 0,<br/>index_error = NULL, index_retry_at = NULL
             else hata
-                L->>DB: index_attempts+1, index_retry_at = now + 5·2^deneme sn, index_error
+                L->>DB: index_attempts+1, index_error,<br/>index_retry_at = now + 5·2^n sn (n: önceki başarısız deneme sayısı)
             end
         end
     end
 ```
 
-- **Ayrı bir iş tablosu yok.** "İndekslenmesi gerekiyor mu?" bilgisi sayfanın kendi satırında (`version` vs `indexed_version`). Sayfa güncellemesiyle aynı satırda olduğu için hiçbir değişiklik kaybolmaz.
+- **Ayrı bir iş tablosu yok.** "İndekslenmesi gerekiyor mu?" bilgisi sayfanın kendi satırında (`version` vs `indexed_version`). Hiç indekslenmemiş sayfada `indexed_version` NULL'dır; SQL'de `≠` NULL ile karşılaştırmada sonuç vermediği için koşul `IS DISTINCT FROM` ile yazılır. Sayfa güncellemesiyle aynı satırda olduğu için hiçbir değişiklik kaybolmaz.
 - **Düzenleme bitince:** `updated_at ≤ now − 10 sn` koşulu, yazma sırasında her otomatik kayıtta embedding API'sinin çağrılmasını engeller (maliyet).
 - **Kilit tutulmaz:** Dış API çağrısı sırasında satır kilitlenmez; otomatik kayıt beklemez. İndeksleme sırasında yeni bir kayıt gelirse sayfa yine "bekliyor" kalır ve sonraki turda tekrar işlenir (nihai tutarlılık).
 - **İdempotent:** Nokta kimlikleri `uuid5(page_id:chunk_no)`; aynı sürümün iki kez işlenmesi aynı sonucu verir.
+- **Kalıcı silme** *(çöp kutusu, Should)*: Satır silinmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler Qdrant'ta öksüz kalırdı.
 - **Tek döngü** varsayımı: Backend tek kopya çalışır. Birden çok kopya gerekirse satır kilitleme (`FOR UPDATE SKIP LOCKED`) eklenir (bilinen sınır).
 
 ### 5.3 Anlamsal arama
