@@ -15,6 +15,8 @@ from kovan.application.ports.ai import ChatCompletion, ChatMessage
 _WORD = re.compile(r"\w+", re.UNICODE)
 
 FAKE_MODEL_NAME = "fake"
+# Fake modda uygulama uzun süre çalışabilir; kaydedilen çağrılar sınırsız büyümesin.
+MAX_RECORDED_CALLS = 20
 DEFAULT_FAKE_REPLY = "Bu cevap fake modda üretildi; gerçek bir dil modeli kullanılmadı. [1]"
 
 
@@ -37,7 +39,8 @@ class FakeEmbeddingProvider:
 
     def _embed_one(self, text: str) -> list[float]:
         vector = [0.0] * self._dimension
-        for word in _WORD.findall(text.lower()):
+        # "İ".lower() "i" + birleşik nokta verir ve kelimeyi ikiye böler; önce düz "i" yapılır.
+        for word in _WORD.findall(text.replace("İ", "i").lower()):
             digest = hashlib.blake2b(word.encode("utf-8"), digest_size=8).digest()
             vector[int.from_bytes(digest, "big") % self._dimension] += 1.0
         norm = math.sqrt(sum(value * value for value in vector))
@@ -46,7 +49,7 @@ class FakeEmbeddingProvider:
 
 @dataclass
 class FakeChatModel:
-    """Her zaman verilen cevabı döner ve aldığı çağrıları saklar (testte prompt doğrulamak için)."""
+    """Her zaman verilen cevabı döner; son çağrıları saklar (testte prompt doğrulamak için)."""
 
     reply: str = DEFAULT_FAKE_REPLY
     calls: list[tuple[str, tuple[ChatMessage, ...]]] = field(default_factory=list)
@@ -55,6 +58,7 @@ class FakeChatModel:
         self, *, system: str, messages: Sequence[ChatMessage], max_tokens: int
     ) -> ChatCompletion:
         self.calls.append((system, tuple(messages)))
+        del self.calls[:-MAX_RECORDED_CALLS]
         input_words = len(system.split()) + sum(len(m.content.split()) for m in messages)
         return ChatCompletion(
             text=self.reply,
