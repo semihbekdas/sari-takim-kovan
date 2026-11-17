@@ -1,4 +1,4 @@
-"""Her isteğe bir `request_id` atayan ve isteği loglayan middleware (Bölüm 4)."""
+"""Her isteğe bir `request_id` atayan ve isteği loglayan middleware."""
 
 import time
 from uuid import uuid4

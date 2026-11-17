@@ -38,6 +38,8 @@ INTERNAL_ERROR_MESSAGE = "Beklenmeyen bir hata oluştu."
 
 
 def register_error_handlers(app: FastAPI) -> None:
+    # Starlette işleyicileri `Exception` tipiyle çağırır; bu yüzden her işleyici önce
+    # beklediği tipi `isinstance` ile doğrular, beklenmeyen tipte genel 500 işleyicisine düşer.
     app.add_exception_handler(DomainError, _handle_known_error)
     app.add_exception_handler(ApplicationError, _handle_known_error)
     app.add_exception_handler(RequestValidationError, _handle_validation_error)
