@@ -51,7 +51,7 @@ def test_move_page_under_own_descendant_raises_cycle_error(page_service, tree):
 ```
 
 - Hata yolları da test edilir: geçersiz girdi, yetkisiz erişim, servis kapalı, sürüm çakışması.
-- **Yasak:** assert'siz test, `skip` ile kapatma, test silme, coverage'ı şişirmek için dosya hariç tutma.
+- **Yasak:** assert'siz test, `skip` ile kapatma, test silme, coverage'ı şişirmek için dosya hariç tutma. Tek istisna: Docker gerektiren entegrasyon testleri yerelde Docker kapalıysa atlanır; CI'da Docker zorunludur ve yoksa test hata verir (`tests/integration/containers.py`).
 - Testler birbirinden bağımsızdır; her entegrasyon testi temiz veriyle başlar.
 
 ## 4. Kapsam hedefleri

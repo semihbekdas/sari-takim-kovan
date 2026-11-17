@@ -172,7 +172,7 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 
 ```bash
 cd backend
-uv run pytest --cov                    # testler + kapsam (Docker yoksa entegrasyon testleri atlanır)
+uv run pytest --cov                    # testler + kapsam (Docker kapalıysa entegrasyon testleri yerelde atlanır, CI'da zorunlu)
 uv run ruff check . && uv run ruff format --check .   # lint + biçim
 uv run mypy                            # tip kontrolü (strict)
 uv run lint-imports                    # mimari katman kuralları

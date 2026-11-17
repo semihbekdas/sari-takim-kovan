@@ -60,7 +60,7 @@ backend/src/kovan/
 
 ```bash
 cd backend
-uv run pytest --cov                       # testler (fake yapay zeka; Docker yoksa entegrasyon testleri atlanır)
+uv run pytest --cov                       # testler (fake yapay zeka; Docker kapalıysa entegrasyon testleri yerelde atlanır, CI'da zorunlu)
 uv run ruff check . && uv run ruff format --check .
 uv run mypy                               # strict tip kontrolü
 uv run lint-imports                       # mimari kontrol
