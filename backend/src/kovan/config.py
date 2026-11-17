@@ -4,6 +4,7 @@ Tüm değişkenler ve açıklamaları: `.env.example`, docs/architecture.md § 8
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,7 +20,7 @@ class Settings(BaseSettings):
     )
 
     database_url: str
-    log_level: str = "INFO"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
 
 def load_settings() -> Settings:
