@@ -37,7 +37,7 @@ Buradan çıkardığımız sonuç: Puanı getiren şey mimarinin "gösterişli" 
 
 | Seviye | Soru | Örnekler |
 | --- | --- | --- |
-| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (Bölüm 7) |
+| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (ders Bölüm 7) |
 | **Uygulama içi yapı** | Kod içeride nasıl bölünüyor, bağımlılıklar hangi yöne akıyor? | N-katman, Clean Architecture, Hexagonal, Vertical Slice … |
 
 ## 3. Kararı belirleyen girdiler (bizim bağlamımız)
@@ -68,7 +68,7 @@ Dersteki Richards & Ford tablosundaki 8 stilin bizim için değerlendirmesi:
 | **Event-Driven** | Bileşenler olaylar ve broker üzerinden asenkron haberleşir | Basitlik ★. Tek asenkron işimiz (indeksleme) için broker gereksiz | ❌ |
 | **Space-Based** | Bellek içi veri ızgarası, çok yüksek ölçek | Gereksiz | ❌ |
 | **Service-Oriented (SOA)** | Kurumsal servis veriyolu ile orkestrasyon | Kurumsal ölçek | ❌ |
-| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
+| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Ders Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
 
 Tablodan bize önemli satırlar:
 

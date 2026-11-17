@@ -6,7 +6,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 ## Bağlam
 
-- RAG kalitesi büyük ölçüde parçalama stratejisine bağlıdır (Bölüm 9: *"embedding modeline ve seçilen parçalama stratejisine bağlıdır"*).
+- RAG kalitesi büyük ölçüde parçalama stratejisine bağlıdır (ders Bölüm 9: *"embedding modeline ve seçilen parçalama stratejisine bağlıdır"*).
 - Derste **sabit karakter sayısına göre** bölme kullanıldı (lesson07: 500 karakter, 50 örtüşme). Bu yöntem cümleleri ve başlık bağlamını ortadan böler.
 - Bizim içeriğimiz yapılandırılmış: BlockNote blokları ve başlık hiyerarşisi elimizde.
 - Parçalama fonksiyonu deterministik ve kolay test edilebilir olmalı; aşırı karmaşık olmamalı.

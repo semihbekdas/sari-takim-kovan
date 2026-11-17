@@ -82,7 +82,7 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 | F-21 | **"Sayfalarına Sor" sohbeti** (RAG): soruya kullanıcının kendi notlarından cevap ve **tıklanabilir kaynak** | 🟥 Must |
 | F-22 | Notlarda bilgi yoksa **uydurmama**: "bulamadım" cevabı | 🟥 Must |
 | F-23 | Yapay zeka servisi kapalıysa çökmeme: anlaşılır hata mesajı, indekslemenin sonra yeniden denenmesi | 🟥 Must |
-| F-24 | Yapay zeka **token kullanımının** loglanması ve maliyet özeti (Bölüm 16) | 🟧 Should |
+| F-24 | Yapay zeka **token kullanımının** loglanması ve maliyet özeti (ders Bölüm 16) | 🟧 Should |
 | F-25 | **Sohbet geçmişi**: önceki soru-cevapların saklanması ve tekrar açılması | 🟧 Should |
 | F-26 | **MCP Server**: Claude Code / Copilot gibi bir asistanın Kovan'daki sayfalarda arama yapabilmesi (sadece okuma) | 🟧 Should |
 | F-27 | **Hibrit arama**: kelime + anlamsal sonuçların birleştirilmesi | 🟨 Could |

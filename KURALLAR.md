@@ -1,6 +1,6 @@
 # Kovan — Ekip Çalışma Kuralları
 
-> Bu kurallar hocanın proje kriterlerinden (`course-guide.md`) ve derste söylediklerinden türetilmiştir. Amaç: **eşit katkı, tarihsel commit geçmişi, mimariye uyum, testli ve dokümante kod.**
+> Bu kurallar hocanın proje kriterlerinden ([`course-guide.md`](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/course-guide.md)) ve derste söylediklerinden türetilmiştir. Amaç: **eşit katkı, tarihsel commit geçmişi, mimariye uyum, testli ve dokümante kod.**
 > Yapay zeka ajanları için teknik kurallar ayrıca [`AGENTS.md`](AGENTS.md) dosyasındadır.
 
 ---
@@ -115,7 +115,7 @@ Ayrıntı: [`docs/architecture.md`](docs/architecture.md), [`docs/adr/`](docs/ad
 - **Okunabilirlik önce gelir.** Açık isimler, kısa fonksiyonlar (hedef ≤ 30 satır), derin iç içe `if` yok (erken dönüş kullan).
 - Python: tip ipuçları zorunlu, `ruff` (lint + format) ve `mypy` temiz olmalı.
 - TypeScript: `strict` mod, `eslint` + `prettier` temiz olmalı, `any` yok.
-- **Boş `except`/`catch` yasak.** Hata ya ele alınır, ya üst katmana iletilir, ya da loglanır (Bölüm 4: *Do Not Swallow Errors*).
+- **Boş `except`/`catch` yasak.** Hata ya ele alınır, ya üst katmana iletilir, ya da loglanır (ders Bölüm 4: *Do Not Swallow Errors*).
 - Kod tekrarından kaçın (Sonar duplication < %3).
 - Kodda yorum "ne"yi değil **"neden"i** anlatır.
 - Kullanılmayan kod, yorum satırına alınmış eski kod commit'lenmez.
@@ -139,7 +139,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 ## 6. Doküman kuralları
 
 - Davranış değiştiren her PR, ilgili dokümanı da günceller (`api-contract.md`, `domain-design.md`, `user-stories.md` …).
-- Geri dönülmesi zor her karar → `docs/adr/` altına yeni ADR (Bölüm 7).
+- Geri dönülmesi zor her karar → `docs/adr/` altına yeni ADR (ders Bölüm 7).
 - `docs/PLAN.md` her hafta sonu toplantısında güncellenir (ilerleme + skor kartı).
 - `README.md` her sprint sonunda güncel tutulur.
 
@@ -148,7 +148,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 ## 7. Yapay zeka kullanım kuralları
 
 - Ajanı başlatmadan önce ilgili dokümanları bağlam olarak ver (`AGENTS.md` bunu otomatik sağlar).
-- Büyük bir işi tek prompt'ta yaptırma; **küçük parçalar halinde** ilerle (Bölüm 1).
+- Büyük bir işi tek prompt'ta yaptırma; **küçük parçalar halinde** ilerle (ders Bölüm 1).
 - Üretilen kodu **satır satır oku**, çalıştır, testini gör. "Derleniyor" ≠ "doğru".
 - Ajanın `try/except: pass` ile hata gizlemesine, testleri silmesine/atlamasına, gereksiz bağımlılık eklemesine izin verme.
 - **Prompt'lara asla** şifre, API anahtarı, `.env` içeriği, kişisel veri yapıştırma (ders README'sindeki "Aman Dikkat" bölümü).
@@ -169,7 +169,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 - Her veritabanı ve Qdrant sorgusu **kullanıcıya göre filtrelenir** (`owner_id`). Başka kullanıcının kaynağı → **404**.
 - SQL her zaman parametreli; ham string birleştirme yok.
 - Kullanıcı içeriği HTML olarak basılmaz (`dangerouslySetInnerHTML` yasak).
-- Sayfa içeriği LLM'e **veri** olarak gider; içindeki talimatlar uygulanmaz (prompt injection önlemi, Bölüm 18).
+- Sayfa içeriği LLM'e **veri** olarak gider; içindeki talimatlar uygulanmaz (prompt injection önlemi, ders Bölüm 18).
 - Bağımlılıklar güncel ve güvenilir kaynaktan; Dependabot uyarıları göz ardı edilmez.
 
 ---

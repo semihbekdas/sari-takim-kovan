@@ -12,7 +12,7 @@
 | 1 | **Test edilebilirlik** | Ders kriteri; yapay zekanın yazdığı kodun doğruluğunu testler kanıtlar | Port/adapter arayüzleri, fake LLM/embedding, Testcontainers |
 | 2 | **Okunabilirlik / bakım kolaylığı** | Ders kriteri (Sonar A); 3 kişi ve 3 ajan aynı kod tabanında | Katman kuralları, kod kuralları, import-linter, Sonar |
 | 3 | **Güvenlik** | Kişisel notlar hassas; RAG ve bulut API yeni riskler getirir | `owner_id` izolasyonu, httpOnly JWT, prompt injection önlemleri, anahtar yönetimi |
-| 4 | **Basitlik** | 3 kişi, ~4 hafta; gereksiz karmaşıklık borçtur (Bölüm 8) | Modüler monolit, tek süreç |
+| 4 | **Basitlik** | 3 kişi, ~4 hafta; gereksiz karmaşıklık borçtur (ders Bölüm 8) | Modüler monolit, tek süreç |
 | 5 | **Maliyet kontrolü** | Bulut LLM/embedding API'leri ücretli | Düzenleme bitince indeksleme, sınırlı bağlam, token loglama |
 | 6 | **Dayanıklılık** | Bulut API yavaş/kapalı olabilir | Yeniden deneme, 503 ile zarif hata |
 
@@ -86,6 +86,8 @@ flowchart TB
 
 ### Klasör yapısı
 
+Ağaç **hedef** yapıyı gösterir; henüz yazılmamış dosyalar onları kullanan işle birlikte eklenir. Bugün var olanlar için repodaki klasörlere bakın.
+
 ```
 kovan/
 ├── backend/
@@ -94,6 +96,7 @@ kovan/
 │   │   ├── application/
 │   │   │   ├── ports/         system.py (ReadinessProbe), ileride users.py, pages.py, ai.py, vector.py …
 │   │   │   ├── health.py      ReadinessService
+│   │   │   ├── errors.py      uygulama hataları (ör. ExternalServiceError → 503)
 │   │   │   ├── auth_service.py, page_service.py, link_service.py,
 │   │   │   ├── search_service.py, chat_service.py, indexing_service.py
 │   │   │   └── chunking.py, prompting.py        (saf fonksiyonlar)
@@ -235,7 +238,7 @@ Alanlar ve kurallar: [domain-design.md](domain-design.md)
 - **PostgreSQL:** `users`, `pages` (içerik `jsonb`, `plain_text`, `search_vector` için GIN indeks, indeks durumu alanları), `page_links`, *(Should)* `chat_sessions`, `chat_messages`. Erişim **SQLAlchemy Core** ile (ORM değil, ADR-003).
 - **Qdrant:** Tek koleksiyon `page_chunks`, mesafe **Cosine**, boyut `EMBEDDING_DIM`; `owner_id` ve `page_id` için payload indeksi.
 
-## 7. Hata yönetimi ve loglama (Bölüm 3–4)
+## 7. Hata yönetimi ve loglama (ders Bölüm 3–4)
 
 | Hata türü | Örnek | Model | HTTP | Log |
 | --- | --- | --- | --- | --- |

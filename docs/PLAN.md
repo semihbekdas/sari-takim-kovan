@@ -70,7 +70,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter. Takvim **4 büyü
 | --- | --- | --- | --- |
 | Süre kısa (~4 hafta), dönem sonu sınavlarıyla çakışma | Yüksek | Yüksek | Kod dondurma 13 Ara + 12 gün tampon; MoSCoW; Should'lar kesilebilir |
 | Kapsam şişmesi (Notion çok büyük) | Yüksek | Yüksek | "Won't" listesi; yeni özellik = toplantıda ekip onayı |
-| **Anlama borcu** (yapay zekanın yazdığı kodu kimse okumuyor) | Yüksek | Yüksek | Zorunlu review, PR'da "ne/neden" açıklaması, sunum provası (Bölüm 15) |
+| **Anlama borcu** (yapay zekanın yazdığı kodu kimse okumuyor) | Yüksek | Yüksek | Zorunlu review, PR'da "ne/neden" açıklaması, sunum provası (ders Bölüm 15) |
 | **API anahtarının public repoya sızması** | Orta | Yüksek | `.env` + `.gitignore`, GitHub push protection, CI'da gerçek anahtar yok, harcama limiti |
 | API maliyeti / ücretsiz kota bitmesi (429) | Orta | Orta | Fake mod varsayılan, düzenleme bitince indeksleme, harcama limiti, 429 → yeniden deneme |
 | Bulut sağlayıcı kesintisi demo sırasında | Düşük | Yüksek | Demo öncesi sağlık kontrolü; gerekirse `.env` ile ikinci sağlayıcıya geçiş; ekran kaydı yedeği |

@@ -8,7 +8,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 - Ders kriterleri: **test edilebilirlik** (birim + entegrasyon), **teknik borç** (ölçüm aracıyla A kalite), **okunabilirlik**, **mimari uyum**.
 - Hocanın vurgusu: Fonksiyonlar kabul kriterlerine göre test edilecek.
-- Kodun büyük kısmı yapay zeka ile üretilecek; doğruluğu ve kaliteyi **otomatik kapılar** kanıtlamalı (Bölüm 15: kabul ölçütü olarak testler).
+- Kodun büyük kısmı yapay zeka ile üretilecek; doğruluğu ve kaliteyi **otomatik kapılar** kanıtlamalı (ders Bölüm 15: kabul ölçütü olarak testler).
 - Hocanın lesson05 ADR-09'unda belirtilen eksik ("yalnızca birim test var, entegrasyon testi yok") bizde olmamalı.
 - Repo **public** → SonarQube Cloud (eski adıyla SonarCloud) açık kaynak projeler için ücretsiz.
 

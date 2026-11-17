@@ -150,7 +150,7 @@
 | AC-12.5 | **Eğer** bir sayfanın içeriği kısalıp parça sayısı 5'ten 2'ye düşerse, **o zaman** Qdrant'ta o sayfaya ait tam olarak 2 nokta kalır. |
 
 ### US-16 Token kullanımı izleme 🟧 (F-24)
-**Geliştirici olarak** yapay zeka maliyetini görmek istiyorum (Bölüm 16).
+**Geliştirici olarak** yapay zeka maliyetini görmek istiyorum (ders Bölüm 16).
 
 | AC | Kriter |
 | --- | --- |
@@ -165,7 +165,7 @@
 | AC-13.3 | **O zaman** başka kullanıcının oturumlarına erişemem (404). |
 
 ### US-15 MCP Server 🟧 (F-26)
-**Bir geliştirici olarak** Claude Code / Copilot'tan Kovan'daki notlarımda arama yapmak istiyorum (Bölüm 12–13).
+**Bir geliştirici olarak** Claude Code / Copilot'tan Kovan'daki notlarımda arama yapmak istiyorum (ders Bölüm 12–13).
 
 | AC | Kriter |
 | --- | --- |

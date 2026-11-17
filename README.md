@@ -9,6 +9,10 @@
 
 > **Durum:** 🛠️ Geliştirme, Sprint 1 (backend iskeleti, CI ve SonarQube Cloud). Bu README her sprint sonunda güncellenir; henüz uygulanmamış bölümler *(planlanan)* olarak işaretlidir.
 
+> **Buradan başlayın:** 1) Bu README'nin 1–4. bölümleri (ne, neden, mimari) → 2) [docs/architecture.md](docs/architecture.md) § 4–5 (katmanlar ve ana akışlar) → 3) Kod: `backend/src/kovan/main.py` → `api/errors.py` → `backend/tests/acceptance/`. Güncel durum ve sprint planı: [docs/PLAN.md](docs/PLAN.md) § 4 ve § 7.
+>
+> **Okuma notu:** «§ N» bulunduğunuz dokümanın N. bölümüdür; «ders Bölüm N» ise [ders reposundaki](https://github.com/buraksenyurt/ai-based-development-lecture) `chapter-NN.md` dosyasıdır. Kısaltmalar: **İP-A/B/C** iş paketleri (Umut, Özlem, Semih; [PLAN](docs/PLAN.md) § 3) · **F-xx** özellik · **US-xx** kullanıcı hikayesi · **AC-xx.y** kabul kriteri · **R-xx** domain kuralı · **Must/Should/Could** öncelik (MoSCoW: olmazsa olmaz / olmalı / zaman kalırsa).
+
 ---
 
 ## İçindekiler
@@ -78,7 +82,7 @@ api ──► application ──► domain
 infrastructure (PostgreSQL, Qdrant, yapay zeka API'leri, güvenlik, indeksleme)
 ```
 
-**Neden?** 3 kişilik ekip ve ~4 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
+**Neden?** 3 kişilik ekip ve ~4 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (ders Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
 
 ## 5. Teknolojiler
 
@@ -115,10 +119,10 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 | Bileşen | Kullanım |
 | --- | --- |
-| Embedding API (OpenAI / Gemini / Voyage; ekip seçecek) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
-| Qdrant | Kosinüs benzerliği ile anlamsal arama (Bölüm 9–10) |
+| Embedding API (OpenAI / bge-m3 / Voyage; ekip ölçerek seçecek, ADR-006) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
+| Qdrant | Kosinüs benzerliği ile anlamsal arama (ders Bölüm 9–10) |
 | Dil modeli API (Claude / GPT / Gemini; ekip seçecek) | Getirilen parçalardan **kaynaklı** cevap üretir (RAG) |
-| *(Should)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (Bölüm 12–13) |
+| *(Should)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (ders Bölüm 12–13) |
 
 - **Fake mod:** API anahtarı olmadan uygulama ve testler sahte (deterministik) yapay zeka ile çalışır. Güçlü bilgisayar veya yerel model gerekmez.
 - **Gizlilik:** Gerçek modda soru ve ilgili not parçaları seçilen bulut sağlayıcıya gönderilir. Demo ve değerlendirme verileri kurgusaldır.
@@ -138,10 +142,10 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 > Backend iskeleti hazır. `docker compose`, Alembic ve frontend adımları ilgili işler bitince geçerli olacak *(planlanan)*.
 
-**Gereksinimler:** Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node.js 22 LTS. Yerel yapay zeka modeli **gerekmez**.
+**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (entegrasyon testleri; `docker compose` gelince PostgreSQL ve Qdrant da Docker'da çalışır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
 
 ```bash
-git clone https://github.com/<kullanici>/sari-takim-kovan.git && cd sari-takim-kovan
+git clone https://github.com/semihbekdas/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
 docker compose up -d                 # PostgreSQL + Qdrant (planlanan)
 
@@ -150,6 +154,7 @@ uv sync                              # Python 3.12 yoksa uv kendisi indirir
 uv run alembic upgrade head          # (planlanan)
 uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
+# /api/v1/health/ready, veritabanına ulaşamazsa 503 döner (docker compose gelince 200)
 
 cd ../frontend                       # (planlanan)
 npm install
@@ -168,7 +173,7 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 | Entegrasyon | pytest + Testcontainers | PostgreSQL repository'leri, Qdrant adaptörü, indeksleme döngüsü |
 | Kabul | pytest (API senaryoları) | Her Must kabul kriteri (AC) en az bir teste bağlı |
 | Uçtan uca *(Should)* | Playwright | 3 duman senaryosu |
-| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5, MRR |
+| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5 (doğru sayfa ilk 5 sonuçta mı), MRR (doğru sayfa ortalama kaçıncı sırada) |
 
 ```bash
 cd backend
@@ -177,7 +182,7 @@ uv run ruff check . && uv run ruff format --check .   # lint + biçim
 uv run mypy                            # tip kontrolü (strict)
 uv run lint-imports                    # mimari katman kuralları
 
-cd frontend && npm test                # (planlanan)
+cd ../frontend && npm test             # (planlanan)
 ```
 
 *Sonuçlar (test sayısı, kapsam, RAG metrikleri) sprintler ilerledikçe buraya eklenecek.*
@@ -186,7 +191,7 @@ cd frontend && npm test                # (planlanan)
 
 - **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
 - **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **ruff, mypy, eslint:** CI'da zorunlu.
+- **ruff, mypy:** CI'da zorunlu; **eslint** frontend iskeleti gelince eklenecek *(planlanan)*.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 

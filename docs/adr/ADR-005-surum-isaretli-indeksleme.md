@@ -10,7 +10,7 @@ Sayfa değişince vektör indeksinin (Qdrant) de güncellenmesi gerekir. Saf yak
 
 - **Maliyet:** Otomatik kaydetme yazarken ~1 sn'de bir çalışır. Her kayıtta ücretli embedding API'sini çağırmak gereksiz harcamadır.
 - **Hız:** Embedding API'si yavaşsa kayıt yavaşlar.
-- **Tutarlılık:** API veya Qdrant o an kapalıysa ya kayıt başarısız olur ya da PostgreSQL ile Qdrant birbirinden kopar (sayfa silinir ama vektörü kalır → silinen içerik sohbette görünür). Bölüm 8'deki yanılgı: "ağ güvenilirdir".
+- **Tutarlılık:** API veya Qdrant o an kapalıysa ya kayıt başarısız olur ya da PostgreSQL ile Qdrant birbirinden kopar (sayfa silinir ama vektörü kalır → silinen içerik sohbette görünür). ders Bölüm 8'deki yanılgı: "ağ güvenilirdir".
 
 ## Karar
 
@@ -44,7 +44,7 @@ Sayfa değişince vektör indeksinin (Qdrant) de güncellenmesi gerekir. Saf yak
 **Avantajlar:**
 - Kayıt hızlıdır ve yapay zeka servisinin durumundan bağımsızdır.
 - Yazma sırasında API çağrısı yok: sayfa başına, düzenleme bitince **bir** embedding çağrısı (maliyet).
-- Hiçbir değişiklik kaybolmaz; geçici hatalar otomatik düzelir (Bölüm 8: **Retry**, **Idempotency**).
+- Hiçbir değişiklik kaybolmaz; geçici hatalar otomatik düzelir (ders Bölüm 8: **Retry**, **Idempotency**).
 - Ek tablo, kuyruk veya kilit yok; tamamı birkaç fonksiyon ve testle anlatılabilir.
 - Sunumda anlatılacak somut bir "zorluk ve çözüm" hikayesi.
 
