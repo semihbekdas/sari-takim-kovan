@@ -30,7 +30,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 3. **Varsayılan mod `fake`** (`CHAT_PROVIDER=fake`, `EMBEDDING_PROVIDER=fake`): Anahtarsız çalışır; testler, CI ve günlük geliştirme bu modda. Gerçek yapay zeka `.env`'ye anahtar ve sağlayıcı girilince devreye girer.
 4. Dış servis hataları (zaman aşımı 30 sn, 429, 5xx, bağlantı hatası) SDK'ların kendi yeniden denemesinden sonra `ExternalServiceError`'a çevrilir → API'de **503**, indeksleme döngüsünde yeniden deneme (ADR-005). Model güvenlik nedeniyle cevap vermeyi reddederse (`stop_reason == "refusal"`) kullanıcıya "Bu soruya cevap üretilemedi" mesajı döner.
 5. Embedding modeli değişirse vektör boyutu değişebilir → `EMBEDDING_DIM` güncellenir ve `reindex --all` çalıştırılır.
-6. Token kullanımı her çağrıda loglanır (Should, US-16).
+6. Token kullanımı her çağrıda yapay zeka adaptörlerinde loglanır (Should, US-16).
 
 ## Seçenekler ve maliyet
 

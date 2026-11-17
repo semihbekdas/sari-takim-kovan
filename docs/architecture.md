@@ -192,7 +192,7 @@ sequenceDiagram
 2. `VectorIndex.search(vector, owner_id=…, limit=20)` → Qdrant, **`owner_id` filtresi zorunlu** (R-12)
 3. Skor eşiğinin (`SEARCH_MIN_SCORE`) altındakiler atılır; sonuçlar **sayfa bazında** gruplanır (her sayfanın en iyi parçası).
 4. Sayfa kimlikleri PostgreSQL'den doğrulanır: Silinmiş sayfalar **hemen** çıkarılır (indeksleme henüz temizlememiş olsa bile).
-5. Sonuç: `{page_id, title, heading_path, snippet, score}`, sayfalı.
+5. Sonuç: `{page_id, title, heading_path, snippet, score}`, en fazla 20 sonuç (`total` ≤ 20).
 
 ### 5.4 "Sayfalarına Sor" (RAG)
 
@@ -203,15 +203,22 @@ sequenceDiagram
     participant S as SearchService
     participant L as ChatModel
     FE->>C: POST /chat {question}
-    C->>S: ilgili parçaları getir (top_k = 6, owner_id filtreli, silinmişler hariç)
+    C->>S: parçaları getir: retrieve(owner_id, soru, limit = RAG_TOP_K)<br/>(sayfaya göre gruplamadan; silinmişler hariç)
+    C->>C: SEARCH_MIN_SCORE altındaki parçaları at
     alt eşik üstü parça yok
         C-->>FE: found=false, "Sayfalarında bu konuda bilgi bulamadım." (LLM çağrılmaz)
     else parçalar var
         C->>C: build_prompt(): sistem talimatı + <context>[1..n]</context> + soru
         C->>L: complete(system, messages, max_tokens)
-        L-->>C: cevap ([1], [2] atıflarıyla) + token kullanımı
-        C->>C: atıfları sayfalara eşle, geçersiz atıfları at, token kullanımını logla
-        C-->>FE: {answer, citations[], found: true}
+        L-->>C: cevap ([1], [2] atıflarıyla) + bitiş nedeni
+        alt model reddetti, cevap boş veya token sınırında kesildi
+            C-->>FE: found=false, "Bu soruya cevap üretilemedi."
+        else geçerli atıf kalmadı
+            C-->>FE: found=false, "Sayfalarında bu konuda bilgi bulamadım." (R-13)
+        else
+            C->>C: atıfları sayfalara eşle, geçersiz atıfları at
+            C-->>FE: {answer, citations[], found: true}
+        end
     end
 ```
 
@@ -283,7 +290,7 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 - Kayıt sırasında API çağrısı yok; indeksleme düzenleme **bittikten** sonra ve sayfa başına bir kez (AC-12.4).
 - Sohbette en fazla `RAG_TOP_K` parça ve `CHAT_MAX_TOKENS` çıktı; ilgili parça yoksa model hiç çağrılmaz (AC-11.2).
 - Testler ve CI **fake** sağlayıcıyla çalışır, para harcamaz.
-- *(Should)* Token kullanımı loglanır ve raporlanır (US-16).
+- *(Should)* Token kullanımı yapay zeka adaptörlerinde (`infrastructure/ai`) loglanır ve raporlanır (US-16). `application` katmanı structlog kullanamaz (import-linter).
 - Sağlayıcı panellerinde aylık harcama limiti tanımlanır.
 
 ## 11. Dağıtım (yerel)
