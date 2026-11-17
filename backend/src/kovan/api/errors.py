@@ -74,6 +74,10 @@ async def _handle_validation_error(request: Request, exc: Exception) -> JSONResp
 async def _handle_http_error(request: Request, exc: Exception) -> JSONResponse:
     if not isinstance(exc, StarletteHTTPException):
         return await _handle_unexpected_error(request, exc)
+    if exc.status_code >= 500:
+        # Ayrıntı iç bilgi içerebilir: Beklenmeyen hata gibi ele alınır, ayrıntı yalnızca loglanır.
+        logger.error("http_server_error", status=exc.status_code, detail=str(exc.detail))
+        return _error_response(request, 500, "INTERNAL_ERROR", INTERNAL_ERROR_MESSAGE)
     code, message = _HTTP_ERRORS.get(exc.status_code, ("HTTP_ERROR", str(exc.detail)))
     _log(exc.status_code, code, message)
     response = _error_response(request, exc.status_code, code, message)

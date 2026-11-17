@@ -24,13 +24,23 @@ async def _request_context(request: Request, call_next: RequestResponseEndpoint)
     structlog.contextvars.bind_contextvars(request_id=request_id)
 
     started = time.perf_counter()
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception:
+        # Beklenmeyen hatanın yanıtını en dıştaki hata işleyicisi üretir; yanıt buraya dönmez.
+        # İstek yine de loglansın diye burada 500 olarak kaydedilir ve hata yukarı iletilir.
+        _log_request(request, status=500, started=started)
+        raise
     response.headers[REQUEST_ID_HEADER] = request_id
+    _log_request(request, status=response.status_code, started=started)
+    return response
+
+
+def _log_request(request: Request, *, status: int, started: float) -> None:
     logger.info(
         "request_completed",
         method=request.method,
         path=request.url.path,
-        status=response.status_code,
+        status=status,
         duration_ms=round((time.perf_counter() - started) * 1000, 1),
     )
-    return response

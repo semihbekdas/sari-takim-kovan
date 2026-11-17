@@ -8,22 +8,12 @@ from testcontainers.community.postgres import PostgresContainer
 from kovan.infrastructure.db.engine import create_db_engine
 from kovan.infrastructure.db.probe import DatabaseProbe
 from tests.fakes import UNREACHABLE_DATABASE_URL
-
-
-def _docker_available() -> bool:
-    try:
-        import docker
-
-        docker.from_env().ping()
-    except Exception:  # Docker yoksa test atlanır; hata yutulmaz, nedeni skip mesajında.
-        return False
-    return True
+from tests.integration.containers import require_docker
 
 
 @pytest.fixture(scope="module")
 def postgres_url() -> Iterator[str]:
-    if not _docker_available():
-        pytest.skip("Docker çalışmıyor; Testcontainers testi atlandı.")
+    require_docker()
     with PostgresContainer("postgres:16-alpine", driver="psycopg") as postgres:
         yield postgres.get_connection_url()
 
