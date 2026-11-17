@@ -18,11 +18,14 @@ class DomainError(Exception):
 
 
 class DomainRuleError(DomainError):
-    """Bir domain kuralı ihlal edildi (ör. R-05). API'de 422 döner."""
+    """Bir domain kuralı ihlal edildi (ör. R-05). API'de 422 döner.
+
+    Kullanım: `DomainRuleError("Döngü oluşur.", rule_code="R-05", code="PAGE_MOVE_CYCLE")`
+    """
 
     default_code = "DOMAIN_RULE_VIOLATION"
 
-    def __init__(self, rule_code: str, message: str, *, code: str | None = None):
+    def __init__(self, message: str, *, rule_code: str, code: str | None = None):
         super().__init__(message, code=code, rule_code=rule_code)
 
 
