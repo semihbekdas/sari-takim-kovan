@@ -24,7 +24,7 @@
 > **📝 `✍️ DOLDURULACAK` yazan yerler ne demek?** Aşağıdaki kayıtlarda yapay zekanın ne ürettiği yazılı, ama **sizin ne yaptığınız** henüz yazılı değil, çünkü henüz bir şey yapmadınız. Ders "Agentic Engineering" istiyor: Yapay zekanın çıktısını okumak, yanlışını bulmak, düzeltmek. Bu alanlar o işin kanıtı.
 > - **Kim:** Claude Code oturumunu yürüten üyenin adı.
 > - **Bizim müdahalemiz:** Dokümanları okuyunca neyi değiştirdiniz, neyi sildiniz, neye itiraz ettiniz? Örnek: *"Sprint 3'ü fazla yüklü bulduk, kelime aramasını Sprint 2'ye aldık."* veya *"İsim önerisini 'sari-takim-kovan' olarak kesinleştirdik."* Hiçbir şey değiştirmediyseniz "okundu, değişiklik yok" yazın. Boş bırakmayın.
-> - Her üye, Sprint 0'da kendi commit'leyeceği dokümanları okuyunca bu alana bir satır ekler.
+> - Her üye, Sprint 1'deki doküman okuma PR'ında kendi iş paketinin dokümanlarını okuyup bu günlüğe ayrı bir kayıt ekler (PLAN § 5).
 
 ### 2026-11-13 — Ders reposunun analizi ve proje dokümanlarının taslağı
 - **Kim:** ✍️ DOLDURULACAK *(oturumu yürüten üye)*
@@ -33,7 +33,7 @@
 - **Prompt (özet):** "Notion ile başlayalım, dokümanları hazırla; önce hocanın reposundaki proje ile ilgili kısımları detaylıca incele, sonra hangi mimariyi neden kullandığımızı, planımızı, README'yi oluştur; ayrıca uygulama özelliklerini ve kuralları ayrı dosyalara yaz."
 - **Sonuç:** `README.md`, `OZELLIKLER.md`, `KURALLAR.md`, `AGENTS.md`, `CLAUDE.md`, `docs/*` ve `docs/adr/ADR-001…010` taslakları.
 - **Yapay zekanın hataları / eksikleri:** Bu taslağın hataları aynı gün yapılan revizyonda bulundu, bkz. bir sonraki kayıt. Sizin bulduklarınızı da buraya ekleyin.
-- **Bizim müdahalemiz:** ✍️ DOLDURULACAK *(her üye kendi commit'lediği dokümanı okuyunca yaptığı değişikliği yazar)*
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK *(üyelerin doküman okuma kayıtları ayrı girdilerdedir)*
 - **Ders çıkarımı:** Kod yazdırmadan önce mimari ve domain dokümanı hazırlamak (Bölüm 2 yaklaşımı) ajanlara tutarlı bağlam sağlar.
 
 ### 2026-11-13 — Dokümanların yeni kararlara göre revizyonu ve aşırı mühendislik kontrolü
@@ -60,7 +60,7 @@
 - **Prompt (özet):** "Hocanın isterlerine bak, her şey hazırsa benim görevime başla." (Görev: docs/PLAN.md § 4, Sprint 1.)
 - **Sonuç:** `backend/` klasörü. 20 test geçti (1 Docker testi Docker kapalı olduğu için atlandı), kapsam %96, ruff + mypy (strict) + import-linter (4/4 sözleşme) temiz.
 - **Yapay zekanın hataları / eksikleri ve düzeltmeleri:**
-  - İlk taslakta henüz kullanılmayan yapay zeka ve vektör port'ları da vardı → "kullanılmayan kod commit'lenmez" kuralına aykırı ve kapsamı %0 gösteriyordu → kaldırıldı; ilk kullanan özellikle (Sprint 2) eklenecek.
+  - İlk taslakta henüz kullanılmayan yapay zeka ve vektör port'ları da vardı → "kullanılmayan kod commit'lenmez" kuralına aykırı ve kapsamı %0 gösteriyordu → kaldırıldı; her port onu ilk kullanan özellikle eklenir.
   - Eşlemesi unutulmuş bir hata tipi 500 ile kendi mesajını döndürüyordu → iç ayrıntı sızdırmasın diye "beklenmeyen hata" gibi ele alındı, testi eklendi.
   - Eski kütüphane yolları uyarı veriyordu (`httpx` → `httpx2`, `testcontainers.postgres` → `testcontainers.community.postgres`) → güncellendi.
   - mypy test modülünü iki farklı adla buluyordu, ruff test fonksiyonunu fazla karmaşık buldu → yapılandırma ve test düzeni düzeltildi.

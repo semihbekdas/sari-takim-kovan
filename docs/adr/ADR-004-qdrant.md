@@ -6,9 +6,9 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 ## Bağlam
 
-- Anlamsal arama ve RAG için sayfa parçalarının embedding vektörlerini saklayıp **kosinüs benzerliği** ile sorgulamamız gerekiyor (Bölüm 9).
-- Ders rehberi P0007 için "Qdrant/Vektör Veritabanı" öneriyor; derste Qdrant kullanıldı ve repo kökündeki `docker-compose.yml`'de hazır.
-- Çok kullanıcılı sistemde her arama **kullanıcıya göre filtrelenmeli** (güvenlik, R-13).
+- Anlamsal arama ve RAG için sayfa parçalarının embedding vektörlerini saklayıp **kosinüs benzerliği** ile sorgulamamız gerekiyor (ders Bölüm 9).
+- Ders rehberi P0007 için "Qdrant/Vektör Veritabanı" öneriyor; derste Qdrant kullanıldı (ders reposunun kökündeki `docker-compose.yml`). Projede de PostgreSQL ile birlikte kendi `docker-compose.yml`'mizle çalıştırılır *(planlanan)*.
+- Çok kullanıcılı sistemde her arama **kullanıcıya göre filtrelenmeli** (güvenlik, R-12).
 
 ## Karar
 
@@ -25,7 +25,7 @@ Vektörler **Qdrant**'ta tutulur:
 | --- | --- | --- |
 | **pgvector** (PostgreSQL eklentisi) | Tek veritabanı, transaction içinde tutarlılık, daha az servis | Ders içeriği ve önerisiyle uyumu düşük; Qdrant'ın filtreli arama ve dashboard özellikleri sunumda vektör veritabanı bilgisini göstermeye daha uygun. Tutarlılık sorununu sürüm işaretli indekslemeyle çözüyoruz (ADR-005). **Süre çok sıkışırsa yedek plan:** `VectorIndex` portunun pgvector adaptörüyle değiştirilmesi (yalnızca infrastructure etkilenir). |
 | **Chroma / FAISS** | Hafif, kolay | FAISS bir kütüphane, sunucu değil (filtreleme ve kalıcılık bizde kalır); Chroma ile ders örnekleri yok. |
-| **Elasticsearch** (kNN + full-text) | Hibrit arama tek yerde | Kaynak tüketimi yüksek, kurulumu ağır (Bölüm 4'te Loki ile karşılaştırması yapılmıştı). |
+| **Elasticsearch** (kNN + full-text) | Hibrit arama tek yerde | Kaynak tüketimi yüksek, kurulumu ağır (ders Bölüm 4'te Loki ile karşılaştırması yapılmıştı). |
 
 ## Sonuçlar
 

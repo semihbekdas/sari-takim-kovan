@@ -34,7 +34,7 @@ Ayrıntılı araştırma, 8 sistem stilinin ve 6 kod organizasyonu yaklaşımın
 
 | Alternatif | Neden seçilmedi |
 | --- | --- |
-| Mikroservisler / event-driven | Ölçek ihtiyacı yok; ağ, dağıtık tutarlılık ve broker karmaşıklığı. Bölüm 8: "gereksiz karmaşıklık borcu". |
+| Mikroservisler / event-driven | Ölçek ihtiyacı yok; ağ, dağıtık tutarlılık ve broker karmaşıklığı. Ders Bölüm 8: "gereksiz karmaşıklık borcu". |
 | Service-based (2–3 servis) | En yakın alternatif; ama ayrı deploy'lar ve servisler arası HTTP 4 haftada ek yük getirir, tek ekip için kazancı yok. |
 | Klasik 3 katman (lesson05) | Application somut veri katmanına bağlı kalır; LLM/Qdrant'ı testte taklit etmek zorlaşır. |
 | Tam Clean Architecture | Özellik başına çok sınıf ve kavram; 4 haftada aşırı mühendislik. |
