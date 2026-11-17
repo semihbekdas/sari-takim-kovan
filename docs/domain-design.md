@@ -81,7 +81,7 @@ Davranışlar (saf fonksiyonlar, birim testli):
 - `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (PageLink üretimi)
 - `to_sections()` → başlık hiyerarşisine göre bölümler (parçalama, ADR-009)
 
-> **Not:** `to_sections()` Sprint 1'deki PageContent işinin (#6) kapsamında değildir; parçalama işiyle (#13) birlikte yazılır. `chunk_page` içeriği başlıklara göre bölümlere ayırırken bu metodu kullanır (ADR-009, madde 1).
+>> **Not:** `to_sections()` parçalama (ADR-009) tarafından kullanılır ve onunla birlikte yazılır.
 
 ## 5. PageLink *(Entity)*
 
