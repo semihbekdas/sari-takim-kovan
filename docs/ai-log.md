@@ -52,3 +52,50 @@
 - **Aşırı mühendislik olarak sadeleştirilenler:** ayrı `index_jobs` outbox tablosu → sayfa satırında sürüm işareti; SQLAlchemy ORM + eşleme → SQLAlchemy Core; unit of work kaldırıldı; kardeş sayfa sıralaması (`position`) ve maksimum derinlik kuralı kaldırıldı; parçalamadaki örtüşme ve özel kurallar kaldırıldı; MSW kaldırıldı; 10 uçtan uca test → 3 duman testi (Should); sohbet oturumu Must'tan Should'a; favori/ikon Won't.
 - **Bizim müdahalemiz:** Kararları ekip verdi: teslim 25 Aralık / hedef 20 Aralık, hafta sonu toplantıları, public repo, bulut dil modeli, çöp kutusunun Should olması, takım adı "Sarı Takım". ✍️ Dokümanları okuyunca yaptığınız ek düzeltmeleri buraya ekleyin.
 - **Ders çıkarımı:** Yapay zekanın ilk ürettiği tasarım "doğru ama fazla" olabiliyor. Kısıtları (süre, ekip, bütçe) açıkça verip çıktıyı aşırı mühendislik açısından ayrıca sorgulamak gerekiyor.
+
+### 2026-11-16 — Backend iskeleti (İP-C altyapı payı)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** Katmanlı backend iskeletini kurmak: proje yapılandırması (uv), katman klasörleri, import-linter sözleşmeleri, ayarlar, JSON loglama + `request_id`, tek hata formatı, sağlık uç noktaları ve testleri.
+- **Prompt (özet):** "Hocanın isterlerine bak, her şey hazırsa benim görevime başla." (Görev: docs/PLAN.md § 4, Sprint 1.)
+- **Sonuç:** `backend/` klasörü. 20 test geçti (1 Docker testi Docker kapalı olduğu için atlandı), kapsam %96, ruff + mypy (strict) + import-linter (4/4 sözleşme) temiz.
+- **Yapay zekanın hataları / eksikleri ve düzeltmeleri:**
+  - İlk taslakta henüz kullanılmayan yapay zeka ve vektör port'ları da vardı → "kullanılmayan kod commit'lenmez" kuralına aykırı ve kapsamı %0 gösteriyordu → kaldırıldı; ilk kullanan özellikle (Sprint 2) eklenecek.
+  - Eşlemesi unutulmuş bir hata tipi 500 ile kendi mesajını döndürüyordu → iç ayrıntı sızdırmasın diye "beklenmeyen hata" gibi ele alındı, testi eklendi.
+  - Eski kütüphane yolları uyarı veriyordu (`httpx` → `httpx2`, `testcontainers.postgres` → `testcontainers.community.postgres`) → güncellendi.
+  - mypy test modülünü iki farklı adla buluyordu, ruff test fonksiyonunu fazla karmaşık buldu → yapılandırma ve test düzeni düzeltildi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK *(kodu okuyunca değiştirdiğin veya sorduğun şeyler)*
+- **Ders çıkarımı:** Otomatik kontroller (lint, tip, mimari, kapsam) yapay zekanın gözden kaçırdığı sorunları hemen yakaladı.
+
+### 2026-11-16 — CI (GitHub Actions) ve SonarQube Cloud
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** Her PR'da lint, biçim, tip, mimari kurallar, testler ve kapsamı çalıştıran CI; analizin SonarQube Cloud'a gönderilmesi.
+- **Sonuç:** `.github/workflows/ci.yml`, `sonar-project.properties`, README rozetleri. SonarQube Cloud organizasyonu/projesi ve `SONAR_TOKEN` secret'ı Semih tarafından tarayıcıdan oluşturuldu.
+- **Kararlar:** SonarQube'un önerdiği örnek workflow yerine testleri ve kapsamı da içeren tek bir CI işi yazıldı. Action'lar güvenlik için sürüm etiketi yerine sabit commit SHA ile kullanıldı. "Automatic Analysis" kapatıldı (CI analiziyle çakışır).
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-16 — İlk SonarQube analizi: güvenlik C → A
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5) + SonarQube Cloud
+- **Ne oldu?** PR #1'in ilk analizinde kod koşulları geçti (kapsam %97.2, tekrar %0) ama **güvenlik derecesi C** olduğu için kalite kapısı kırmızı yandı.
+- **Yapay zekanın hatası:** Yazdığı CI dosyasında `uv sync` paketlerin kurulum betiklerini çalıştırabiliyordu (`githubactions:S8541`), `uv run` adımları kilitli sürümlerden sapabiliyordu (`S8544`). Ayrıca `lifespan` içinde `yield` sonrası temizlik `try/finally` ile korunmamıştı (`python:S9152`).
+- **Düzeltme:** `uv sync --locked --no-build --no-install-project`, `uv run --frozen --no-sync`, kod kaynaktan (`PYTHONPATH=src`) çalıştırıldı; `lifespan` `try/finally` ile sarıldı.
+- **Sonuç:** Kalite kapısı geçti: güvenilirlik, güvenlik ve bakım kolaylığı **A**, kapsam %97.2, 0 açık bulgu. CI'da gerçek PostgreSQL ile 21/21 test.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
+
+### 2026-11-18 — PR #1 review'u: Codex'in 5 uyarısı ve Özlem'in sorusu
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Ne oldu?** PR #1'e Codex otomatik review'u 5 uyarı bıraktı. Özlem review'unda, Docker yokken entegrasyon testinin atlanmasının KURALLAR § 5'teki "`skip` yasak" kuralıyla çeliştiğini sordu ve diğer uyarılara da bakılmasını istedi.
+- **Yapay zekanın hataları (review yakaladı):**
+  1. Hata loglarına o andaki yerel değişkenler de yazılıyordu (structlog'da `show_locals` varsayılan olarak açık); şifre veya API anahtarı loga düşebilirdi.
+  2. 5xx durumlu `HTTPException`'ın ayrıntısı istemciye gönderiliyordu.
+  3. Hata veren istekler süre ve durum bilgisiyle loglanmıyordu.
+  4. CI'da Docker bozulursa entegrasyon testi atlanıyor, CI yine yeşil yanabiliyordu.
+  5. Fork veya Dependabot PR'larında token olmadığı için Sonar adımı CI'ı kırıyordu.
+- **Düzeltme:** Yerel değişkenler loglanmıyor, SQL hata mesajlarına sorgu parametreleri yazılmıyor (`hide_parameters`). 5xx `HTTPException` genel `INTERNAL_ERROR` döndürüyor. Hata veren istekler 500 olarak loglanıyor. Docker CI'da zorunlu (yoksa test hata veriyor), yerelde atlanıyor; kural metni de buna göre netleştirildi. Sonar analizi secret'ı olmayan PR'larda çalışmıyor. Her düzeltme için, eski kodda düşen bir test eklendi; 27 test geçti (PostgreSQL entegrasyon testi Docker ile çalıştı).
+- **Kararlar:** Hatanın mesajı ve satırları loglarda kalıyor (teşhis için gerekli, istemciye hiç gitmiyor); asıl risk olan yerel değişkenler ve SQL parametreleri kaldırıldı.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Ders çıkarımı:** İnsan review'u ve otomatik review birlikte, yapay zekanın "çalışan ama güvensiz" yazdığı ayrıntıları yakaladı.

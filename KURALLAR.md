@@ -131,7 +131,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 - Test türleri: **birim** (domain/application), **entegrasyon** (gerçek PostgreSQL + Qdrant, Testcontainers), **kabul** (API senaryoları); *(Should)* birkaç Playwright duman testi.
 - Testler gerçek yapay zeka API'si çağırmaz; fake sağlayıcılar kullanılır.
 - Hata yolları da test edilir (geçersiz girdi, yetkisiz erişim, servis kapalı) — *negative path testing*.
-- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**.
+- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**. Tek istisna: Docker gerektiren entegrasyon testleri **yerelde** Docker kapalıysa atlanır; **CI'da Docker zorunludur**, yoksa test hata verir.
 - Yeni kod, mevcut testleri kırmadan gelir.
 
 ---

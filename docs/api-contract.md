@@ -1,6 +1,6 @@
 # REST API Sözleşmesi
 
-> Frontend ve backend'in paralel geliştirilebilmesi için ortak sözleşme. Kod yazılınca FastAPI'nin ürettiği OpenAPI (`/docs`) asıl kaynak olur; bu doküman onunla tutarlı tutulur.
+> Frontend ve backend'in paralel geliştirilebilmesi için ortak sözleşme. Kod yazılınca FastAPI'nin ürettiği OpenAPI (Swagger arayüzü: `/api/docs`) asıl kaynak olur; bu doküman onunla tutarlı tutulur.
 
 ## Genel kurallar
 
@@ -24,6 +24,10 @@
   }
 }
 ```
+
+- `rule` yalnızca bir domain kuralı (R-xx) ihlalinde doludur, aksi halde `null`.
+- `VALIDATION_ERROR` yanıtında ek olarak hangi alanın hatalı olduğunu söyleyen `details` listesi bulunur: `[{"field": "body.email", "message": "..."}]`. Girilen değer (ör. şifre) yanıta konmaz.
+- Beklenmeyen hatalarda (500) iç ayrıntı istemciye gönderilmez; `request_id` ile loglarda aranır.
 
 | HTTP | `code` örnekleri |
 | --- | --- |

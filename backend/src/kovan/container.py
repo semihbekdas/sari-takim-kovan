@@ -1,0 +1,14 @@
+"""Uygulama servislerinin tutulduğu kap.
+
+`main.py` (composition root) doldurur; API katmanı `api/deps.py` üzerinden okur.
+Böylece API katmanı infrastructure'ı hiç import etmez (ADR-001).
+"""
+
+from dataclasses import dataclass
+
+from kovan.application.health import ReadinessService
+
+
+@dataclass(frozen=True)
+class Container:
+    readiness: ReadinessService

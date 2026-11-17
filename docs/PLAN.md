@@ -6,14 +6,14 @@
 
 ## 1. Hedef
 
-**20 Aralık 2026**'ya kadar tüm **Must** özellikleri, ders kriterlerinin hepsini karşılayacak kalitede bitirmek: Sonar A, testli, dokümante, dengeli ve zamana yayılmış commit geçmişi. Zaman kalırsa **Should** özellikleri eklemek. 21–25 Aralık yalnızca sunum hazırlığı ve hata düzeltme için ayrılmıştır. **Teslim: 25 Aralık 2026 (Cuma).**
+**13 Aralık 2026**'ya kadar tüm **Must** özellikleri, ders kriterlerinin hepsini karşılayacak kalitede bitirmek: Sonar A, testli, dokümante, dengeli ve zamana yayılmış commit geçmişi. Zaman kalırsa **Should** özellikleri eklemek. 14–25 Aralık yalnızca sunum hazırlığı ve hata düzeltme için ayrılmıştır. **Teslim: 25 Aralık 2026 (Cuma).**
 
 ## 2. Varsayımlar ve kısıtlar
 
 | Konu | Durum |
 | --- | --- |
-| Teslim | 25 Aralık 2026 (son gün). Hedef bitiş 20 Aralık. |
-| Süre | ~5 haftalık geliştirme (16 Kasım – 20 Aralık) + Sprint 0 + 5 günlük tampon |
+| Teslim | 25 Aralık 2026 (son gün). Kod dondurma 13 Aralık. |
+| Süre | 4 büyük sprint (16 Kasım – 13 Aralık) + Sprint 0 + 12 günlük sunum/tampon |
 | Ekip | 3 kişi; herkes yapay zeka destekli geliştirme yapacak |
 | Toplantılar | **Hafta sonu** (Cumartesi veya Pazar, ~45 dk) |
 | Yapay zeka | Bulut API (Claude / GPT / Gemini + embedding sağlayıcısı); geliştirme ve testler varsayılan olarak **fake** modda, API anahtarı gerekmez |
@@ -24,37 +24,36 @@
 ## 3. İş paketleri ve görev dağılımı
 
 İş yükü **eşit** dağıtıldı; paketler kabaca aynı büyüklükte tutuldu. Herkes üç tür iş alır:
-1. Altyapıdan bir parça,
+1. bir altyapı veya ortak servis işi,
 2. bir **dikey özellik paketi** (kendi backend'i, frontend'i, testi ve dokümanıyla; sunumda baştan sona anlatılabilir),
 3. eşit büyüklükte Should işleri.
 
-| Paket | Sahibi | Altyapı payı | Must | Should |
+| Paket | Sahibi | Altyapı / ortak servis payı | Must | Should |
 | --- | --- | --- | --- | --- |
 | **İP-A Sayfalar & Editör** | **Umut** | docker-compose (PostgreSQL + Qdrant) + Alembic kurulumu, frontend iskeleti (Vite + React + TS, yönlendirme, ana yerleşim, API istemcisi) | Page aggregate (R-03, R-04, R-07, R-08), sayfa CRUD API'si, sol menü ağacı + breadcrumb, BlockNote editör (kısıtlı şema) + otomatik kaydetme + çakışma uyarısı (409), silme, `@` sayfa bağlantısı (editör tarafı) · F-05–F-10, F-15, F-17 | F-11 taşıma (R-05), F-12 çöp kutusu, F-13 son düzenlenenler |
-| **İP-B Kimlik, İçerik & Arama** | **Özlem** | CI (GitHub Actions: lint + test + import-linter) + SonarQube Cloud bağlantısı | `PageContent` (R-06), kayıt/giriş/çıkış (ADR-008) + ekranları, chunking (ADR-009), bağlantılar + geri bağlantılar (R-09) API'si ve paneli, kelime araması + arama ekranı · F-01–F-03, F-16, F-18 | F-04 rate limit, F-24 token loglama, Playwright duman testleri |
-| **İP-C Yapay Zeka** | **Semih** | Backend iskeleti (uv, FastAPI, katman klasörleri, import-linter sözleşmeleri, yapılandırma, hata formatı, port arayüzleri) | Yapay zeka adaptörleri + fake mod (ADR-006), Qdrant adaptörü, indeksleme döngüsü (R-10, R-11) + indeks durumu, anlamsal arama (R-12), "Sayfalarına Sor" + kaynaklar (R-13) · F-19–F-23 | F-25 sohbet geçmişi, F-26 MCP server |
+| **İP-B Kimlik, İçerik & Arama** | **Özlem** | Arama servisi: anlamsal arama (R-12), yapay zeka port'larını kullanarak | `PageContent` (R-06), kayıt/giriş/çıkış (ADR-008) + ekranları, chunking (ADR-009), bağlantılar + geri bağlantılar (R-09) API'si ve paneli, kelime araması + arama ekranı (kelime ve anlamsal mod) · F-01–F-03, F-16, F-18, F-19 | F-04 rate limit, F-24 token loglama, Playwright duman testleri |
+| **İP-C Yapay Zeka** | **Semih** | Backend iskeleti (uv, FastAPI, katman klasörleri, import-linter sözleşmeleri, yapılandırma, hata formatı, port düzeni) · CI (GitHub Actions: lint + test + import-linter) + SonarQube Cloud | Yapay zeka adaptörleri + fake mod (ADR-006), Qdrant adaptörü, indeksleme döngüsü (R-10, R-11) + indeks durumu, "Sayfalarına Sor" + kaynaklar (R-13) · F-20–F-23 | F-25 sohbet geçmişi, F-26 MCP server |
 | **Ortak** | Herkes | — | RAG değerlendirme seti (herkes ~5 kurgusal sayfa + 7 soru yazar), embedding karşılaştırması (herkes bir adayı dener, ADR-006), güvenlik gözden geçirmesi, eksik testler, README, sunum | — |
 
 **Review düzeni:** Her PR'ı, PR'ı açan kişi dışındaki en az bir ekip üyesi inceler; review'lar dönüşümlü yapılır. Böylece herkes diğer modülleri de tanır ve sunumda onlarla ilgili sorulara da cevap verebilir.
 
-**Bağımlılıklar:** Backend iskeleti Sprint 1'in ilk günlerinde `main`'e girer, diğer backend işleri onun üzerine kurulur. Kimlik doğrulama bitene kadar sayfa API'si testlerde sabit bir test kullanıcısıyla geliştirilir. Port arayüzleri iskeletle gelir; böylece kimse kimseyi beklemez. SonarQube Cloud token'ını GitHub'a repo sahibi ekler (yönetici yetkisi gerekir).
+**Bağımlılıklar:** Backend iskeleti Sprint 1'in ilk günlerinde `main`'e girer, diğer backend işleri onun üzerine kurulur. Kimlik doğrulama bitene kadar sayfa API'si testlerde sabit bir test kullanıcısıyla geliştirilir. İskelet; katman yapısını, port düzenini (`application/ports/`), hata formatını ve sağlık uç noktalarını getirir. Her port, onu ilk kullanan özellikle birlikte eklenir (kullanılmayan kod commit'lenmez). Anlamsal arama (Özlem), yapay zeka ve Qdrant adaptörleri (Semih) gelene kadar fake'lerle geliştirilir.
 
 ## 4. Sprint takvimi
 
-Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter.
+Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter. Takvim **4 büyük sprinte** sıkıştırıldı: kod **13 Aralık**'ta donar, 14–25 Aralık sunum hazırlığı ve tampondur.
 
 | Sprint | Tarih | Umut (İP-A) | Özlem (İP-B) | Semih (İP-C) |
 | --- | --- | --- | --- | --- |
 | **0** | 13 – 15 Kas | Doküman seti ve public repo | | |
-| **1** Temel | 16 – 22 Kas | Doküman okuma PR'ı · docker-compose + Alembic · Frontend iskeleti | Doküman okuma PR'ı · CI + SonarQube Cloud · `PageContent` (doğrulama, düz metin, bağlantı çıkarma) + birim testleri | Repo ayarları (secret scanning, push protection) · Backend iskeleti + port arayüzleri (hafta başında) |
-| **2** | 23 – 29 Kas | Page domain + `pages` migration + sayfa CRUD API'si + kabul testleri | Kayıt/giriş/çıkış API'si (Argon2, JWT çerez) + testleri · Chunking modülü | Yapay zeka adaptörleri + fake mod + 503 eşlemesi · Qdrant adaptörü |
-| **3** | 30 Kas – 6 Ara | Sol menü ağacı + breadcrumb · BlockNote editör + otomatik kaydetme + 409 | Giriş/kayıt ekranları · Bağlantılar + geri bağlantılar (API + panel) | İndeksleme döngüsü + indeks durumu + `reindex` CLI · Anlamsal arama servisi |
-| **4** RAG | 7 – 13 Ara | Silme (R-08) · `@` sayfa bağlantısı + `/pages/titles` | Kelime araması + arama ekranı | Arama ekranına anlamsal mod · "Sayfalarına Sor" (backend + UI + kaynaklar) |
-| **5** Bitiş | 14 – 20 Ara | *(Should)* taşıma, çöp kutusu, son düzenlenenler | *(Should)* rate limit, token loglama, Playwright duman testleri | *(Should)* sohbet geçmişi, MCP server · RAG parametre ayarı |
-| | | **Ortak:** değerlendirme seti ve embedding karşılaştırması (Sprint 2–3) · güvenlik gözden geçirmesi, eksik testler, Sonar A, README, sunum taslağı (Sprint 4–5) · **20 Ara: kod dondurma** | | |
-| **Tampon** | 21 – 25 Ara | Sunum provası (en az 2 kez, ≤ 25 dk), yalnızca hata düzeltme · **25 Ara: teslim** | | |
+| **1** Temel | 16 – 22 Kas | Doküman okuma PR'ı · docker-compose + Alembic · Frontend iskeleti | Doküman okuma PR'ı · `PageContent` (doğrulama, düz metin, bağlantı çıkarma) + birim testleri | Repo ayarları · Backend iskeleti · CI + SonarQube Cloud · Yapay zeka adaptörleri + fake mod |
+| **2** | 23 – 29 Kas | Page domain + `pages` migration + sayfa CRUD API'si + kabul testleri · Sol menü ağacı + breadcrumb | Kayıt/giriş/çıkış API'si (Argon2, JWT çerez) + testleri · Chunking modülü | Qdrant adaptörü · İndeksleme döngüsü + indeks durumu + `reindex` CLI |
+| **3** | 30 Kas – 6 Ara | BlockNote editör (kısıtlı şema) + otomatik kaydetme + 409 · Silme (R-08) | Giriş/kayıt ekranları · Anlamsal arama servisi · Kelime araması + arama ekranı (iki mod) | "Sayfalarına Sor" (backend + UI + kaynaklar) |
+| **4** Bitiş | 7 – 13 Ara | `@` sayfa bağlantısı + `/pages/titles` · *(Should)* taşıma, çöp kutusu, son düzenlenenler | Bağlantılar + geri bağlantılar (API + panel) · *(Should)* rate limit, token loglama, Playwright duman testleri | *(Should)* sohbet geçmişi, MCP server · RAG parametre ayarı |
+| | | **Ortak:** değerlendirme seti ve embedding karşılaştırması (Sprint 2) · güvenlik gözden geçirmesi (Sprint 3) · eksik testler, Sonar A, README (Sprint 4) · **13 Ara: kod dondurma** | | |
+| **Sunum + tampon** | 14 – 25 Ara | README ekran görüntüleri ve sonuçlar, sunum taslağı, en az 2 prova (≤ 25 dk), yalnızca hata düzeltme · **25 Ara: teslim** | | |
 
-**Kural:** Bir sprintin Must işleri bitmeden Should işlerine geçilmez. Sprint 4 sonunda Must'larda gecikme varsa Should'lar kesilir.
+**Kural:** Bir sprintin Must işleri bitmeden Should işlerine geçilmez. Sprint 3 sonunda Must'larda gecikme varsa Sprint 4'teki Should'lar kesilir.
 
 **Commit hedefi:** Her üye her sprintte **≥ 3 commit** (en az 2 farklı günde), **≥ 1 PR** ve **≥ 1 review**.
 
@@ -69,7 +68,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter.
 
 | Risk | Olasılık | Etki | Önlem |
 | --- | --- | --- | --- |
-| Süre kısa (~5 hafta), dönem sonu sınavlarıyla çakışma | Yüksek | Yüksek | Hedef 20 Ara + 5 gün tampon; MoSCoW; Should'lar kesilebilir |
+| Süre kısa (~4 hafta), dönem sonu sınavlarıyla çakışma | Yüksek | Yüksek | Kod dondurma 13 Ara + 12 gün tampon; MoSCoW; Should'lar kesilebilir |
 | Kapsam şişmesi (Notion çok büyük) | Yüksek | Yüksek | "Won't" listesi; yeni özellik = toplantıda ekip onayı |
 | **Anlama borcu** (yapay zekanın yazdığı kodu kimse okumuyor) | Yüksek | Yüksek | Zorunlu review, PR'da "ne/neden" açıklaması, sunum provası (Bölüm 15) |
 | **API anahtarının public repoya sızması** | Orta | Yüksek | `.env` + `.gitignore`, GitHub push protection, CI'da gerçek anahtar yok, harcama limiti |
@@ -85,7 +84,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter.
 | Sprint | Durum | Not |
 | --- | --- | --- |
 | 0 | ✅ Tamamlandı | Doküman seti ve public repo (14 Kas) |
-| 1 | 🟡 Başladı | Görev dağılımı yapıldı (16 Kas); iskelet hazırlanıyor |
+| 1 | 🟡 Devam ediyor | Görev dağılımı (16 Kas); backend iskeleti + CI + SonarQube (PR #1, kalite kapısı A); yapay zeka adaptörleri hazırlanıyor. Takvim 4 büyük sprinte sıkıştırıldı |
 
 ## 8. Kriter skor kartı
 

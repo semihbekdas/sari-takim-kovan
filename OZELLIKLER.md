@@ -3,7 +3,7 @@
 > **Kovan**, Notion benzeri bir kişisel bilgi tabanıdır. Sayfalar oluşturup düzenlersin, sayfaları birbirine bağlarsın ve en önemlisi **sayfalarında anlamına göre arama yapar, sayfalarına soru sorarsın** (RAG).
 >
 > **Sarı Takım** · Ders: Yapay Zeka Destekli Yazılım Geliştirme · Proje kodu: **P0007 – Bilgi Tabanı (Notion Clone + Anlamsal Arama)**
-> **Teslim: 25 Aralık 2026** · **Hedef bitiş: 20 Aralık 2026**
+> **Teslim: 25 Aralık 2026** · **Kod dondurma (hedef bitiş): 13 Aralık 2026**
 > Bu dosya ekibin "ne yapıyoruz?" sorusuna tek bakışta cevap vermesi için yazıldı. Teknik detaylar `docs/` altındadır.
 
 ---
@@ -145,7 +145,7 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 | Konu | Karar |
 | --- | --- |
 | Proje | ✅ P0007 – Notion klonu + anlamsal arama |
-| Teslim | ✅ **25 Aralık 2026**; hedef bitiş **20 Aralık** |
+| Teslim | ✅ **25 Aralık 2026**; kod dondurma **13 Aralık** |
 | Toplantılar | ✅ Hafta sonu |
 | Repo | ✅ **Public**, adı önerisi **`sari-takim-kovan`** (SonarQube Cloud ücretsiz, hoca takip edebilir) |
 | Takım adı | ✅ **Sarı Takım** (hocanın verdiği ad) |
