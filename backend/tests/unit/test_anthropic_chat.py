@@ -11,6 +11,7 @@ import pytest
 from kovan.application.errors import ExternalServiceError
 from kovan.application.ports.ai import ChatMessage
 from kovan.infrastructure.ai.anthropic_chat import AnthropicChatModel
+from kovan.infrastructure.ai.errors import AI_SERVICE_MESSAGE
 
 Handler = Callable[[httpx2.Request], httpx2.Response]
 
@@ -101,12 +102,18 @@ def _connection_failure(request: httpx2.Request) -> httpx2.Response:
     raise httpx2.ConnectError("bağlantı yok", request=request)
 
 
-@pytest.mark.parametrize("handler", [_error_response, _connection_failure])
+def _timeout(request: httpx2.Request) -> httpx2.Response:
+    raise httpx2.ReadTimeout("zaman aşımı", request=request)
+
+
+@pytest.mark.ac("AC-11.5")
+@pytest.mark.parametrize("handler", [_error_response, _connection_failure, _timeout])
 def test_provider_failures_become_external_service_error(handler: Handler) -> None:
     with pytest.raises(ExternalServiceError) as error:
         _ask(_model(handler))
 
     assert error.value.code == "AI_SERVICE_UNAVAILABLE"
+    assert error.value.message == AI_SERVICE_MESSAGE
 
 
 def test_conversation_history_keeps_roles() -> None:
