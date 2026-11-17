@@ -64,7 +64,7 @@ def test_move_page_under_own_descendant_raises_cycle_error(page_service, tree):
 
 Kapsam bir araçtır, amaç değildir. Sonar'daki quality gate kapsam koşulu frontend yüzünden kırmızıya düşerse backend ve frontend iki ayrı Sonar projesi olarak analiz edilir (ADR-010).
 
-## 5. İzlenebilirlik matrisi
+## 5. AC izlenebilirlik matrisi
 
 Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.py`, `grep` mantığında) güncellenir. Planlanan eşleşmeler:
 

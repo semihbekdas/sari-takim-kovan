@@ -13,11 +13,11 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 ## Karar
 
-`application/chunking.py` içinde **saf fonksiyon** `chunk_page(title, content) -> list[Chunk]`:
+`application/chunking.py` içinde **saf fonksiyon** `chunk_page(title, content)`. Her parça `heading_path` ve `text` alanlarını taşır; bunlar indekslemede vektöre çevrilip Qdrant noktası olur (`domain-design.md` § 6):
 
 1. İçerik başlıklara (H1–H3) göre **bölümlere** ayrılır; her bölüm `heading_path` taşır (`Sayfa › Başlık › Alt başlık`). Başlıksız içerik sayfa başlığının altında tek bölümdür.
-2. Bir bölümün blokları sırayla bir parçaya eklenir; parça **`CHUNK_MAX_CHARS` (varsayılan 1000)** karakteri aşacaksa yeni parça başlar. Bloklar bölünmez; tek başına sınırı aşan bir blok sabit uzunlukta parçalara bölünür.
-3. Embedding'e giden metnin başına bağlam başlığı eklenir: `"{heading_path}\n\n{metin}"`. Böylece "3NF" geçen bir paragraf "Veritabanı › Normalizasyon" bağlamını da taşır.
+2. Bir bölümün blokları sırayla bir parçaya eklenir; parça **`CHUNK_MAX_CHARS` (varsayılan 1000)** karakteri aşacaksa yeni parça başlar. Bloklar normalde bölünmez; yalnızca tek başına `CHUNK_MAX_CHARS`'ı aşan bir blok sabit uzunlukta parçalara bölünür.
+3. İndeksleme sırasında embedding'e giden metnin başına bağlam başlığı eklenir (`chunk_page` ham metni döndürür): `"{heading_path}\n\n{metin}"`. Böylece "3NF" geçen bir paragraf "Veritabanı › Normalizasyon" bağlamını da taşır.
 4. Boş sayfa → parça yok (indeks temizlenir).
 
 `CHUNK_MAX_CHARS` RAG değerlendirme setiyle ayarlanır; seçilen değer ve ölçüm sonucu README'ye yazılır.

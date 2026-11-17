@@ -7,8 +7,8 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 ## Bağlam
 
 - Anlamsal arama ve RAG için sayfa parçalarının embedding vektörlerini saklayıp **kosinüs benzerliği** ile sorgulamamız gerekiyor (Bölüm 9).
-- Ders rehberi P0007 için "Qdrant/Vektör Veritabanı" öneriyor; derste Qdrant kullanıldı ve repo kökündeki `docker-compose.yml`'de hazır.
-- Çok kullanıcılı sistemde her arama **kullanıcıya göre filtrelenmeli** (güvenlik, R-13).
+- Ders rehberi P0007 için "Qdrant/Vektör Veritabanı" öneriyor; derste Qdrant kullanıldı. Projede PostgreSQL ile birlikte repo kökündeki `docker-compose.yml` ile çalıştırılır *(planlanan)*.
+- Çok kullanıcılı sistemde her arama **kullanıcıya göre filtrelenmeli** (güvenlik, R-12).
 
 ## Karar
 

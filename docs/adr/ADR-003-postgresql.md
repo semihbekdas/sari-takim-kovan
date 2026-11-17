@@ -15,7 +15,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 ## Karar
 
 - Ana veritabanı **PostgreSQL**.
-- Sayfa içeriği tek bir **`jsonb`** kolonunda (BlockNote blok dizisi) saklanır; blok başına satır tutulmaz. Arama ve parçalama için içerikten türetilen `plain_text` kolonu da saklanır.
+- Sayfa içeriği tek bir **`jsonb`** kolonunda (BlockNote blok dizisi) saklanır; blok başına satır tutulmaz. Kelime araması için içerikten türetilen `plain_text` kolonu da saklanır (parçalama başlık yapısına ihtiyaç duyduğu için `content`'ten yapılır).
 - Kelime araması PostgreSQL **full-text search** ile (`tsvector` + GIN indeks, `simple` sözlük).
 - Hiyerarşi `parent_id` ile; alt ağaç ve breadcrumb sorguları **recursive CTE** ile.
 - Veri erişimi **SQLAlchemy 2.x Core** ile: tablo tanımları + açık `select`/`insert`/`update` ifadeleri, repository'lerde domain nesnelerine elle eşleme. **ORM (Session, lazy loading) kullanılmaz.** Şema değişiklikleri **Alembic** migration'larıyla.

@@ -1,6 +1,6 @@
 # Kullanıcı Hikayeleri ve Kabul Kriterleri
 
-> Her hikaye **US-xx**, her kabul kriteri **AC-xx.y** kimliği taşır. Her AC en az bir otomatik teste bağlanır (`@pytest.mark.ac("AC-xx.y")` veya frontend test adı). Eşleşme tablosu: [test-strategy.md § 5](test-strategy.md#5-izlenebilirlik-matrisi).
+> Her hikaye **US-xx**, her kabul kriteri **AC-xx.y** kimliği taşır. Her Must AC (ve yapılan Should'ların AC'leri) en az bir otomatik teste bağlanır (`@pytest.mark.ac("AC-xx.y")` veya frontend test adı); gerçek anlam ölçümü gerektirenler (AC-10.1) RAG değerlendirme setiyle ölçülür. Eşleşme tablosu: [test-strategy.md § 5](test-strategy.md#5-ac-izlenebilirlik-matrisi).
 > Kabul kriterleri **Diyelim ki / Eğer / O zaman** (Given / When / Then) biçimindedir.
 > Öncelik: 🟥 Must · 🟧 Should · 🟨 Could. Özellik kodları (F-xx) için bkz. [OZELLIKLER.md](../OZELLIKLER.md); kural kodları (R-xx) için bkz. [domain-design.md](domain-design.md#8-domain-kuralları).
 
@@ -15,10 +15,10 @@
 | --- | --- |
 | AC-01.1 | **Diyelim ki** e-posta kayıtlı değil, **eğer** geçerli e-posta, 8+ karakter şifre ve görünen adla kayıt olursam, **o zaman** hesap oluşturulur (201) ve yanıtta şifre yer almaz. |
 | AC-01.2 | **Diyelim ki** `Ayse@Ornek.com` kayıtlı, **eğer** `ayse@ornek.com` ile kayıt olmaya çalışırsam, **o zaman** 409 alırım (R-01). |
-| AC-01.3 | **Eğer** şifre 8 karakterden kısa veya e-posta geçersizse, **o zaman** hangi alanın hatalı olduğunu söyleyen 422 alırım (R-02). |
+| AC-01.3 | **Eğer** şifre 8 karakterden kısa veya e-posta geçersizse, **o zaman** hangi alanın hatalı olduğunu söyleyen 422 alırım (R-01, R-02). |
 | AC-01.4 | **Eğer** kayıt başarılıysa, **o zaman** veritabanında şifre düz metin değil Argon2id hash olarak durur. |
 
-### US-02 Giriş ve çıkış 🟥 (F-02, F-04)
+### US-02 Giriş ve çıkış 🟥/🟧 (F-02, F-04)
 **Bir kullanıcı olarak** giriş yapıp çıkmak istiyorum, **böylece** notlarım yalnızca bana açık olsun.
 
 | AC | Kriter |
@@ -112,7 +112,7 @@
 | AC | Kriter |
 | --- | --- |
 | AC-09.1 | **Eğer** bir kelimeyle ararsam, **o zaman** başlığında veya içeriğinde geçen sayfalarım kısa bir özetle listelenir. |
-| AC-09.2 | **O zaman** sonuçlarda yalnızca **benim** ve silinmemiş sayfalarım vardır (R-12). |
+| AC-09.2 | **O zaman** sonuçlarda yalnızca **benim** ve silinmemiş sayfalarım vardır (R-08, R-12). |
 | AC-09.3 | **Eğer** sonuç çoksa, **o zaman** sayfalı gelir (`limit`, `offset`, `total`). |
 
 ### US-10 Anlamsal arama 🟥 (F-19)

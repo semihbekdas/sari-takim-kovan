@@ -49,7 +49,7 @@ Tüm kimlikler **UUID v4** (Qdrant nokta kimlikleri hariç, bkz. Chunk). Tüm za
 | `parent_id` | UUID? | Üst sayfa; `null` ise kök sayfa | `null` | R-04, R-05 |
 | `title` | Text | Sayfa başlığı | `Veritabanı` | R-03 |
 | `content` | [PageContent](#4-pagecontent-value-object) | Blok içerik | `[{type:"heading",…}]` | R-06 |
-| `plain_text` | Text | İçerikten türetilen düz metin (kelime araması ve parçalama için) | `Normalizasyon …` | Sadece sistem yazar |
+| `plain_text` | Text | İçerikten türetilen düz metin (kelime araması için) | `Normalizasyon …` | Sadece sistem yazar |
 | `version` | Integer | İyimser kilitleme sürümü; içerik/görünürlük her değiştiğinde +1 | `7` | R-07, R-10 |
 | `deleted_at` | Timestamp? | Silinme (çöpe atılma) zamanı | `null` | R-08 |
 | `indexed_version` | Integer? | Qdrant'a en son işlenen sürüm | `7` | R-10 |
@@ -62,7 +62,7 @@ Tüm kimlikler **UUID v4** (Qdrant nokta kimlikleri hariç, bkz. Chunk). Tüm za
 - `index_status`: `INDEXED` (`indexed_version = version`), `FAILED` (`index_attempts ≥ 5`), aksi halde `PENDING`
 - `breadcrumbs` (üst sayfa zinciri), `has_children`
 
-Kardeş sayfalar **başlığa göre alfabetik** sıralanır; elle sıralama yoktur (Won't).
+Kardeş sayfalar **başlığa göre alfabetik** sıralanır; elle sıralama yoktur (Won't). Ç, Ğ, İ, Ö, Ş, Ü harflerinin Türkçe sırada olması için PostgreSQL'in ICU harmanlaması kullanılır (`ORDER BY title COLLATE "tr-x-icu"`).
 
 ## 4. PageContent *(Value Object)*
 
@@ -77,7 +77,7 @@ BlockNote editörünün ürettiği blok dizisi. Değişmezdir; doğrulama oluşt
 > Frontend'deki BlockNote şeması **aynı blok listesiyle** yapılandırılır (ADR-007). Böylece kullanıcı editörde backend'in reddedeceği bir blok (tablo, görsel vb.) ekleyemez.
 
 Davranışlar (saf fonksiyonlar, birim testli):
-- `to_plain_text()` → kelime araması ve parçalama için düz metin
+- `to_plain_text()` → kelime araması için düz metin
 - `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (PageLink üretimi)
 - `to_sections()` → başlık hiyerarşisine göre bölümler (parçalama, ADR-009)
 

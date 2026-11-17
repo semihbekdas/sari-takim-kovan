@@ -39,7 +39,7 @@ flowchart TB
     end
 
     chat[[Dil modeli API<br/>Claude / GPT / Gemini]]
-    emb[[Embedding API<br/>OpenAI / Gemini / Voyage]]
+    emb[[Embedding API<br/>OpenAI uyumlu: OpenAI / Gemini / bge-m3]]
 
     user --> fe
     fe -- "REST/JSON, httpOnly çerez" --> api
@@ -267,7 +267,10 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `EMBEDDING_API_KEY` | *(gizli)* | Asla commit'lenmez; embedding sağlayıcısı OpenAI değilse `EMBEDDING_API_KEY` kullanılır |
 | `RAG_TOP_K` / `SEARCH_MIN_SCORE` / `CHAT_MAX_TOKENS` | `6` / `0.35` / `800` | Değerlendirme setiyle ayarlanır |
 | `INDEX_SETTLE_SECONDS` | `10` | Düzenleme bittikten sonra indeksleme beklemesi |
-| `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez |
+| `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez; `.env.example`'da boş, herkes kendi değerini üretir |
+| `LOG_LEVEL` | `INFO` | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` |
+
+Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`, `INDEX_SETTLE_SECONDS`, `JWT_SECRET`) onları kullanan özellikle birlikte `config.py`'ye eklenir; o zamana kadar `.env`'de değiştirilmeleri etkisizdir.
 
 ## 9. Güvenlik
 
@@ -277,7 +280,7 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | Arama/RAG ile başka kullanıcının içeriğine sızma | Qdrant sorgusunda zorunlu `owner_id` filtresi; `VectorIndex.search` `owner_id` olmadan çağrılamaz | AC-10.2, AC-11.3 |
 | Şifre sızıntısı | Argon2id; şifre hiçbir yanıtta/logda yok | AC-01.4 |
 | Oturum çalma (XSS ile token) | JWT `HttpOnly; SameSite=Strict` çerezde | AC-02.1 |
-| XSS | İçerik BlockNote ile render edilir, `dangerouslySetInnerHTML` yok; sohbet cevabı düz metin/güvenli Markdown; bağlantılarda yalnızca http/https | AC-04.4, review |
+| XSS | İçerik BlockNote ile render edilir, `dangerouslySetInnerHTML` yok; sohbet cevabı düz metin/güvenli Markdown; bağlantılarda yalnızca http/https | R-06, review |
 | SQL injection | Parametreli SQLAlchemy Core sorguları | Sonar + review |
 | Kaba kuvvet girişi | *(Should)* rate limit | AC-02.5 |
 | **Prompt injection** | İçerik ayraçlı veri olarak verilir; sistem talimatı içerikteki talimatları yok sayar; dil modelinin **hiçbir aracı/yetkisi yok** (yalnızca metin üretir) → enjeksiyon aksiyona dönüşemez | AC-11.4 |
