@@ -158,4 +158,4 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 - [ ] **Embedding sağlayıcısı**: Claude'un embedding modeli yok. OpenAI `text-embedding-3-small`, BAAI `bge-m3` ve Voyage `voyage-4-lite` Sprint 2'de Türkçe notlarla küçük bir karşılaştırmayla denenip en iyisi seçilecek (ADR-006).
 - [x] API anahtarlarının yönetimi: Sağlayıcı panelinde ortak bir organizasyon/proje, harcama limiti, herkesin kendi anahtarı (KURALLAR § 8). *Panel kurulumu, sağlayıcı seçilince yapılır.*
 - [x] İş paketlerinin kişilere dağıtımı: eşit dağıtıldı ([docs/PLAN.md](docs/PLAN.md) § 3).
-- [ ] İsim "Kovan" kalsın mı?
+- [x] İsim: **Kovan** (kesinleşti; repo `sari-takim-kovan`, Python paketi `kovan`).

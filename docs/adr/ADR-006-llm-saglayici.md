@@ -17,7 +17,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13: port'lar, fake mod ve hata yönetimi. 
 
 ## Karar
 
-1. `application` katmanında iki ayrı port: `EmbeddingProvider.embed(texts) -> vectors` ve `ChatModel.complete(system, messages, max_tokens) -> ChatCompletion` (metin + token kullanımı). Sağlayıcılar birbirinden bağımsız seçilir.
+1. `application` katmanında iki ayrı port: `EmbeddingProvider.embed(texts) -> vectors` ve `ChatModel.complete(system, messages, max_tokens) -> ChatCompletion` (metin, bitiş nedeni ve token kullanımı). Sağlayıcılar birbirinden bağımsız seçilir.
 2. `infrastructure/ai/` altında **üç gerçek adaptör + fake'ler**:
 
 | Adaptör | Kütüphane | Kapsadığı sağlayıcılar |
@@ -68,7 +68,7 @@ Bizim ölçeğimizde (birkaç yüz sayfa) **hepsi pratikte bedava**: Tüm proje 
 Fazla abartmadan, 3 aday tek bir küçük betikle denenir:
 
 1. **Adaylar:** OpenAI `text-embedding-3-small`, `bge-m3`, `voyage-4-lite`.
-2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve 20 soru (test-strategy § 6).
+2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve ~21 soru; kişi başı 5 sayfa + 7 soru (test-strategy § 6).
 3. **Betik:** `eval/compare_embeddings.py`. Qdrant gerekmez; parçaları her modelle embed edip kosinüs benzerliğini bellekte hesaplar.
 4. **Ölçüt:** Hit@5 ve MRR. Fark %5'ten azsa **en basit olan** seçilir (ek adaptör gerektirmeyen).
 5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2; ekip birlikte yapar (her üye bir adayı dener).

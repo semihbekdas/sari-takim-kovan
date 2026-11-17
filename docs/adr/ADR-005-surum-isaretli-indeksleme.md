@@ -27,7 +27,7 @@ Sayfa değişince vektör indeksinin (Qdrant) de güncellenmesi gerekir. Saf yak
 5. **İdempotent:** Nokta kimlikleri `uuid5(page_id:chunk_no)`; aynı sürümün iki kez işlenmesi aynı sonucu verir.
 6. **Silme anında görünmezlik:** Arama ve sohbet, Qdrant sonuçlarını PostgreSQL'den doğrular; silinmiş sayfalar indeksleme beklenmeden hemen elenir.
 7. **Kurtarma:** `uv run python -m kovan.cli reindex --all` *(planlanan)* Qdrant koleksiyonunu PostgreSQL'den baştan üretir (embedding modeli değişince de kullanılır).
-8. **Kalıcı silme** *(çöp kutusu, Should)*: Satırı silmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler öksüz kalırdı.
+8. **Kalıcı silme** *(çöp kutusu, Should)*: Satırı silmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir; Qdrant'a ulaşılamazsa satır silinmez ve istek 503 döner. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler öksüz kalırdı.
 
 ## Değerlendirilen alternatifler
 

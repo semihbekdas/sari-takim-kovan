@@ -8,7 +8,7 @@
 - Gövdeler **JSON**, alan adları `snake_case`. İstisna: `content` içindeki BlockNote blokları kendi biçiminde (camelCase alanlarla) olduğu gibi saklanır.
 - Kimlik doğrulama: `kovan_session` çerezi (`HttpOnly; SameSite=Strict; Path=/api`, prod'da `Secure`). Aksi belirtilmedikçe tüm uç noktalar oturum ister; yoksa **401**.
 - RESTful: oluşturma `POST`, tam güncelleme `PUT`, kısmi işlem `PATCH`, silme `DELETE` (hocanın lesson01 API standardı).
-- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`. İstisna: Boyutu sınırlı olan ağaç, geri bağlantılar ve başlıklar (`/pages/tree`, `/pages/{id}/backlinks`, `/pages/titles`) düz liste döner.
+- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`. İstisna: Boyutu üst sınırlı olan ağaç (≤ 1000), geri bağlantılar (≤ 100) ve başlıklar (≤ 100 kimlik) düz liste döner (`/pages/tree`, `/pages/{id}/backlinks`, `/pages/titles`).
 - Başka kullanıcının kaynağı **404** döner (403 değil).
 - Her yanıtta `X-Request-ID` başlığı vardır.
 
@@ -27,7 +27,7 @@
 
 - `rule` yalnızca bir domain kuralı (R-xx) ihlalinde doludur, aksi halde `null`.
 - `VALIDATION_ERROR` yanıtında ek olarak hangi alanın hatalı olduğunu söyleyen `details` listesi bulunur: `[{"field": "body.email", "message": "Bu alan zorunludur."}]`. Mesajlar Türkçedir; girilen değer (ör. şifre) yanıta konmaz.
-- **Doğrulama nerede?** API şeması yalnızca tipleri ve zorunlu alanları denetler (`VALIDATION_ERROR`). Kural kodlu sınırlar (R-01 e-posta biçimi, R-02 şifre uzunluğu, R-03 başlık, R-06 içerik) şemada tekrarlanmaz; domain'de kontrol edilir ve `rule` alanıyla döner. Bu yanıtlarda `message` hatalı alanı adıyla söyler (ör. "Şifre en az 8 karakter olmalı.").
+- **Doğrulama nerede?** API şeması tipleri, zorunlu alanları ve taşıma sınırlarını (ör. arama sorgusu 1–200, soru 1–1000 karakter, `limit` ≤ 100) denetler (`VALIDATION_ERROR`). Kural kodlu sınırlar (R-01 e-posta biçimi, R-02 şifre uzunluğu, R-03 başlık, R-06 içerik) şemada tekrarlanmaz; domain'de kontrol edilir ve `rule` alanıyla döner. Bu yanıtlarda `message` hatalı alanı adıyla söyler (ör. "Şifre en az 8 karakter olmalı.").
 - Beklenmeyen hatalarda (500) iç ayrıntı istemciye gönderilmez; `request_id` ile loglarda aranır.
 
 | HTTP | `code` örnekleri |
@@ -62,13 +62,13 @@
 | GET | `/pages/{id}` | — | **200** `Page` | 404 | 🟥 US-03 |
 | PUT | `/pages/{id}` | `{title, content, version}` | **200** `Page` | 404, 409, 422 | 🟥 US-04 |
 | DELETE | `/pages/{id}` | — | **204** (sayfa + alt sayfalar silindi işaretlenir) | 404 | 🟥 US-06 |
-| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` | 404 | 🟥 US-08 |
+| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` (en fazla 100, en son düzenlenen önce) | 404 | 🟥 US-08 |
 | GET | `/pages/titles` | `?ids=…&ids=…` (tekrarlanan parametre, ≤ 100) | **200** `{id, title, deleted}[]` (bağlantı gösterimi için) | — | 🟥 US-07 |
 | PATCH | `/pages/{id}/move` | `{parent_id: uuid \| null}` | **200** `Page` | 404, 422 | 🟧 US-05 |
 | GET | `/pages/recent` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-14 |
 | GET | `/trash` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-06 |
 | POST | `/trash/{id}/restore` | — | **200** `Page` | 404 | 🟧 US-06 |
-| DELETE | `/trash/{id}` | — | **204** (kalıcı silme; önce Qdrant noktaları silinir, ADR-005) | 404 | 🟧 US-06 |
+| DELETE | `/trash/{id}` | — | **204** (kalıcı silme; önce Qdrant noktaları silinir, ADR-005) | 404, 503 (Qdrant'a ulaşılamazsa satır silinmez) | 🟧 US-06 |
 
 ```jsonc
 // Page

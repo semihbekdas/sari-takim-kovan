@@ -173,7 +173,7 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 | Entegrasyon | pytest + Testcontainers | PostgreSQL repository'leri, Qdrant adaptörü, indeksleme döngüsü |
 | Kabul | pytest (API senaryoları) | Her Must kabul kriteri (AC) en az bir teste bağlı |
 | Uçtan uca *(Should)* | Playwright | 3 duman senaryosu |
-| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5 (doğru sayfa ilk 5 sonuçta mı), MRR (doğru sayfa ortalama kaçıncı sırada) |
+| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5 (doğru sayfa ilk 5 sonuçta mı), MRR (doğru sayfanın sırasının tersinin ortalaması: 1. sıra = 1, 2. sıra = 0,5; 0 ile 1 arası) |
 
 ```bash
 cd backend

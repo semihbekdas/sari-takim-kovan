@@ -120,9 +120,9 @@ Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.p
 
 ## 6. RAG değerlendirmesi
 
-- `eval/dataset/`: Kurgusal bir kullanıcının ~15 sayfalık not seti (ders notları, tarifler, gezi planı vb.). **Gerçek kişisel veri kullanılmaz.**
-- `eval/questions.yaml`: **20 soru**, her biri için beklenen kaynak sayfa(lar). En az 4'ü "notlarda yok" sorusu, 2'si prompt injection içeren sayfaya dair, 4'ü eşanlamlı/farklı kelimeli soru (AC-10.1).
-- Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu.
+- `eval/dataset/<isim>/*.md`: Her üyenin 5 kurgusal sayfası (toplam ~15). **Gerçek kişisel veri kullanılmaz.** Biçim: `eval/README.md`.
+- `eval/questions/<isim>.toml`: Her üyenin 7 sorusu (toplam ~21), her biri için beklenen kaynak sayfa(lar). Türler: `normal`, `synonym` (AC-10.1), `not_found` (AC-11.2), `injection` (AC-11.4).
+- Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu. Embedding adayları `eval/compare_embeddings.py` ile karşılaştırılır.
 - Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K`, `SEARCH_MIN_SCORE` ve parça boyutu bu sete göre ayarlanır; sonuç tablosu README'ye yazılır.
 - Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez).
 

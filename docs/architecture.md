@@ -80,7 +80,7 @@ flowchart TB
 | `main.py` | Composition root: yapılandırmaya göre adaptörleri seçip servislere bağlar | Hepsi | — |
 
 **Port arayüzleri** (`application/ports/` paketi, alan başına bir modül, Python `Protocol`). Her port, onu ilk kullanan özellikle birlikte eklenir:
-`UserRepository`, `PageRepository`, `LinkRepository`, `VectorIndex`, `EmbeddingProvider`, `ChatModel`, `PasswordHasher`, `TokenService`, `Clock` · *(Should)* `ChatHistoryRepository`
+`ReadinessProbe`, `UserRepository`, `PageRepository`, `LinkRepository`, `VectorIndex`, `EmbeddingProvider`, `ChatModel`, `PasswordHasher`, `TokenService` · *(Should)* `ChatHistoryRepository`. Zaman, ona ihtiyaç duyan servise parametre olarak verilir (testte sabit bir an); ayrı bir `Clock` port'u yoktur.
 
 **Denetim:** import-linter sözleşmeleri ([mimari-secimi.md § 7](mimari-secimi.md#7-uyumu-nasıl-kanıtlayacağız)), CI'da zorunlu.
 
@@ -186,7 +186,7 @@ sequenceDiagram
 - **Düzenleme bitince:** `updated_at ≤ now − 10 sn` koşulu, yazma sırasında her otomatik kayıtta embedding API'sinin çağrılmasını engeller (maliyet).
 - **Kilit tutulmaz:** Dış API çağrısı sırasında satır kilitlenmez; otomatik kayıt beklemez. İndeksleme sırasında yeni bir kayıt gelirse sayfa yine "bekliyor" kalır ve sonraki turda tekrar işlenir (nihai tutarlılık).
 - **İdempotent:** Nokta kimlikleri `uuid5(page_id:chunk_no)`; aynı sürümün iki kez işlenmesi aynı sonucu verir.
-- **Kalıcı silme** *(çöp kutusu, Should)*: Satır silinmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler Qdrant'ta öksüz kalırdı.
+- **Kalıcı silme** *(çöp kutusu, Should)*: Satır silinmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir; Qdrant'a ulaşılamazsa satır silinmez ve istek 503 döner. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler Qdrant'ta öksüz kalırdı.
 - **Tek döngü** varsayımı: Backend tek kopya çalışır. Birden çok kopya gerekirse satır kilitleme (`FOR UPDATE SKIP LOCKED`) eklenir (bilinen sınır).
 
 ### 5.3 Anlamsal arama
@@ -213,7 +213,7 @@ sequenceDiagram
     else parçalar var
         C->>C: build_prompt(): sistem talimatı + <context>[1..n]</context> + soru
         C->>L: complete(system, messages, max_tokens)
-        L-->>C: cevap ([1], [2] atıflarıyla) + bitiş nedeni
+        L-->>C: cevap ([1], [2] atıflarıyla) + bitiş nedeni + token kullanımı
         alt model reddetti, cevap boş veya token sınırında kesildi
             C-->>FE: found=false, "Bu soruya cevap üretilemedi."
         else geçerli atıf kalmadı
