@@ -36,6 +36,22 @@ _HTTP_ERRORS: dict[int, tuple[str, str]] = {
 
 INTERNAL_ERROR_MESSAGE = "Beklenmeyen bir hata oluştu."
 
+# Pydantic hata tiplerinin kullanıcıya gösterilen Türkçe karşılıkları.
+_VALIDATION_MESSAGES: dict[str, str] = {
+    "missing": "Bu alan zorunludur.",
+    "int_parsing": "Tam sayı olmalıdır.",
+    "float_parsing": "Sayı olmalıdır.",
+    "bool_parsing": "Doğru veya yanlış olmalıdır.",
+    "uuid_parsing": "Geçerli bir kimlik (UUID) olmalıdır.",
+    "string_type": "Metin olmalıdır.",
+    "string_too_short": "Çok kısa.",
+    "string_too_long": "Çok uzun.",
+    "greater_than_equal": "İzin verilen en küçük değerin altında.",
+    "less_than_equal": "İzin verilen en büyük değerin üstünde.",
+    "json_invalid": "Geçerli bir JSON değil.",
+}
+DEFAULT_VALIDATION_MESSAGE = "Geçersiz değer."
+
 
 def register_error_handlers(app: FastAPI) -> None:
     # Starlette işleyicileri `Exception` tipiyle çağırır; bu yüzden her işleyici önce
@@ -64,7 +80,10 @@ async def _handle_validation_error(request: Request, exc: Exception) -> JSONResp
         return await _handle_unexpected_error(request, exc)
     # Girilen değer (ör. şifre) yanıta konmaz; yalnızca alan adı ve sorun.
     details = [
-        {"field": ".".join(str(part) for part in error["loc"]), "message": error["msg"]}
+        {
+            "field": ".".join(str(part) for part in error["loc"]),
+            "message": _VALIDATION_MESSAGES.get(error["type"], DEFAULT_VALIDATION_MESSAGE),
+        }
         for error in exc.errors()
     ]
     _log(422, "VALIDATION_ERROR", "İstek doğrulanamadı.")
