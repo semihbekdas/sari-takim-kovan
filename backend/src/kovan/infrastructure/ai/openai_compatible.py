@@ -61,11 +61,12 @@ class OpenAICompatibleEmbeddingProvider:
     def _check_dimension(self, vectors: list[list[float]]) -> None:
         wrong = next((len(vector) for vector in vectors if len(vector) != self._dimension), None)
         if wrong is not None:
-            # Yapılandırma hatası: Qdrant koleksiyonu yanlış boyutla kurulmasın diye hemen durulur.
+            # Yapılandırma hatası: Yanlış boyutlu vektörler Qdrant'a yazılmasın diye hata verilir.
+            # Ayar düzeltilene kadar hiçbir sayfa indekslenemez.
             raise ValueError(
                 f"EMBEDDING_DIM={self._dimension} ama '{self._model}' {wrong} boyutlu "
-                "vektör döndü. "
-                ".env'deki EMBEDDING_DIM'i düzeltip `reindex --all` çalıştırın."
+                "vektör döndü. .env'deki EMBEDDING_DIM'i düzeltip "
+                "`uv run python -m kovan.cli reindex --all` çalıştırın."
             )
 
 

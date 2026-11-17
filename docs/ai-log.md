@@ -111,3 +111,15 @@
 - **Kararlar:** Hatanın mesajı ve satırları loglarda kalıyor (teşhis için gerekli, istemciye hiç gitmiyor); asıl risk olan yerel değişkenler ve SQL parametreleri kaldırıldı.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** İnsan review'u ve otomatik review birlikte, yapay zekanın "çalışan ama güvensiz" yazdığı ayrıntıları yakaladı.
+
+### 2026-11-18 — Yapay zeka adaptörleri: repo incelemesi bulguları
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5), beş ayrı alt ajanla repo incelemesi
+- **Yapay zekanın hataları (inceleme yakaladı):**
+  1. `EMBEDDING_API_KEY` boşken OpenAI anahtarı, `EMBEDDING_BASE_URL` başka bir sağlayıcıyı gösterse bile oraya gönderiliyordu.
+  2. SDK'ların varsayılan 2 yeniden denemesi yüzünden kullanıcı 503'ü ~90 sn sonra görebiliyordu.
+  3. Fake embedding "İ" harfini yanlış bölüyordu ("İndeksler" ile "indeksler" hiç benzemiyordu).
+  4. Fake sohbet modeli, uygulamanın fake modunda çağrı kaydını sınırsız büyütüyordu.
+  5. Yorumlar gerçeği yansıtmıyordu: fabrikanın "composition root'tan çağrıldığı" yazıyordu ama henüz çağrılmıyor; port listesinde var olan `ai` "ileride" diye geçiyordu.
+- **Düzeltme:** Anahtarlar göreve göre adlandırıldı (`CHAT_API_KEY`, `EMBEDDING_API_KEY`), birinin yerine diğerine düşülmüyor. SDK yeniden denemesi 1'e indirildi. Fake düzeltmeleri ve yorumlar güncellendi. AC-11.5'in adaptör kısmı (zaman aşımında kullanıcıya giden mesaj) teste bağlandı. 56 test geçti.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
