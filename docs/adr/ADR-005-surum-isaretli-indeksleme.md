@@ -10,7 +10,7 @@ Sayfa değişince vektör indeksinin (Qdrant) de güncellenmesi gerekir. Saf yak
 
 - **Maliyet:** Otomatik kaydetme yazarken ~1 sn'de bir çalışır. Her kayıtta ücretli embedding API'sini çağırmak gereksiz harcamadır.
 - **Hız:** Embedding API'si yavaşsa kayıt yavaşlar.
-- **Tutarlılık:** API veya Qdrant o an kapalıysa ya kayıt başarısız olur ya da PostgreSQL ile Qdrant birbirinden kopar (sayfa silinir ama vektörü kalır → silinen içerik sohbette görünür). ders Bölüm 8'deki yanılgı: "ağ güvenilirdir".
+- **Tutarlılık:** API veya Qdrant o an kapalıysa ya kayıt başarısız olur ya da PostgreSQL ile Qdrant birbirinden kopar (sayfa silinir ama vektörü kalır → silinen içerik sohbette görünür). Ders Bölüm 8'deki yanılgı: "ağ güvenilirdir".
 
 ## Karar
 

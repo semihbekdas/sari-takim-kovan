@@ -148,7 +148,7 @@ flowchart TB
 
 ## 7. Uyumu nasıl kanıtlayacağız?
 
-1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine:
+1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine (güncel hali o dosyadadır; dış kütüphaneler bağımlılık olarak eklendikçe yasak listesine girer):
 
 ```toml
 [tool.importlinter]
@@ -175,7 +175,7 @@ forbidden_modules = ["kovan.infrastructure"]
 name = "İç katmanlar framework ve dış kütüphanelerden bağımsız"
 type = "forbidden"
 source_modules = ["kovan.domain", "kovan.application"]
-forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "qdrant_client", "openai", "anthropic"]
+forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "structlog", "qdrant_client", "openai", "anthropic"]
 ```
 
 2. **Review kontrol listesi:** "Yeni kod doğru katmanda mı? Router'da iş kuralı var mı?"

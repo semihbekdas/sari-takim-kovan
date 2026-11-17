@@ -31,8 +31,8 @@ git config --global user.email "github-hesabindaki@eposta.com"
 ### 2.2 Branch akışı
 
 - `main` korumalıdır: doğrudan push yok, sadece PR ile merge.
-- Her iş için yeni branch: `feature/<iş-paketi>-<kısa-ad>`, `fix/<kısa-ad>`, `docs/<kısa-ad>`, `test/<kısa-ad>`
-  - Örnek: `feature/sayfalar-agac-menu`, `feature/indeks-chunking`, `docs/adr-qdrant`
+- Her iş için yeni branch: `feature/<kısa-ad>`, `fix/<kısa-ad>`, `docs/<kısa-ad>`, `test/<kısa-ad>`
+  - Örnek: `feature/sayfa-agaci`, `feature/chunking`, `docs/adr-qdrant`
 - Branch ömrü kısa olsun (en fazla ~1 hafta). Uzun yaşayan branch = büyük çakışma.
 
 ### 2.3 Commit kuralları
@@ -40,7 +40,7 @@ git config --global user.email "github-hesabindaki@eposta.com"
 - **Herkes kendi hesabından, kendi işini commit'ler.** Başkasının kodunu senin hesabından push'lamak yok.
 - **Küçük ve anlamlı commit:** Bir commit bir mantıksal değişiklik.
 - **Hedef tempo:** Herkes haftada **en az 3 commit**, en az **2 farklı günde**.
-- **Commit tarihleriyle oynamak yasak** (`--date`, `GIT_COMMITTER_DATE`, rebase ile geçmiş değiştirme vb.). Tarihsel geçmiş, işi gerçekten zamana yayarak oluşur.
+- **Commit tarihleriyle oynamak yasak** (`--date`, `GIT_COMMITTER_DATE` vb.). Push'lanmış commit'ler yeniden yazılmaz (rebase, `push --force` yok); branch'ini güncellemek için `main`'i branch'ine merge et. Tarihsel geçmiş, işi gerçekten zamana yayarak oluşur.
 - Mesaj formatı ([Conventional Commits](https://www.conventionalcommits.org/)), açıklama Türkçe:
 
 ```text
@@ -61,7 +61,7 @@ git config --global user.email "github-hesabindaki@eposta.com"
 Örnekler:
 ```text
 feat(pages): sayfa taşıma uç noktası eklendi
-test(chunking): başlık hiyerarşisine göre parçalama kabul testleri (AC-10.1)
+test(chunking): başlık hiyerarşisine göre parçalama birim testleri (ADR-009)
 fix(search): çöp kutusundaki sayfalar arama sonuçlarından çıkarıldı
 docs(adr): ADR-004 Qdrant seçimi gerekçesi yazıldı
 ```
@@ -83,7 +83,7 @@ docs(adr): ADR-004 Qdrant seçimi gerekçesi yazıldı
 
 - **En az 1 onay (review)** gerekir; PR'ı açan kişi kendi PR'ını onaylayamaz.
 - **CI yeşil olmadan merge yok** (testler + lint + mimari kontrol + Sonar quality gate).
-- Merge yöntemi: **"Create a merge commit"** veya **"Rebase and merge"**. **Squash kullanmıyoruz** — squash, herkesin ayrı commit'lerini tek commit'e ezer ve tarihsel geçmişi siler.
+- Merge yöntemi: yalnızca **"Create a merge commit"**. Squash ve "Rebase and merge" repo ayarlarında kapalıdır: Squash herkesin ayrı commit'lerini tek commit'e ezer, rebase-merge commit'leri yeniden yazar; ikisi de tarihsel geçmişi bozar.
 - Review yapan kişi kodu gerçekten okur ve en az bir yorum/soru bırakır. "LGTM" tek başına review sayılmaz.
 
 ### 2.5 Eşit katkı takibi

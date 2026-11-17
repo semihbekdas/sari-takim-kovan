@@ -47,7 +47,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter. Takvim **4 büyü
 | --- | --- | --- | --- | --- |
 | **0** | 13 – 15 Kas | Doküman seti ve public repo | | |
 | **1** Temel | 16 – 22 Kas | Doküman okuma PR'ı · docker-compose + Alembic · Frontend iskeleti | Doküman okuma PR'ı · `PageContent` (doğrulama, düz metin, bağlantı çıkarma) + birim testleri | Repo ayarları · Backend iskeleti · CI + SonarQube Cloud · Yapay zeka adaptörleri + fake mod |
-| **2** | 23 – 29 Kas | Page domain + `pages` migration + sayfa CRUD API'si + kabul testleri · Sol menü ağacı + breadcrumb | Kayıt/giriş/çıkış API'si (Argon2, JWT çerez) + testleri · Chunking modülü | Qdrant adaptörü · İndeksleme döngüsü + indeks durumu + `reindex` CLI |
+| **2** | 23 – 29 Kas | Page domain + `pages` migration + sayfa CRUD API'si + kabul testleri · Sol menü ağacı + breadcrumb | Kayıt/giriş/çıkış API'si (Argon2, JWT çerez) + testleri · Chunking modülü | Qdrant adaptörü · İndeksleme döngüsü + indeks durumu + `reindex` CLI · CI'a frontend kontrolleri |
 | **3** | 30 Kas – 6 Ara | BlockNote editör (kısıtlı şema) + otomatik kaydetme + 409 · Silme (R-08) | Giriş/kayıt ekranları · Anlamsal arama servisi · Kelime araması + arama ekranı (iki mod) | "Sayfalarına Sor" (backend + UI + kaynaklar) |
 | **4** Bitiş | 7 – 13 Ara | `@` sayfa bağlantısı + `/pages/titles` · *(Should)* taşıma, çöp kutusu, son düzenlenenler | Bağlantılar + geri bağlantılar (API + panel) · *(Should)* rate limit, token loglama, Playwright duman testleri | *(Should)* sohbet geçmişi, MCP server · RAG parametre ayarı |
 | | | **Ortak:** değerlendirme seti ve embedding karşılaştırması (Sprint 2) · güvenlik gözden geçirmesi (Sprint 3) · eksik testler, Sonar A, README (Sprint 4) · **13 Ara: kod dondurma** | | |
@@ -84,7 +84,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter. Takvim **4 büyü
 | Sprint | Durum | Not |
 | --- | --- | --- |
 | 0 | ✅ Tamamlandı | Doküman seti ve public repo (14 Kas) |
-| 1 | 🟡 Devam ediyor | Görev dağılımı (16 Kas); backend iskeleti + CI + SonarQube (PR #1, kalite kapısı A); yapay zeka adaptörleri hazırlanıyor. Takvim 4 büyük sprinte sıkıştırıldı |
+| 1 | 🟡 Devam ediyor | Görev dağılımı ve issue'lar (#2–#17, 16 Kas); backend iskeleti + CI + SonarQube (PR #1, kalite kapısı A; review düzeltmeleri 18 Kas); yapay zeka adaptörleri hazır (PR #1 merge olunca PR açılır); doküman tutarlılık düzeltmeleri (18 Kas). Takvim 4 büyük sprinte sıkıştırıldı |
 
 ## 8. Kriter skor kartı
 
@@ -97,4 +97,4 @@ Ders rehberindeki kriterlere göre her hafta sonu puanlanır (her kriter 0–10,
 | 13 Kas | 0 | 2 | 0 | 0 | 2 | 3 | 0 | 2 | 6 | 2 | 0 | **17** |
 | 13 Kas (revizyon) | 0 | 2 | 0 | 0 | 2 | 4 | 0 | 2 | 7 | 2 | 0 | **19** |
 
-*Not:* Henüz kod ve commit yok; puanlar "planlandı ve belgelendi" düzeyinde. Revizyonda mimari araştırma dokümanı eklendi (Mimari +1, Doküman +1). En düşük kriterler (Süreç, Takım, Teknik Borç, Okunabilirlik) Sprint 0–1'in önceliği: repo + PR akışı + CI + Sonar + ilk kod.
+*Not (13 Kas itibarıyla):* O tarihte kod ve commit yoktu; puanlar "planlandı ve belgelendi" düzeyinde. Revizyonda mimari araştırma dokümanı eklendi (Mimari +1, Doküman +1). En düşük kriterler (Süreç, Takım, Teknik Borç, Okunabilirlik) Sprint 0–1'in önceliği: repo + PR akışı + CI + Sonar + ilk kod.

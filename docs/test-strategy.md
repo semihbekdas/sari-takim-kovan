@@ -29,8 +29,8 @@
 | --- | --- | --- |
 | `EmbeddingProvider` | `FakeEmbeddingProvider` | Kelimelerden deterministik vektör (hash tabanlı, normalize). Ortak kelimesi olan metinler benzer çıkar |
 | `ChatModel` | `FakeChatModel` | Programlanabilir cevap; aldığı prompt'u saklar (prompt içeriği assert edilebilir) |
-| İkisi de | `FailingProvider` | `ExternalServiceError` fırlatır (503 ve yeniden deneme senaryoları) |
-| `Clock` | `FixedClock` | Zamanı kontrol eder (10 sn bekleme, yeniden deneme süreleri) |
+| İkisi de | Testte yazılan küçük bir hata fake'i | `ExternalServiceError` fırlatır (503 ve yeniden deneme senaryoları) |
+| Zaman | Servise parametre olarak verilen sabit bir an | Zamanı kontrol eder (10 sn bekleme, yeniden deneme süreleri) |
 
 Bu fake'ler aynı zamanda uygulamanın **`fake` çalışma modudur** (ADR-006): API anahtarı olmayan ekip üyesi uygulamayı uçtan uca çalıştırabilir.
 
@@ -40,7 +40,7 @@ Bu fake'ler aynı zamanda uygulamanın **`fake` çalışma modudur** (ADR-006): 
 
 - İsimlendirme: `test_<ne>_<koşul>_<beklenen>` → `test_move_page_under_own_descendant_raises_cycle_error`
 - Yapı **Arrange – Act – Assert**, test başına tek davranış.
-- Her test ilgili kabul kriterini işaretler (`pytest.ini`/`pyproject.toml`'da `ac` işareti kayıtlı):
+- Bir kabul kriterini doğrulayan her test o kriteri işaretler (`pyproject.toml`'da `ac` işareti kayıtlı); altyapı testleri (ör. sağlık, adaptör ayrıntıları) işaretsiz olabilir:
 
 ```python
 @pytest.mark.ac("AC-05.5")
@@ -66,7 +66,7 @@ Kapsam bir araçtır, amaç değildir. Sonar'daki quality gate kapsam koşulu fr
 
 ## 5. AC izlenebilirlik matrisi
 
-Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.py`, `grep` mantığında) güncellenir. Planlanan eşleşmeler:
+Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.py`, `grep` mantığında) güncellenecek *(planlanan, Ortak / Sprint 4)*. Şimdilik: `grep -rn 'pytest.mark.ac' backend/tests`. Tablodaki test adları planlanan adlardır:
 
 | AC | Seviye | Planlanan test |
 | --- | --- | --- |
@@ -116,7 +116,7 @@ Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.p
 | AC-12.3 | Entegrasyon | `test_indexing_same_version_twice_is_idempotent` |
 | AC-12.4 | Entegrasyon | `test_rapid_saves_trigger_single_embedding_call_after_settle` |
 | AC-12.5 | Entegrasyon | `test_shrinking_content_removes_stale_chunks` |
-| AC-13.x, AC-15.x, AC-16.x 🟧 | Kabul / Birim | İlgili Should işi başlarken eklenir |
+| AC-13.x, AC-14.1, AC-15.x, AC-16.x 🟧 | Kabul / Birim | İlgili Should işi başlarken eklenir |
 
 ## 6. RAG değerlendirmesi
 
@@ -131,7 +131,7 @@ Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.p
 ```
 ruff check · ruff format --check · mypy · lint-imports
 pytest (unit + integration + acceptance) --cov
-vitest · eslint · tsc --noEmit
+vitest · eslint · tsc --noEmit        (frontend iskeleti gelince)
 SonarQube Cloud analizi + quality gate
 (Should: Playwright duman testleri, main'e merge sonrası)
 ```
