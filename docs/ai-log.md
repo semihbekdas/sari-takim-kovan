@@ -84,3 +84,18 @@
 - **Sonuç:** Kalite kapısı geçti: güvenilirlik, güvenlik ve bakım kolaylığı **A**, kapsam %97.2, 0 açık bulgu. CI'da gerçek PostgreSQL ile 21/21 test.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
+
+### 2026-11-18 — PR #1 review'u: Codex'in 5 uyarısı ve Özlem'in sorusu
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Ne oldu?** PR #1'e Codex otomatik review'u 5 uyarı bıraktı. Özlem review'unda, Docker yokken entegrasyon testinin atlanmasının KURALLAR § 5'teki "`skip` yasak" kuralıyla çeliştiğini sordu ve diğer uyarılara da bakılmasını istedi.
+- **Yapay zekanın hataları (review yakaladı):**
+  1. Hata loglarına o andaki yerel değişkenler de yazılıyordu (structlog'da `show_locals` varsayılan olarak açık); şifre veya API anahtarı loga düşebilirdi.
+  2. 5xx durumlu `HTTPException`'ın ayrıntısı istemciye gönderiliyordu.
+  3. Hata veren istekler süre ve durum bilgisiyle loglanmıyordu.
+  4. CI'da Docker bozulursa entegrasyon testi atlanıyor, CI yine yeşil yanabiliyordu.
+  5. Fork veya Dependabot PR'larında token olmadığı için Sonar adımı CI'ı kırıyordu.
+- **Düzeltme:** Yerel değişkenler loglanmıyor, SQL hata mesajlarına sorgu parametreleri yazılmıyor (`hide_parameters`). 5xx `HTTPException` genel `INTERNAL_ERROR` döndürüyor. Hata veren istekler 500 olarak loglanıyor. Docker CI'da zorunlu (yoksa test hata veriyor), yerelde atlanıyor; kural metni de buna göre netleştirildi. Sonar analizi secret'ı olmayan PR'larda çalışmıyor. Her düzeltme için, eski kodda düşen bir test eklendi; 27 test geçti (PostgreSQL entegrasyon testi Docker ile çalıştı).
+- **Kararlar:** Hatanın mesajı ve satırları loglarda kalıyor (teşhis için gerekli, istemciye hiç gitmiyor); asıl risk olan yerel değişkenler ve SQL parametreleri kaldırıldı.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Ders çıkarımı:** İnsan review'u ve otomatik review birlikte, yapay zekanın "çalışan ama güvensiz" yazdığı ayrıntıları yakaladı.
