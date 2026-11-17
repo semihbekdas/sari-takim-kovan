@@ -18,7 +18,7 @@ _test_router = APIRouter(prefix="/_test")
 
 @_test_router.get("/rule")
 def _rule() -> None:
-    raise DomainRuleError("R-05", "Döngü oluşur.", code="PAGE_MOVE_CYCLE")
+    raise DomainRuleError("Döngü oluşur.", rule_code="R-05", code="PAGE_MOVE_CYCLE")
 
 
 @_test_router.get("/not-found")
@@ -130,7 +130,7 @@ def test_validation_error_names_the_invalid_field(error_client: TestClient) -> N
     assert response.status_code == 422
     error = _error_of(response)
     assert error["code"] == "VALIDATION_ERROR"
-    assert [detail["field"] for detail in error["details"]] == ["query.limit"]
+    assert error["details"] == [{"field": "query.limit", "message": "Tam sayı olmalıdır."}]
     assert "çok" not in response.text  # girilen değer yanıta konmaz
 
 

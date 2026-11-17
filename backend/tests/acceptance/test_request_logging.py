@@ -7,9 +7,8 @@ from fastapi import APIRouter
 from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
-from kovan.config import Settings
 from kovan.main import create_app
-from tests.fakes import UNREACHABLE_DATABASE_URL
+from tests.fakes import make_test_settings
 
 _failing_router = APIRouter(prefix="/_test")
 
@@ -20,7 +19,7 @@ def _bug() -> None:
 
 
 def _completed_requests(path: str) -> list[MutableMapping[str, Any]]:
-    app = create_app(Settings(database_url=UNREACHABLE_DATABASE_URL, log_level="INFO"))
+    app = create_app(make_test_settings(log_level="INFO"))
     app.include_router(_failing_router)
     with TestClient(app, raise_server_exceptions=False) as client, capture_logs() as logs:
         client.get(path)

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     )
 
     database_url: str
-    log_level: str = "INFO"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     # Yapay zeka (ADR-006). Varsayılan "fake": API anahtarı gerekmez.
     chat_provider: Literal["fake", "anthropic", "openai_compatible"] = "fake"

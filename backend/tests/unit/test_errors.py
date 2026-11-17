@@ -3,7 +3,7 @@ from kovan.domain.errors import DomainRuleError, NotFoundError
 
 
 def test_domain_rule_error_carries_rule_code_and_default_code() -> None:
-    error = DomainRuleError("R-05", "Döngü oluşur.")
+    error = DomainRuleError("Döngü oluşur.", rule_code="R-05")
 
     assert error.rule_code == "R-05"
     assert error.code == "DOMAIN_RULE_VIOLATION"

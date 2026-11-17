@@ -1,4 +1,4 @@
-"""Yapısal (JSON) loglama ayarı (Bölüm 4).
+"""Yapısal (JSON) loglama ayarı.
 
 Her log satırı tek satırlık JSON'dur ve istek içindeyken `request_id` taşır.
 """
