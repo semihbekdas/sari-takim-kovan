@@ -13,7 +13,7 @@ Bu, hocanın **ProjectRouter** örneğindeki yapının aynısıdır (`Domain ←
 Neden?
 1. Ders tablosunda (Richards & Ford) **basitlik ve maliyette en iyi** stil katmanlı mimari; bizim ölçeğimizde ölçeklenebilirliğe ihtiyaç yok.
 2. Katmanlı mimarinin zayıf yanı olan **test edilebilirliği**, dış servisleri (LLM, embedding, Qdrant, PostgreSQL) arayüzlerin arkasına koyarak kapatıyoruz.
-3. **3 kişi, ~5 hafta, kodun çoğu yapay zeka ile yazılacak** → az kavram, net kurallar, otomatik denetim gerekiyor.
+3. **3 kişi, ~4 hafta, kodun çoğu yapay zeka ile yazılacak** → az kavram, net kurallar, otomatik denetim gerekiyor.
 4. "Mimari uyum" kriterini **import-linter** ile otomatik ve kanıtlanabilir hale getirebiliyoruz.
 
 ---
@@ -37,7 +37,7 @@ Buradan çıkardığımız sonuç: Puanı getiren şey mimarinin "gösterişli" 
 
 | Seviye | Soru | Örnekler |
 | --- | --- | --- |
-| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (Bölüm 7) |
+| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (ders Bölüm 7) |
 | **Uygulama içi yapı** | Kod içeride nasıl bölünüyor, bağımlılıklar hangi yöne akıyor? | N-katman, Clean Architecture, Hexagonal, Vertical Slice … |
 
 ## 3. Kararı belirleyen girdiler (bizim bağlamımız)
@@ -45,7 +45,7 @@ Buradan çıkardığımız sonuç: Puanı getiren şey mimarinin "gösterişli" 
 | Girdi | Durum | Mimariye etkisi |
 | --- | --- | --- |
 | Ekip | 3 kişi | Az kavram, herkesin hızla öğrenebileceği yapı |
-| Süre | Bugün 13 Kasım; hedef bitiş **20 Aralık** (~5 hafta), teslim 25 Aralık | Tören (boilerplate) minimum |
+| Süre | Bugün 13 Kasım; kod dondurma **13 Aralık** (~4 hafta), teslim 25 Aralık | Tören (boilerplate) minimum |
 | Kod üretimi | Çoğunlukla yapay zeka ajanlarıyla | Net, yazılı, otomatik denetlenen kurallar |
 | Trafik | Ders projesi, birkaç kullanıcı | Ölçeklenebilirlik/elastikiyet önemsiz |
 | Dış bağımlılıklar | Bulut LLM ve embedding API'leri, Qdrant, PostgreSQL | Testte bunları **taklit edebilmek** şart |
@@ -64,11 +64,11 @@ Dersteki Richards & Ford tablosundaki 8 stilin bizim için değerlendirmesi:
 | **Layered** (katmanlı) | Tek uygulama, teknik katmanlara bölünmüş | Basitlik ★★★★★, maliyet ★★★★★. Test ★★ ama port/adapter ile düzeltilebilir | ✅ **Seçildi** |
 | **Pipeline** | Veri sırayla filtrelerden geçer | Tüm uygulama için uygun değil; ama indeksleme hattımız (parçala → embed → kaydet) içeride bu fikri kullanıyor | ➖ İç desen olarak |
 | **Microkernel** | Çekirdek + eklentiler (IDE, tarayıcı gibi) | Eklenti ihtiyacımız yok | ❌ |
-| **Service-Based** | Birkaç büyük servis, çoğu zaman ortak veritabanı | En ciddi alternatif (test ★★★★, basitlik ★★★). Ama 2–3 ayrı deploy, servisler arası HTTP, ortak kimlik doğrulama → 5 haftada ek yük; tek ekip için kazancı yok | ❌ |
+| **Service-Based** | Birkaç büyük servis, çoğu zaman ortak veritabanı | En ciddi alternatif (test ★★★★, basitlik ★★★). Ama 2–3 ayrı deploy, servisler arası HTTP, ortak kimlik doğrulama → 4 haftada ek yük; tek ekip için kazancı yok | ❌ |
 | **Event-Driven** | Bileşenler olaylar ve broker üzerinden asenkron haberleşir | Basitlik ★. Tek asenkron işimiz (indeksleme) için broker gereksiz | ❌ |
 | **Space-Based** | Bellek içi veri ızgarası, çok yüksek ölçek | Gereksiz | ❌ |
 | **Service-Oriented (SOA)** | Kurumsal servis veriyolu ile orkestrasyon | Kurumsal ölçek | ❌ |
-| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
+| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Ders Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
 
 Tablodan bize önemli satırlar:
 
@@ -91,7 +91,7 @@ Martin Fowler'ın **"Monolith First"** önerisi de aynı yönde: Yeni bir projey
 | --- | --- | --- | --- | --- |
 | **A** | **Klasik N-katman** (hocanın lesson05 BookApp örneği) | `Application → Data → Domain`; repository arayüzü Data katmanında | En basit | Application somut veri katmanına bağlı; LLM/Qdrant'ı testte taklit etmek zor |
 | **B** | **Katmanlı + port/adapter** (hocanın **ProjectRouter** örneği) | `Domain ← Application (arayüzler burada) ← Infrastructure / API` | Test edilebilir, az kavram, hocanın en güncel örneğiyle aynı | Domain nesnesi ↔ veritabanı satırı eşleme kodu |
-| **C** | **Clean Architecture (tam hali)** (Uncle Bob; hocanın lesson01 CvApp'i bu adı kullanıyor) | Entity, her use case için ayrı interactor sınıfı, input/output port, presenter, gateway | Çok test edilebilir | Özellik başına çok dosya ve kavram → 5 haftada aşırı mühendislik; ajanlar çok boilerplate üretir |
+| **C** | **Clean Architecture (tam hali)** (Uncle Bob; hocanın lesson01 CvApp'i bu adı kullanıyor) | Entity, her use case için ayrı interactor sınıfı, input/output port, presenter, gateway | Çok test edilebilir | Özellik başına çok dosya ve kavram → 4 haftada aşırı mühendislik; ajanlar çok boilerplate üretir |
 | **D** | **Hexagonal / Ports & Adapters** (Cockburn; hocanın HexagonalArchitecture_101 reposu) | Uygulama çekirdeği + sürücü/sürülen port'lar + adaptörler | Dış servisler için çok uygun | Terminoloji ağır; çekirdeğin içi kendiliğinden katmanlı değil. **B zaten bu fikrin "sürülen" (driven) tarafını kullanıyor** |
 | **E** | **Vertical Slice** (Jimmy Bogard) | Kod özelliğe göre dilimlenir, her dilim kendi yığınını taşır | Özellik bazlı iş bölümüne uygun, az çakışma | Katman sınırı yok → "mimari uyumu" göstermek zor; ajanlarla kod tekrarı riski; hocanın örneklerinde yok |
 | **F** | **Düz FastAPI** (router + model, "tutorial" tarzı) | İş mantığı router içinde | En hızlı başlangıç | Test edilemez, gösterilecek mimari yok |
@@ -106,7 +106,7 @@ Martin Fowler'ın **"Monolith First"** önerisi de aynı yönde: Yeni bir projey
 | Ekip içi paralel çalışma | 3 | 4 | 3 | 4 | 5 | 2 |
 | Yapay zeka ajanlarıyla uyum (net kural, az boilerplate) | 4 | 5 | 2 | 3 | 3 | 3 |
 | Hocanın örnekleriyle uyum | 4 | 5 | 4 | 4 | 2 | 1 |
-| ~5 haftaya uygunluk | 5 | 5 | 2 | 3 | 4 | 4 |
+| ~4 haftaya uygunluk | 5 | 5 | 2 | 3 | 4 | 4 |
 | **Toplam (/35)** | 27 | **33** | 23 | 26 | 24 | 17 |
 
 ---
@@ -148,7 +148,7 @@ flowchart TB
 
 ## 7. Uyumu nasıl kanıtlayacağız?
 
-1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine:
+1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine (güncel hali o dosyadadır; dış kütüphaneler bağımlılık olarak eklendikçe yasak listesine girer):
 
 ```toml
 [tool.importlinter]
@@ -175,7 +175,7 @@ forbidden_modules = ["kovan.infrastructure"]
 name = "İç katmanlar framework ve dış kütüphanelerden bağımsız"
 type = "forbidden"
 source_modules = ["kovan.domain", "kovan.application"]
-forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "qdrant_client", "openai", "anthropic"]
+forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "structlog", "qdrant_client", "openai", "anthropic"]
 ```
 
 2. **Review kontrol listesi:** "Yeni kod doğru katmanda mı? Router'da iş kuralı var mı?"

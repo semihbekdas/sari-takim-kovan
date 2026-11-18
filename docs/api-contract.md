@@ -1,14 +1,14 @@
 # REST API Sözleşmesi
 
-> Frontend ve backend'in paralel geliştirilebilmesi için ortak sözleşme. Kod yazılınca FastAPI'nin ürettiği OpenAPI (`/docs`) asıl kaynak olur; bu doküman onunla tutarlı tutulur.
+> Frontend ve backend'in paralel geliştirilebilmesi için ortak sözleşme. Kod yazılınca FastAPI'nin ürettiği OpenAPI (Swagger arayüzü: `/api/docs`) asıl kaynak olur; bu doküman onunla tutarlı tutulur.
 
 ## Genel kurallar
 
 - Temel yol: **`/api/v1`**
-- Gövdeler **JSON**, alan adları `snake_case`.
+- Gövdeler **JSON**, alan adları `snake_case`. İstisna: `content` içindeki BlockNote blokları kendi biçiminde (camelCase alanlarla) olduğu gibi saklanır.
 - Kimlik doğrulama: `kovan_session` çerezi (`HttpOnly; SameSite=Strict; Path=/api`, prod'da `Secure`). Aksi belirtilmedikçe tüm uç noktalar oturum ister; yoksa **401**.
 - RESTful: oluşturma `POST`, tam güncelleme `PUT`, kısmi işlem `PATCH`, silme `DELETE` (hocanın lesson01 API standardı).
-- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`.
+- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`. İstisna: Boyutu üst sınırlı olan ağaç (≤ 1000), geri bağlantılar (≤ 100) ve başlıklar (≤ 100 kimlik) düz liste döner (`/pages/tree`, `/pages/{id}/backlinks`, `/pages/titles`).
 - Başka kullanıcının kaynağı **404** döner (403 değil).
 - Her yanıtta `X-Request-ID` başlığı vardır.
 
@@ -24,6 +24,11 @@
   }
 }
 ```
+
+- `rule` yalnızca bir domain kuralı (R-xx) ihlalinde doludur, aksi halde `null`.
+- `VALIDATION_ERROR` yanıtında ek olarak hangi alanın hatalı olduğunu söyleyen `details` listesi bulunur: `[{"field": "body.email", "message": "Bu alan zorunludur."}]`. Mesajlar Türkçedir; girilen değer (ör. şifre) yanıta konmaz.
+- **Doğrulama nerede?** API şeması tipleri, zorunlu alanları ve taşıma sınırlarını (ör. arama sorgusu 1–200, soru 1–1000 karakter, `limit` ≤ 100) denetler (`VALIDATION_ERROR`). Kural kodlu sınırlar (R-01 e-posta biçimi, R-02 şifre uzunluğu, R-03 başlık, R-06 içerik) şemada tekrarlanmaz; domain'de kontrol edilir ve `rule` alanıyla döner. Bu yanıtlarda `message` hatalı alanı adıyla söyler (ör. "Şifre en az 8 karakter olmalı.").
+- Beklenmeyen hatalarda (500) iç ayrıntı istemciye gönderilmez; `request_id` ile loglarda aranır.
 
 | HTTP | `code` örnekleri |
 | --- | --- |
@@ -57,13 +62,13 @@
 | GET | `/pages/{id}` | — | **200** `Page` | 404 | 🟥 US-03 |
 | PUT | `/pages/{id}` | `{title, content, version}` | **200** `Page` | 404, 409, 422 | 🟥 US-04 |
 | DELETE | `/pages/{id}` | — | **204** (sayfa + alt sayfalar silindi işaretlenir) | 404 | 🟥 US-06 |
-| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` | 404 | 🟥 US-08 |
-| GET | `/pages/titles` | `ids=uuid,uuid,…` (≤ 100) | **200** `{id, title, deleted}[]` (bağlantı gösterimi için) | — | 🟥 US-07 |
+| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` (en fazla 100, en son düzenlenen önce) | 404 | 🟥 US-08 |
+| GET | `/pages/titles` | `?ids=…&ids=…` (tekrarlanan parametre, ≤ 100) | **200** `{id, title, deleted}[]` (bağlantı gösterimi için) | — | 🟥 US-07 |
 | PATCH | `/pages/{id}/move` | `{parent_id: uuid \| null}` | **200** `Page` | 404, 422 | 🟧 US-05 |
 | GET | `/pages/recent` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-14 |
 | GET | `/trash` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-06 |
 | POST | `/trash/{id}/restore` | — | **200** `Page` | 404 | 🟧 US-06 |
-| DELETE | `/trash/{id}` | — | **204** (kalıcı silme) | 404 | 🟧 US-06 |
+| DELETE | `/trash/{id}` | — | **204** (kalıcı silme; önce Qdrant noktaları silinir, ADR-005) | 404, 503 (Qdrant'a ulaşılamazsa satır silinmez) | 🟧 US-06 |
 
 ```jsonc
 // Page
@@ -81,13 +86,15 @@
 { "id": "…", "title": "…", "breadcrumbs": [ … ], "updated_at": "…" }
 ```
 
+> Sabit yollar (`/pages/tree`, `/pages/titles`, `/pages/recent`) router'da `/pages/{id}`'den **önce** tanımlanır; aksi halde FastAPI bunları sayfa kimliği sanıp 422 döner.
+
 > `/pages/titles`: Editördeki `@` bağlantılarının güncel başlığını ve silinmiş olup olmadığını göstermek için (AC-07.3). Kullanıcıya ait olmayan kimlikler `deleted: true` gibi davranır, bilgi sızdırılmaz.
 
 ## Arama — `/search` 🟥
 
 | Metot | Yol | Sorgu | Başarılı | Hatalar | Hikaye |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/search` | `q` (1–200 karakter), `mode=keyword\|semantic`, `limit`, `offset` | **200** sayfalı `SearchResult` | 422, 503 (semantic) | US-09, US-10 |
+| GET | `/search` | `q` (1–200 karakter), `mode=keyword\|semantic` (varsayılan `keyword`), `limit`, `offset` | **200** sayfalı `SearchResult` | 422, 503 (semantic) | US-09, US-10 |
 
 ```jsonc
 // SearchResult
@@ -95,6 +102,9 @@
   "snippet": "… normalizasyon kuralları …",   // düz metin; vurgulamayı frontend yapar
   "score": 0.82 }
 ```
+
+- `keyword` modunda `heading_path` boştur (`null`) ve `score` PostgreSQL tam metin sıralama puanıdır.
+- `semantic` modunda en fazla 20 sonuç döner (`total` ≤ 20); `score` kosinüs benzerliğidir.
 
 ## Sohbet — `/chat`
 
@@ -109,7 +119,8 @@
 {
   "answer": "3NF'de geçişli bağımlılık kaldırılır [1]; BCNF ise her belirleyicinin aday anahtar olmasını ister [1].",
   "citations": [ { "index": 1, "page_id": "…", "page_title": "Veritabanı", "heading_path": "Veritabanı › Normalizasyon" } ],
-  "found": true,          // false → "bulamadım" cevabı, citations boş
+  "found": true,          // true → cevap en az bir geçerli kaynağa dayanıyor
+                          // false → answer sabit bir bilgi mesajıdır ("bulamadım" veya "üretilemedi"), citations boş
   "session_id": null      // Should: sohbet geçmişi açıkken dolu
 }
 ```
@@ -119,9 +130,9 @@
 | Metot | Yol | Açıklama |
 | --- | --- | --- |
 | GET | `/health` | Canlılık (oturum gerekmez) |
-| GET | `/health/ready` | PostgreSQL + Qdrant erişimi (oturum gerekmez) |
+| GET | `/health/ready` | PostgreSQL + Qdrant erişimi; biri erişilemezse **503** (oturum gerekmez) |
 
-## Yönetim (CLI, HTTP değil)
+## Yönetim (CLI, HTTP değil) *(planlanan)*
 
 ```bash
 uv run python -m kovan.cli reindex --all          # Qdrant'ı PostgreSQL'den baştan üret

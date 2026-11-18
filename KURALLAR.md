@@ -1,6 +1,6 @@
 # Kovan — Ekip Çalışma Kuralları
 
-> Bu kurallar hocanın proje kriterlerinden (`course-guide.md`) ve derste söylediklerinden türetilmiştir. Amaç: **eşit katkı, tarihsel commit geçmişi, mimariye uyum, testli ve dokümante kod.**
+> Bu kurallar hocanın proje kriterlerinden ([`course-guide.md`](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/course-guide.md)) ve derste söylediklerinden türetilmiştir. Amaç: **eşit katkı, tarihsel commit geçmişi, mimariye uyum, testli ve dokümante kod.**
 > Yapay zeka ajanları için teknik kurallar ayrıca [`AGENTS.md`](AGENTS.md) dosyasındadır.
 
 ---
@@ -31,8 +31,8 @@ git config --global user.email "github-hesabindaki@eposta.com"
 ### 2.2 Branch akışı
 
 - `main` korumalıdır: doğrudan push yok, sadece PR ile merge.
-- Her iş için yeni branch: `feature/<iş-paketi>-<kısa-ad>`, `fix/<kısa-ad>`, `docs/<kısa-ad>`, `test/<kısa-ad>`
-  - Örnek: `feature/sayfalar-agac-menu`, `feature/indeks-chunking`, `docs/adr-qdrant`
+- Her iş için yeni branch: `feature/<kısa-ad>`, `fix/<kısa-ad>`, `docs/<kısa-ad>`, `test/<kısa-ad>`
+  - Örnek: `feature/sayfa-agaci`, `feature/chunking`, `docs/adr-qdrant`
 - Branch ömrü kısa olsun (en fazla ~1 hafta). Uzun yaşayan branch = büyük çakışma.
 
 ### 2.3 Commit kuralları
@@ -40,7 +40,7 @@ git config --global user.email "github-hesabindaki@eposta.com"
 - **Herkes kendi hesabından, kendi işini commit'ler.** Başkasının kodunu senin hesabından push'lamak yok.
 - **Küçük ve anlamlı commit:** Bir commit bir mantıksal değişiklik.
 - **Hedef tempo:** Herkes haftada **en az 3 commit**, en az **2 farklı günde**.
-- **Commit tarihleriyle oynamak yasak** (`--date`, `GIT_COMMITTER_DATE`, rebase ile geçmiş değiştirme vb.). Tarihsel geçmiş, işi gerçekten zamana yayarak oluşur.
+- **Commit tarihleriyle oynamak yasak** (`--date`, `GIT_COMMITTER_DATE` vb.). Push'lanmış commit'ler yeniden yazılmaz (rebase, `push --force` yok); branch'ini güncellemek için `main`'i branch'ine merge et. Tarihsel geçmiş, işi gerçekten zamana yayarak oluşur.
 - Mesaj formatı ([Conventional Commits](https://www.conventionalcommits.org/)), açıklama Türkçe:
 
 ```text
@@ -61,7 +61,7 @@ git config --global user.email "github-hesabindaki@eposta.com"
 Örnekler:
 ```text
 feat(pages): sayfa taşıma uç noktası eklendi
-test(chunking): başlık hiyerarşisine göre parçalama kabul testleri (AC-10.1)
+test(chunking): başlık hiyerarşisine göre parçalama birim testleri (ADR-009)
 fix(search): çöp kutusundaki sayfalar arama sonuçlarından çıkarıldı
 docs(adr): ADR-004 Qdrant seçimi gerekçesi yazıldı
 ```
@@ -83,7 +83,7 @@ docs(adr): ADR-004 Qdrant seçimi gerekçesi yazıldı
 
 - **En az 1 onay (review)** gerekir; PR'ı açan kişi kendi PR'ını onaylayamaz.
 - **CI yeşil olmadan merge yok** (testler + lint + mimari kontrol + Sonar quality gate).
-- Merge yöntemi: **"Create a merge commit"** veya **"Rebase and merge"**. **Squash kullanmıyoruz** — squash, herkesin ayrı commit'lerini tek commit'e ezer ve tarihsel geçmişi siler.
+- Merge yöntemi: yalnızca **"Create a merge commit"**. Squash ve "Rebase and merge" repo ayarlarında kapalıdır: Squash herkesin ayrı commit'lerini tek commit'e ezer, rebase-merge commit'leri yeniden yazar; ikisi de tarihsel geçmişi bozar.
 - Review yapan kişi kodu gerçekten okur ve en az bir yorum/soru bırakır. "LGTM" tek başına review sayılmaz.
 
 ### 2.5 Eşit katkı takibi
@@ -115,7 +115,7 @@ Ayrıntı: [`docs/architecture.md`](docs/architecture.md), [`docs/adr/`](docs/ad
 - **Okunabilirlik önce gelir.** Açık isimler, kısa fonksiyonlar (hedef ≤ 30 satır), derin iç içe `if` yok (erken dönüş kullan).
 - Python: tip ipuçları zorunlu, `ruff` (lint + format) ve `mypy` temiz olmalı.
 - TypeScript: `strict` mod, `eslint` + `prettier` temiz olmalı, `any` yok.
-- **Boş `except`/`catch` yasak.** Hata ya ele alınır, ya üst katmana iletilir, ya da loglanır (Bölüm 4: *Do Not Swallow Errors*).
+- **Boş `except`/`catch` yasak.** Hata ya ele alınır, ya üst katmana iletilir, ya da loglanır (ders Bölüm 4: *Do Not Swallow Errors*).
 - Kod tekrarından kaçın (Sonar duplication < %3).
 - Kodda yorum "ne"yi değil **"neden"i** anlatır.
 - Kullanılmayan kod, yorum satırına alınmış eski kod commit'lenmez.
@@ -131,7 +131,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 - Test türleri: **birim** (domain/application), **entegrasyon** (gerçek PostgreSQL + Qdrant, Testcontainers), **kabul** (API senaryoları); *(Should)* birkaç Playwright duman testi.
 - Testler gerçek yapay zeka API'si çağırmaz; fake sağlayıcılar kullanılır.
 - Hata yolları da test edilir (geçersiz girdi, yetkisiz erişim, servis kapalı) — *negative path testing*.
-- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**.
+- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**. Tek istisna: Docker gerektiren entegrasyon testleri **yerelde** Docker kapalıysa atlanır; **CI'da Docker zorunludur**, yoksa test hata verir.
 - Yeni kod, mevcut testleri kırmadan gelir.
 
 ---
@@ -139,7 +139,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 ## 6. Doküman kuralları
 
 - Davranış değiştiren her PR, ilgili dokümanı da günceller (`api-contract.md`, `domain-design.md`, `user-stories.md` …).
-- Geri dönülmesi zor her karar → `docs/adr/` altına yeni ADR (Bölüm 7).
+- Geri dönülmesi zor her karar → `docs/adr/` altına yeni ADR (ders Bölüm 7).
 - `docs/PLAN.md` her hafta sonu toplantısında güncellenir (ilerleme + skor kartı).
 - `README.md` her sprint sonunda güncel tutulur.
 
@@ -148,7 +148,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 ## 7. Yapay zeka kullanım kuralları
 
 - Ajanı başlatmadan önce ilgili dokümanları bağlam olarak ver (`AGENTS.md` bunu otomatik sağlar).
-- Büyük bir işi tek prompt'ta yaptırma; **küçük parçalar halinde** ilerle (Bölüm 1).
+- Büyük bir işi tek prompt'ta yaptırma; **küçük parçalar halinde** ilerle (ders Bölüm 1).
 - Üretilen kodu **satır satır oku**, çalıştır, testini gör. "Derleniyor" ≠ "doğru".
 - Ajanın `try/except: pass` ile hata gizlemesine, testleri silmesine/atlamasına, gereksiz bağımlılık eklemesine izin verme.
 - **Prompt'lara asla** şifre, API anahtarı, `.env` içeriği, kişisel veri yapıştırma (ders README'sindeki "Aman Dikkat" bölümü).
@@ -169,7 +169,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 - Her veritabanı ve Qdrant sorgusu **kullanıcıya göre filtrelenir** (`owner_id`). Başka kullanıcının kaynağı → **404**.
 - SQL her zaman parametreli; ham string birleştirme yok.
 - Kullanıcı içeriği HTML olarak basılmaz (`dangerouslySetInnerHTML` yasak).
-- Sayfa içeriği LLM'e **veri** olarak gider; içindeki talimatlar uygulanmaz (prompt injection önlemi, Bölüm 18).
+- Sayfa içeriği LLM'e **veri** olarak gider; içindeki talimatlar uygulanmaz (prompt injection önlemi, ders Bölüm 18).
 - Bağımlılıklar güncel ve güvenilir kaynaktan; Dependabot uyarıları göz ardı edilmez.
 
 ---

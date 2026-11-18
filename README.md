@@ -4,12 +4,14 @@
 
 **Sarı Takım** · Yapay Zeka Destekli Yazılım Geliştirme dersi dönem projesi · Proje kodu **P0007 – Bilgi Tabanı (Notion Clone + Anlamsal Arama)** · Teslim: **25 Aralık 2026**
 
-<!-- Kod iskeleti kurulunca eklenecek:
-![CI](https://github.com/<kullanici>/sari-takim-kovan/actions/workflows/ci.yml/badge.svg)
-![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=<key>&metric=alert_status)
--->
+[![CI](https://github.com/semihbekdas/sari-takim-kovan/actions/workflows/ci.yml/badge.svg)](https://github.com/semihbekdas/sari-takim-kovan/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=semihbekdas_sari-takim-kovan&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)
 
-> **Durum:** 📝 Planlama (Sprint 0). Bu README her sprint sonunda güncellenir; henüz uygulanmamış bölümler *(planlanan)* olarak işaretlidir.
+> **Durum:** 🛠️ Geliştirme, Sprint 1 (backend iskeleti, CI ve SonarQube Cloud). Bu README her sprint sonunda güncellenir; henüz uygulanmamış bölümler *(planlanan)* olarak işaretlidir.
+
+> **Buradan başlayın:** 1) Bu README'nin 1–4. bölümleri (ne, neden, mimari) → 2) [docs/architecture.md](docs/architecture.md) § 4–5 (katmanlar ve ana akışlar) → 3) Kod: `backend/src/kovan/main.py` → `api/errors.py` → `backend/tests/acceptance/`. Güncel durum ve sprint planı: [docs/PLAN.md](docs/PLAN.md) § 4 ve § 7.
+>
+> **Okuma notu:** «§ N» bulunduğunuz dokümanın N. bölümüdür; «ders Bölüm N» ise [ders reposundaki](https://github.com/buraksenyurt/ai-based-development-lecture) `chapter-NN.md` dosyasıdır. Kısaltmalar: **İP-A/B/C** iş paketleri (Umut, Özlem, Semih; [PLAN](docs/PLAN.md) § 3) · **F-xx** özellik · **US-xx** kullanıcı hikayesi · **AC-xx.y** kabul kriteri · **R-xx** domain kuralı · **Must/Should/Could** öncelik (MoSCoW: olmazsa olmaz / olmalı / zaman kalırsa).
 
 ---
 
@@ -80,7 +82,7 @@ api ──► application ──► domain
 infrastructure (PostgreSQL, Qdrant, yapay zeka API'leri, güvenlik, indeksleme)
 ```
 
-**Neden?** 3 kişilik ekip ve ~5 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
+**Neden?** 3 kişilik ekip ve ~4 haftalık süre için Richards & Ford karşılaştırmasında **basitlik ve maliyette** en iyi seçenek katmanlı yapıdır; mikroservis veya event-driven bir yapı bu ölçekte "gereksiz karmaşıklık borcu" olurdu (ders Bölüm 7–8). Katmanlı yapının zayıf yanı olan test edilebilirliği **port/adapter arayüzleriyle** güçlendiriyoruz; bu, hocanın ProjectRouter örneğindeki yapının aynısıdır. Katman kuralları **import-linter** ile CI'da otomatik denetlenir. 8 mimari stil ve 6 kod organizasyonu yaklaşımının karşılaştırması [mimari-secimi.md](docs/mimari-secimi.md)'de.
 
 ## 5. Teknolojiler
 
@@ -117,10 +119,10 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 | Bileşen | Kullanım |
 | --- | --- |
-| Embedding API (OpenAI / Gemini / Voyage; ekip seçecek) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
-| Qdrant | Kosinüs benzerliği ile anlamsal arama (Bölüm 9–10) |
+| Embedding API (OpenAI / bge-m3 / Voyage; ekip ölçerek seçecek, ADR-006) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
+| Qdrant | Kosinüs benzerliği ile anlamsal arama (ders Bölüm 9–10) |
 | Dil modeli API (Claude / GPT / Gemini; ekip seçecek) | Getirilen parçalardan **kaynaklı** cevap üretir (RAG) |
-| *(Should)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (Bölüm 12–13) |
+| *(Should)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (ders Bölüm 12–13) |
 
 - **Fake mod:** API anahtarı olmadan uygulama ve testler sahte (deterministik) yapay zeka ile çalışır. Güçlü bilgisayar veya yerel model gerekmez.
 - **Gizlilik:** Gerçek modda soru ve ilgili not parçaları seçilen bulut sağlayıcıya gönderilir. Demo ve değerlendirme verileri kurgusaldır.
@@ -138,21 +140,23 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 ## 8. Kurulum ve Çalıştırma
 
-> *(planlanan; kod iskeleti Sprint 1'de eklenecek)*
+> Backend iskeleti hazır. `docker compose`, Alembic ve frontend adımları ilgili işler bitince geçerli olacak *(planlanan)*.
 
-**Gereksinimler:** Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node.js 22 LTS. Yerel yapay zeka modeli **gerekmez**.
+**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (entegrasyon testleri; `docker compose` gelince PostgreSQL ve Qdrant da Docker'da çalışır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
 
 ```bash
-git clone https://github.com/<kullanici>/sari-takim-kovan.git && cd sari-takim-kovan
+git clone https://github.com/semihbekdas/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
-docker compose up -d                 # PostgreSQL + Qdrant
+docker compose up -d                 # PostgreSQL + Qdrant (planlanan)
 
 cd backend
-uv sync
-uv run alembic upgrade head
-uv run uvicorn kovan.main:app --reload
+uv sync                              # Python 3.12 yoksa uv kendisi indirir
+uv run alembic upgrade head          # (planlanan)
+uv run uvicorn kovan.main:create_app --factory --reload
+# API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
+# /api/v1/health/ready, veritabanına ulaşamazsa 503 döner (docker compose gelince 200)
 
-cd ../frontend
+cd ../frontend                       # (planlanan)
 npm install
 npm run dev                          # http://localhost:5173
 ```
@@ -169,19 +173,25 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 | Entegrasyon | pytest + Testcontainers | PostgreSQL repository'leri, Qdrant adaptörü, indeksleme döngüsü |
 | Kabul | pytest (API senaryoları) | Her Must kabul kriteri (AC) en az bir teste bağlı |
 | Uçtan uca *(Should)* | Playwright | 3 duman senaryosu |
-| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5, MRR |
+| RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5 (doğru sayfa ilk 5 sonuçta mı), MRR (doğru sayfanın sırasının tersinin ortalaması: 1. sıra = 1, 2. sıra = 0,5; 0 ile 1 arası) |
 
 ```bash
-cd backend && uv run pytest --cov      # (planlanan)
-cd frontend && npm test                # (planlanan)
+cd backend
+uv run pytest --cov                    # testler + kapsam (Docker kapalıysa entegrasyon testleri yerelde atlanır, CI'da zorunlu)
+uv run ruff check . && uv run ruff format --check .   # lint + biçim
+uv run mypy                            # tip kontrolü (strict)
+uv run lint-imports                    # mimari katman kuralları
+
+cd ../frontend && npm test             # (planlanan)
 ```
 
 *Sonuçlar (test sayısı, kapsam, RAG metrikleri) sprintler ilerledikçe buraya eklenecek.*
 
 ## 10. Kod Kalitesi ve Güvenlik
 
-- **SonarQube Cloud:** Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
-- **ruff, mypy, eslint:** CI'da zorunlu.
+- **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
+- **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+- **ruff, mypy:** CI'da zorunlu; **eslint** frontend iskeleti gelince eklenecek *(planlanan)*.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 
@@ -194,6 +204,7 @@ cd frontend && npm test                # (planlanan)
 | 1 | PostgreSQL ile Qdrant arasında tutarlılık: Sayfa silinince vektörü kalabiliyor, her otomatik kayıtta embedding çağırmak pahalı | Sürüm işaretli indeksleme: düzenleme bitince tek seferlik, yeniden denemeli ve idempotent işleme; aramada PostgreSQL doğrulaması | ADR-005 |
 | 2 | Claude'un embedding modeli yok | Sohbet ve embedding sağlayıcıları ayrı port'lar; embedding için ayrı sağlayıcı | ADR-006 |
 | 3 | İlk doküman taslağı aşırı mühendislik içeriyordu (ayrı iş tablosu, ORM eşlemesi vb.) | Gözden geçirmede sadeleştirildi; gerekçeler ADR'lerde | ai-log |
+| 4 | İlk SonarQube analizinde güvenlik derecesi **C** çıktı: CI'daki bağımlılık kurulumu paketlerin kurulum betiklerini çalıştırabiliyor ve kilitli sürümlerden sapabiliyordu | Kurulum `--locked --no-build`, komutlar `--frozen --no-sync` yapıldı; kalite kapısı **A** ile geçti | PR #1 |
 
 ## 12. Ders Kriterlerinin Karşılanması
 
@@ -218,13 +229,13 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 - Plan, sprintler, iş paketleri, riskler, skor kartı: **[docs/PLAN.md](docs/PLAN.md)**
 - Ekip çalışma kuralları: **[KURALLAR.md](KURALLAR.md)**
 - Takım: **Sarı Takım** · Repo: `sari-takim-kovan`
-- Toplantılar: hafta sonu · Hedef bitiş: 20 Aralık · Teslim: 25 Aralık
+- Toplantılar: hafta sonu · Kod dondurma: 13 Aralık · Teslim: 25 Aralık
 
 | Üye | İş paketi | Sorumluluk |
 | --- | --- | --- |
 | Umut | İP-A Sayfalar & Editör | docker-compose + frontend iskeleti; sayfa API'si, sayfa ağacı, editör, otomatik kaydetme, silme, `@` bağlantısı |
-| Özlem | İP-B Kimlik, İçerik & Arama | CI + SonarQube Cloud; kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime araması |
-| Semih | İP-C Yapay Zeka | Backend iskeleti; yapay zeka adaptörleri, Qdrant, indeksleme, anlamsal arama, "Sayfalarına Sor" |
+| Özlem | İP-B Kimlik, İçerik & Arama | Kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime ve anlamsal arama |
+| Semih | İP-C Yapay Zeka | Backend iskeleti, CI + SonarQube Cloud; yapay zeka adaptörleri, Qdrant, indeksleme, "Sayfalarına Sor" |
 | Herkes | Ortak | Değerlendirme seti ve embedding karşılaştırması, güvenlik gözden geçirmesi, README, sunum |
 
 ## 14. Doküman Haritası
