@@ -87,8 +87,6 @@
 - **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
 
 ### 2026-11-18 — PR #1 review'u: Codex'in 5 uyarısı ve Özlem'in sorusu
-
-### 2026-11-17 — Özlem: doküman okuma (#5)
 - **Kim:** Özlem
 - **Araç / model:** Claude (claude.ai, Claude Code)
 - **Amaç:** İP-B ile ilgili dokümanları (README, KURALLAR, PLAN, architecture, domain-design, api-contract, ADR-008, ADR-009) okumak ve belirsiz yerleri bulmak.
