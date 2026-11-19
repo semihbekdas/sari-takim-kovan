@@ -20,11 +20,17 @@ from kovan.infrastructure.ai.openai_compatible import (
 # beklerdi. Bir yeniden deneme geçici hataya yeter; indeksleme zaten kendi yeniden denemesini yapar.
 SDK_MAX_RETRIES = 1
 
+# Adres her zaman açıkça verilir: Aksi halde SDK'lar ortamdaki OPENAI_BASE_URL / ANTHROPIC_BASE_URL
+# değişkenini kullanır ve anahtar ile sorular Kovan'ın ayarlamadığı bir adrese gidebilir.
+ANTHROPIC_API_URL = "https://api.anthropic.com"
+OPENAI_API_URL = "https://api.openai.com/v1"
+
 
 def build_chat_model(settings: Settings) -> ChatModel:
     if settings.chat_provider == "anthropic":
         client = anthropic.Anthropic(
             api_key=_require(settings.chat_api_key, "CHAT_API_KEY"),
+            base_url=ANTHROPIC_API_URL,
             timeout=settings.ai_timeout_seconds,
             max_retries=SDK_MAX_RETRIES,
         )
@@ -32,7 +38,7 @@ def build_chat_model(settings: Settings) -> ChatModel:
     if settings.chat_provider == "openai_compatible":
         openai_client = openai.OpenAI(
             api_key=_require(settings.chat_api_key, "CHAT_API_KEY"),
-            base_url=settings.chat_base_url or None,
+            base_url=settings.chat_base_url or OPENAI_API_URL,
             timeout=settings.ai_timeout_seconds,
             max_retries=SDK_MAX_RETRIES,
         )

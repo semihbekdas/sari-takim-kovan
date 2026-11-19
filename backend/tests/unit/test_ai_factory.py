@@ -1,11 +1,13 @@
 """Yapay zeka fabrikası: ayarlara göre doğru adaptör, doğru anahtar ve sınırlı yeniden deneme."""
 
 import pytest
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 from kovan.config import Settings
 from kovan.infrastructure.ai.anthropic_chat import AnthropicChatModel
 from kovan.infrastructure.ai.factory import (
+    ANTHROPIC_API_URL,
+    OPENAI_API_URL,
     SDK_MAX_RETRIES,
     build_chat_model,
     build_embedding_provider,
@@ -43,6 +45,30 @@ def test_anthropic_chat_model_is_built_with_key() -> None:
 
     assert isinstance(model, AnthropicChatModel)
     assert model._client.max_retries == SDK_MAX_RETRIES
+
+
+def test_ambient_base_url_variables_are_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Ortamdaki adres değişkenleri anahtarı ve soruları başka bir sunucuya yönlendirmemeli.
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://baska-sunucu.example/v1")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://baska-sunucu.example")
+
+    openai_model = build_chat_model(
+        _settings(chat_provider="openai_compatible", chat_api_key=SecretStr("k"))
+    )
+    anthropic_model = build_chat_model(
+        _settings(chat_provider="anthropic", chat_api_key=SecretStr("k"))
+    )
+
+    assert isinstance(openai_model, OpenAICompatibleChatModel)
+    assert isinstance(anthropic_model, AnthropicChatModel)
+    assert str(openai_model._client.base_url) == OPENAI_API_URL + "/"
+    assert str(anthropic_model._client.base_url) == ANTHROPIC_API_URL
+
+
+@pytest.mark.parametrize("field", ["embedding_dim", "chat_max_tokens", "ai_timeout_seconds"])
+def test_non_positive_numeric_settings_are_rejected(field: str) -> None:
+    with pytest.raises(ValidationError, match=field):
+        _settings(**{field: 0})
 
 
 def test_openai_compatible_chat_model_is_built_with_key() -> None:
