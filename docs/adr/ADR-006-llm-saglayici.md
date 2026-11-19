@@ -2,7 +2,7 @@
 
 ## Durum
 
-Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip tarafından kesinleştirilecek** (§ Açık karar).
+Kabul Edildi *(Accepted)* — 2026-11-13: port'lar, fake mod ve hata yönetimi. **Açık kalan:** sağlayıcı ve model seçimi ekip tarafından kesinleştirilecek (§ Açık karar).
 
 ## Bağlam
 
@@ -11,13 +11,13 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 - **Anthropic'in kendi embedding modeli yok.** Resmi dokümanı embedding için Voyage AI'ı öneriyor. Yani Claude kullanılsa bile embedding için ayrı bir sağlayıcı gerekir.
 - Testler ve CI para harcamamalı, internete çıkmamalı, deterministik olmalı. API anahtarı olmayan bir üye de uygulamayı çalıştırabilmeli.
 - Repo **public**: Anahtarlar asla koda veya CI'a girmemeli.
-- Kişisel notlar buluta gider → gizlilik (README "Aman Dikkat").
+- Kişisel notlar buluta gider → gizlilik (ders reposunun README'sindeki "Aman Dikkat" bölümü).
 
 > "Claude Code" ve "Codex" **geliştirme araçlarıdır** (kodu yazmamıza yardım eder). Ürünün içindeki yapay zeka ise ilgili sağlayıcının **API**'si üzerinden, ayrı bir API anahtarı ve kullanım başı ücretle çalışır.
 
 ## Karar
 
-1. `application` katmanında iki ayrı port: `EmbeddingProvider.embed(texts) -> vectors` ve `ChatModel.complete(system, messages, max_tokens) -> ChatCompletion` (metin + token kullanımı). Sağlayıcılar birbirinden bağımsız seçilir.
+1. `application` katmanında iki ayrı port: `EmbeddingProvider.embed(texts) -> vectors` ve `ChatModel.complete(system, messages, max_tokens) -> ChatCompletion` (metin, bitiş nedeni ve token kullanımı). Sağlayıcılar birbirinden bağımsız seçilir.
 2. `infrastructure/ai/` altında **üç gerçek adaptör + fake'ler**:
 
 | Adaptör | Kütüphane | Kapsadığı sağlayıcılar |
@@ -30,7 +30,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 3. **Varsayılan mod `fake`** (`CHAT_PROVIDER=fake`, `EMBEDDING_PROVIDER=fake`): Anahtarsız çalışır; testler, CI ve günlük geliştirme bu modda. Gerçek yapay zeka `.env`'ye anahtar ve sağlayıcı girilince devreye girer.
 4. Dış servis hataları (zaman aşımı `AI_TIMEOUT_SECONDS` = 30 sn, 429, 5xx, bağlantı hatası) SDK'nın tek yeniden denemesinden sonra (en kötü durumda ~60 sn) `ExternalServiceError`'a çevrilir → API'de **503**, indeksleme döngüsünde yeniden deneme (ADR-005). Model güvenlik nedeniyle cevap vermeyi reddederse (`stop_reason == "refusal"`) kullanıcıya "Bu soruya cevap üretilemedi" mesajı döner.
 5. Embedding modeli değişirse vektör boyutu değişebilir → `EMBEDDING_DIM` güncellenir ve `reindex --all` çalıştırılır.
-6. Token kullanımı her çağrıda loglanır (Should, US-16).
+6. Token kullanımı her çağrıda yapay zeka adaptörlerinde loglanır (Should, US-16).
 
 ## Seçenekler ve maliyet
 
@@ -58,7 +58,7 @@ Claude 5.5 modelleriyle ilgili uygulama notları: Opus 5.5'te düşünme kapatı
 | --- | --- | --- | --- | --- |
 | **OpenAI `text-embedding-3-small`** | 1536 | ~$0.02 | Türkçe için yayımlanmış bir karşılaştırma bulamadık | En basit seçenek: ek adaptör gerekmez, kararlı, iyi belgelenmiş |
 | **BAAI `bge-m3`** (açık kaynak; OpenRouter vb. üzerinden API) | 1024 | ~$0.01 | Türkçe karşılaştırmalarda üst sıralarda (TR-TEB, Türkçe soru-cevap testleri) | Çok dilli, 8K bağlam. Model açık kaynak, biz barındırmıyoruz; bir API sağlayıcısı üzerinden kullanılır |
-| **Voyage AI `voyage-4-lite`** | 1024 | ~$0.02; **ilk 200M token ücretsiz** | Çok dilli olarak tanıtılıyor | Anthropic'in önerdiği sağlayıcı. Anahtar MongoDB Atlas'tan alınır; ödeme yöntemi eklenmezse hız limiti düşük olabilir. Seçilirse küçük bir adaptör eklenir |
+| **Voyage AI `voyage-4-lite`** | 1024 | ~$0.02; **ilk 200M token ücretsiz** | Çok dilli olarak tanıtılıyor | Anthropic'in önerdiği sağlayıcı. Anahtar MongoDB Atlas'tan alınır; ödeme yöntemi eklenmezse hız limiti düşük olabilir. OpenAI uyumlu uç nokta üzerinden denenir; uyumsuzluk çıkarsa küçük bir adaptör eklenir |
 | Google `gemini-embedding-001` | 3072 (küçültülebilir) | Ücretsiz katman var | — | Ücretsiz katmanda kota düşük, 429 hataları bildiriliyor. Yedek seçenek |
 
 Bizim ölçeğimizde (birkaç yüz sayfa) **hepsi pratikte bedava**: Tüm proje boyunca 1–2 milyon token'ı geçmemesi beklenir, yani adayların hepsi < $0.05 tutar. Bu yüzden seçimi fiyat değil **Türkçe arama kalitesi** belirler.
@@ -68,10 +68,10 @@ Bizim ölçeğimizde (birkaç yüz sayfa) **hepsi pratikte bedava**: Tüm proje 
 Fazla abartmadan, 3 aday tek bir küçük betikle denenir:
 
 1. **Adaylar:** OpenAI `text-embedding-3-small`, `bge-m3`, `voyage-4-lite`.
-2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve 20 soru (test-strategy § 6).
+2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve ~21 soru; kişi başı 5 sayfa + 7 soru (test-strategy § 6).
 3. **Betik:** `eval/compare_embeddings.py`. Qdrant gerekmez; parçaları her modelle embed edip kosinüs benzerliğini bellekte hesaplar.
 4. **Ölçüt:** Hit@5 ve MRR. Fark %5'ten azsa **en basit olan** seçilir (ek adaptör gerektirmeyen).
-5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2–3; ekip birlikte yapar (her üye bir adayı dener).
+5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2; ekip birlikte yapar (her üye bir adayı dener).
 6. Sonuç tablosu README'ye ve bu ADR'ye yazılır. Bu tablo sunumda da "veriye dayalı karar" örneği olur.
 
 ### Açık karar (ekip)

@@ -15,7 +15,7 @@
 - Kısa, Türkçe, akılda kalıcı, telaffuzu kolay; repo adı olarak da sorunsuz (`kovan`, ASCII).
 - "Notion" gibi başka bir ürünün marka adını kullanmıyoruz; klon olduğumuzu dokümanda söylüyoruz ama kendi adımız var.
 
-İsim kesin değil; ekip daha iyisini bulursa değiştirilebilir (sadece doküman ve repo adı etkilenir).
+İsim kesinleşti: Repo `sari-takim-kovan`, Python paketi `kovan`.
 
 ## 1. Tek cümlede
 
@@ -82,7 +82,7 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 | F-21 | **"Sayfalarına Sor" sohbeti** (RAG): soruya kullanıcının kendi notlarından cevap ve **tıklanabilir kaynak** | 🟥 Must |
 | F-22 | Notlarda bilgi yoksa **uydurmama**: "bulamadım" cevabı | 🟥 Must |
 | F-23 | Yapay zeka servisi kapalıysa çökmeme: anlaşılır hata mesajı, indekslemenin sonra yeniden denenmesi | 🟥 Must |
-| F-24 | Yapay zeka **token kullanımının** loglanması ve maliyet özeti (Bölüm 16) | 🟧 Should |
+| F-24 | Yapay zeka **token kullanımının** loglanması ve maliyet özeti (ders Bölüm 16) | 🟧 Should |
 | F-25 | **Sohbet geçmişi**: önceki soru-cevapların saklanması ve tekrar açılması | 🟧 Should |
 | F-26 | **MCP Server**: Claude Code / Copilot gibi bir asistanın Kovan'daki sayfalarda arama yapabilmesi (sadece okuma) | 🟧 Should |
 | F-27 | **Hibrit arama**: kelime + anlamsal sonuçların birleştirilmesi | 🟨 Could |
@@ -134,7 +134,7 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 | --- | --- |
 | Kod kalitesi | SonarQube Cloud'da güvenilirlik, güvenlik ve bakım kolaylığı **A** |
 | Test | Backend satır kapsamı ≥ %80, her Must kabul kriterine en az bir test |
-| Arama kalitesi | 20 soruluk değerlendirme setinde doğru sayfanın ilk 5 sonuçta olma oranı ≥ %80 |
+| Arama kalitesi | ~21 soruluk (kişi başı 7) değerlendirme setinde doğru sayfanın ilk 5 sonuçta olma oranı ≥ %80 |
 | Güvenlik | Bir kullanıcı başka kullanıcının içeriğine hiçbir yoldan (sayfa, arama, sohbet) erişemez; testle kanıtlı |
 | Mimari | Katman kuralları import-linter ile CI'da otomatik denetlenir |
 
@@ -147,7 +147,7 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 | Proje | ✅ P0007 – Notion klonu + anlamsal arama |
 | Teslim | ✅ **25 Aralık 2026**; kod dondurma **13 Aralık** |
 | Toplantılar | ✅ Hafta sonu |
-| Repo | ✅ **Public**, adı önerisi **`sari-takim-kovan`** (SonarQube Cloud ücretsiz, hoca takip edebilir) |
+| Repo | ✅ **Public**, adı **`sari-takim-kovan`** (SonarQube Cloud ücretsiz, hoca takip edebilir) |
 | Takım adı | ✅ **Sarı Takım** (hocanın verdiği ad) |
 | Dil modeli | ✅ **Bulut API** (Claude / GPT / Gemini); yerel model zorunlu değil |
 | Çöp kutusu | ✅ Ekranı **Should**; silme Must |
@@ -156,6 +156,6 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 
 - [ ] **Sohbet modeli ve sağlayıcı**: Claude mı, GPT mi, Gemini mi? Fiyat karşılaştırması [ADR-006](docs/adr/ADR-006-llm-saglayici.md)'da. Kod hepsini destekleyecek; yalnızca `.env` değişir.
 - [ ] **Embedding sağlayıcısı**: Claude'un embedding modeli yok. OpenAI `text-embedding-3-small`, BAAI `bge-m3` ve Voyage `voyage-4-lite` Sprint 2'de Türkçe notlarla küçük bir karşılaştırmayla denenip en iyisi seçilecek (ADR-006).
-- [ ] API anahtarlarının yönetimi: Sağlayıcı panelinde ortak bir organizasyon/proje, harcama limiti, herkesin kendi anahtarı (KURALLAR § 8).
+- [x] API anahtarlarının yönetimi: Sağlayıcı panelinde ortak bir organizasyon/proje, harcama limiti, herkesin kendi anahtarı (KURALLAR § 8). *Panel kurulumu, sağlayıcı seçilince yapılır.*
 - [x] İş paketlerinin kişilere dağıtımı: eşit dağıtıldı ([docs/PLAN.md](docs/PLAN.md) § 3).
-- [ ] İsim "Kovan" kalsın mı?
+- [x] İsim: **Kovan** (kesinleşti; repo `sari-takim-kovan`, Python paketi `kovan`).

@@ -49,7 +49,7 @@ Tüm kimlikler **UUID v4** (Qdrant nokta kimlikleri hariç, bkz. Chunk). Tüm za
 | `parent_id` | UUID? | Üst sayfa; `null` ise kök sayfa | `null` | R-04, R-05 |
 | `title` | Text | Sayfa başlığı | `Veritabanı` | R-03 |
 | `content` | [PageContent](#4-pagecontent-value-object) | Blok içerik | `[{type:"heading",…}]` | R-06 |
-| `plain_text` | Text | İçerikten türetilen düz metin (kelime araması ve parçalama için) | `Normalizasyon …` | Sadece sistem yazar |
+| `plain_text` | Text | İçerikten türetilen düz metin (kelime araması için) | `Normalizasyon …` | Sadece sistem yazar |
 | `version` | Integer | İyimser kilitleme sürümü; içerik/görünürlük her değiştiğinde +1 | `7` | R-07, R-10 |
 | `deleted_at` | Timestamp? | Silinme (çöpe atılma) zamanı | `null` | R-08 |
 | `indexed_version` | Integer? | Qdrant'a en son işlenen sürüm | `7` | R-10 |
@@ -62,7 +62,7 @@ Tüm kimlikler **UUID v4** (Qdrant nokta kimlikleri hariç, bkz. Chunk). Tüm za
 - `index_status`: `INDEXED` (`indexed_version = version`), `FAILED` (`index_attempts ≥ 5`), aksi halde `PENDING`
 - `breadcrumbs` (üst sayfa zinciri), `has_children`
 
-Kardeş sayfalar **başlığa göre alfabetik** sıralanır; elle sıralama yoktur (Won't).
+Kardeş sayfalar **başlığa göre alfabetik** sıralanır; elle sıralama yoktur (Won't). Ç, Ğ, İ, Ö, Ş, Ü harflerinin Türkçe sırada olması için PostgreSQL'in ICU harmanlaması kullanılır (`ORDER BY title COLLATE "tr-x-icu"`).
 
 ## 4. PageContent *(Value Object)*
 
@@ -77,9 +77,11 @@ BlockNote editörünün ürettiği blok dizisi. Değişmezdir; doğrulama oluşt
 > Frontend'deki BlockNote şeması **aynı blok listesiyle** yapılandırılır (ADR-007). Böylece kullanıcı editörde backend'in reddedeceği bir blok (tablo, görsel vb.) ekleyemez.
 
 Davranışlar (saf fonksiyonlar, birim testli):
-- `to_plain_text()` → kelime araması ve parçalama için düz metin
+- `to_plain_text()` → kelime araması için düz metin
 - `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (PageLink üretimi)
 - `to_sections()` → başlık hiyerarşisine göre bölümler (parçalama, ADR-009)
+
+> **Not:** `to_sections()` parçalama (ADR-009) tarafından kullanılır ve onunla birlikte yazılır.
 
 ## 5. PageLink *(Entity)*
 
@@ -140,8 +142,8 @@ Must aşamasında sohbet **durumsuzdur** (her soru bağımsız). Sohbet geçmiş
 | **R-07** | Güncelleme, istemcinin gönderdiği `version` güncel sürüme eşitse yapılır (iyimser kilitleme). | `Page.update` | 409 | Must |
 | **R-08** | Silinen sayfa **alt sayfalarıyla birlikte** silinmiş işaretlenir; ağaçta, aramada, sohbette ve geri bağlantılarda görünmez. (Should: çöp kutusundan geri alınınca hepsi geri gelir.) | `PageService.delete/restore` | — | Must |
 | **R-09** | Bağlantılar içerikten türetilir; yalnızca aynı kullanıcının sayfalarına verilebilir; sayfanın kendine verdiği bağlantı yok sayılır. | `LinkService` | Geçersiz hedef yok sayılır | Must |
-| **R-10** | İçeriği veya görünürlüğü değiştiren her işlem `version`'ı artırır ve sayfayı "indeksleme bekliyor" durumuna sokar (`indexed_version ≠ version`). İndeks, düzenleme **en az 10 sn durduktan sonra** güncellenir. | `PageService`, `IndexingService` | — | Must |
-| **R-11** | Başarısız indeksleme en fazla **5** kez denenir (bekleme: `5 × 2^deneme` sn). 5. başarısızlıkta durum `FAILED` olur; sayfa tekrar düzenlenince sayaç sıfırlanır. | `IndexingService` | — | Must |
+| **R-10** | İçeriği veya görünürlüğü değiştiren her işlem `version`'ı artırır ve sayfayı "indeksleme bekliyor" durumuna sokar (`indexed_version IS DISTINCT FROM version`; hiç indekslenmemiş sayfada `indexed_version` NULL'dır). İndeks, düzenleme **en az 10 sn durduktan sonra** güncellenir. | `PageService`, `IndexingService` | — | Must |
+| **R-11** | Başarısız indeksleme en fazla **5** kez denenir (bekleme: `5 × 2^n` sn, n = o ana kadarki başarısız deneme sayısı → 5, 10, 20, 40 sn). 5. başarısızlıkta durum `FAILED` olur; sayfa tekrar düzenlenince sayaç ve bekleme sıfırlanır. | `IndexingService` | — | Must |
 | **R-12** | Her arama ve vektör sorgusu kullanıcının `owner_id`'si ile filtrelenir. | `SearchService`, `VectorIndex` | — | Must |
 | **R-13** | Sohbet cevabı yalnızca getirilen parçalara dayanır ve kaynak gösterir; eşik üstü parça yoksa dil modeli **çağrılmadan** "bulamadım" cevabı verilir. | `ChatService` | — | Must |
 

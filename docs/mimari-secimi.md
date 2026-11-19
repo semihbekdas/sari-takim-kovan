@@ -37,7 +37,7 @@ Buradan çıkardığımız sonuç: Puanı getiren şey mimarinin "gösterişli" 
 
 | Seviye | Soru | Örnekler |
 | --- | --- | --- |
-| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (Bölüm 7) |
+| **Sistem mimarisi stili** | Uygulama kaç parçadan oluşuyor, parçalar nasıl haberleşiyor, nasıl dağıtılıyor? | Katmanlı monolit, mikroservis, event-driven, service-based … (ders Bölüm 7) |
 | **Uygulama içi yapı** | Kod içeride nasıl bölünüyor, bağımlılıklar hangi yöne akıyor? | N-katman, Clean Architecture, Hexagonal, Vertical Slice … |
 
 ## 3. Kararı belirleyen girdiler (bizim bağlamımız)
@@ -68,7 +68,7 @@ Dersteki Richards & Ford tablosundaki 8 stilin bizim için değerlendirmesi:
 | **Event-Driven** | Bileşenler olaylar ve broker üzerinden asenkron haberleşir | Basitlik ★. Tek asenkron işimiz (indeksleme) için broker gereksiz | ❌ |
 | **Space-Based** | Bellek içi veri ızgarası, çok yüksek ölçek | Gereksiz | ❌ |
 | **Service-Oriented (SOA)** | Kurumsal servis veriyolu ile orkestrasyon | Kurumsal ölçek | ❌ |
-| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
+| **Microservices** | Bağımsız dağıtılan küçük servisler | Basitlik ★, maliyet ★. Ders Bölüm 8: "gereksiz karmaşıklık borcu" | ❌ |
 
 Tablodan bize önemli satırlar:
 
@@ -148,7 +148,7 @@ flowchart TB
 
 ## 7. Uyumu nasıl kanıtlayacağız?
 
-1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine:
+1. **import-linter** (CI'da zorunlu). `backend/pyproject.toml` içine (güncel hali o dosyadadır; dış kütüphaneler bağımlılık olarak eklendikçe yasak listesine girer):
 
 ```toml
 [tool.importlinter]
@@ -175,7 +175,7 @@ forbidden_modules = ["kovan.infrastructure"]
 name = "İç katmanlar framework ve dış kütüphanelerden bağımsız"
 type = "forbidden"
 source_modules = ["kovan.domain", "kovan.application"]
-forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "qdrant_client", "openai", "anthropic"]
+forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "structlog", "qdrant_client", "openai", "anthropic"]
 ```
 
 2. **Review kontrol listesi:** "Yeni kod doğru katmanda mı? Router'da iş kuralı var mı?"

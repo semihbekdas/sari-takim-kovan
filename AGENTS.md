@@ -11,7 +11,7 @@ Bu dosya Claude Code, Codex, GitHub Copilot vb. kodlama ajanlarına bu projede n
 
 ## Teknoloji
 
-- Backend: Python 3.12, FastAPI, Pydantic v2 (yalnızca `api` katmanında), SQLAlchemy 2.x **Core** (ORM değil) + Alembic, PostgreSQL, Qdrant, resmi `anthropic` ve `openai` SDK'ları, structlog
+- Backend: Python 3.12, FastAPI, Pydantic v2 (API şemaları ve `config.py`; `domain`/`application`'da yasak), SQLAlchemy 2.x **Core** (ORM değil) + Alembic, PostgreSQL, Qdrant, resmi `anthropic` ve `openai` SDK'ları, structlog
 - Frontend: React + TypeScript (strict) + Vite, BlockNote (kısıtlı şema), React Router, TanStack Query
 - Test: pytest, Testcontainers, Vitest; kalite: ruff, mypy, import-linter, eslint, SonarQube Cloud
 
@@ -26,7 +26,7 @@ backend/src/kovan/
   main.py          # composition root: adaptörlerin seçilip bağlandığı tek yer
 ```
 
-- Bağımlılık yönü: `api → application → domain`, `infrastructure → application/domain`. `domain` ve `application` hiçbir zaman `infrastructure`, `api`, `fastapi`, `pydantic`, `sqlalchemy`, `qdrant_client`, `openai`, `anthropic` import etmez (import-linter denetler).
+- Bağımlılık yönü: `api → application → domain`, `infrastructure → application/domain`. `domain` ve `application` hiçbir zaman `infrastructure`, `api`, `fastapi`, `pydantic`, `sqlalchemy`, `structlog`, `qdrant_client`, `openai`, `anthropic` import etmez (import-linter denetler; güncel liste `backend/pyproject.toml`).
 - Domain kuralı ihlalleri `DomainRuleError(rule_code="R-xx", ...)` ile bildirilir; kural kodları `docs/domain-design.md § 8`'de.
 - Her veri erişimi `owner_id` ile filtrelenir. Qdrant sorgularında `owner_id` filtresi **zorunlu** (R-12).
 - Sayfanın içeriğini veya görünürlüğünü değiştiren her işlem `version`'ı artırır ve indeksleme alanlarını sıfırlar (R-10, ADR-005). Kayıt isteği içinde yapay zeka API'si **çağrılmaz**.
@@ -46,14 +46,14 @@ backend/src/kovan/
 
 - Her davranış değişikliği testle gelir. Testler ilgili kabul kriterini işaretler: `@pytest.mark.ac("AC-xx.y")`.
 - Domain/application için birim test; repository, Qdrant, indeksleme döngüsü ve API için Testcontainers ile entegrasyon/kabul testi.
-- Testler **gerçek yapay zeka API'si çağırmaz**: `FakeEmbeddingProvider`, `FakeChatModel`, `FailingProvider` kullanılır.
+- Testler **gerçek yapay zeka API'si çağırmaz**: `FakeEmbeddingProvider` ve `FakeChatModel` (`infrastructure/ai/fake.py`) kullanılır; hata senaryoları için testte `ExternalServiceError` fırlatan küçük bir fake yazılır. Test ayarları `tests/fakes.py`'deki `make_test_settings()` ile kurulur (geliştiricinin `.env` dosyası okunmaz).
 - Assert'siz test yazma, test silme/atlama, coverage'tan dosya hariç tutma **yasak**.
 
 ## Çalışma biçimi
 
 - Değişiklikleri küçük tut (bir PR ≈ tek iş, ≤ 400 satır). Kullanıcı istemedikçe birden fazla özelliği aynı anda yazma.
 - Davranış değişirse ilgili dokümanı da güncelle.
-- **Commit veya push yapma.** Değişiklikleri kullanıcı inceler ve kendi hesabından commit'ler. Commit tarihleriyle asla oynama.
+- **Kullanıcı açıkça istemedikçe commit veya push yapma.** Commit her zaman kullanıcının kendi hesabıyla atılır; değişiklikleri kullanıcı inceler. Commit tarihleriyle asla oynama, push'lanmış geçmişi yeniden yazma.
 - İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, `docs/ai-log.md`'ye ne yazılmalı.
 
 ## Komutlar
@@ -65,5 +65,5 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy                               # strict tip kontrolü
 uv run lint-imports                       # mimari kontrol
 uv run uvicorn kovan.main:create_app --factory --reload
-cd frontend && npm test && npm run lint   # (frontend iskeleti gelince)
+cd ../frontend && npm test && npm run lint   # (frontend iskeleti gelince)
 ```
