@@ -81,6 +81,8 @@ Davranışlar (saf fonksiyonlar, birim testli):
 - `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (PageLink üretimi)
 - `to_sections()` → başlık hiyerarşisine göre bölümler (parçalama, ADR-009)
 
+> **Not:** `to_sections()` parçalama (ADR-009) tarafından kullanılır ve onunla birlikte yazılır.
+
 ## 5. PageLink *(Entity)*
 
 Sayfalar arası bağlantı. **Elle oluşturulmaz**; sayfa her kaydedildiğinde içerikteki `pageMention`'lardan yeniden türetilir (R-09).
