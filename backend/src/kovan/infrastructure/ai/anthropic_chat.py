@@ -20,7 +20,11 @@ Effort = Literal["low", "medium", "high", "xhigh", "max"]
 # "default", yedek desteklemeyen modellerde yok sayılır (hata vermez).
 _FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
-_FINISH_REASONS: dict[str, FinishReason] = {"max_tokens": "length", "refusal": "refusal"}
+_FINISH_REASONS: dict[str, FinishReason] = {
+    "max_tokens": "length",
+    "model_context_window_exceeded": "length",  # bağlam penceresi doldu, cevap kesildi
+    "refusal": "refusal",
+}
 
 _ERROR_REASONS: tuple[tuple[type[Exception], str], ...] = (
     (anthropic.APITimeoutError, "timeout"),

@@ -1,7 +1,7 @@
 """OpenAI uyumlu API adaptörleri (ADR-006).
 
-Resmi `openai` SDK'sı `base_url` ile OpenAI, Google Gemini (OpenAI uyumlu uç nokta),
-OpenRouter (ör. BAAI bge-m3) veya yerel LM Studio/Ollama'ya bağlanabilir.
+Resmi `openai` SDK'sı `base_url` ile OpenAI, Google Gemini (OpenAI uyumlu uç nokta) veya
+OpenRouter'a (ör. BAAI bge-m3) bağlanır. Yerel modeller kullanılmaz (ADR-006).
 """
 
 from collections.abc import Sequence
@@ -87,13 +87,19 @@ class OpenAICompatibleChatModel:
         except openai.APIError as error:
             raise to_external_error(error, provider="openai", reasons=_ERROR_REASONS) from error
 
-        choice = response.choices[0]
         usage = response.usage
+        input_tokens = usage.prompt_tokens if usage else 0
+        output_tokens = usage.completion_tokens if usage else 0
+        # Gemini güvenlik nedeniyle engellediğinde cevap seçeneği veya mesaj hiç gelmeyebilir.
+        choice = response.choices[0] if response.choices else None
+        message = getattr(choice, "message", None)
+        if choice is None or message is None:
+            return ChatCompletion("", response.model, input_tokens, 0, finish_reason="refusal")
         return ChatCompletion(
-            text=choice.message.content or "",
+            text=message.content or "",
             model=response.model,
-            input_tokens=usage.prompt_tokens if usage else 0,
-            output_tokens=usage.completion_tokens if usage else 0,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
             finish_reason=_FINISH_REASONS.get(choice.finish_reason, "stop"),
         )
 

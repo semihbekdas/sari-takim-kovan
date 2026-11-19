@@ -84,7 +84,8 @@ def test_effort_is_omitted_when_not_configured() -> None:
 
 
 @pytest.mark.parametrize(
-    ("stop_reason", "expected"), [("refusal", "refusal"), ("max_tokens", "length")]
+    ("stop_reason", "expected"),
+    [("refusal", "refusal"), ("max_tokens", "length"), ("model_context_window_exceeded", "length")],
 )
 def test_stop_reason_is_mapped(stop_reason: str, expected: str) -> None:
     completion = _ask(_model(lambda _: _message_response("", stop_reason)))

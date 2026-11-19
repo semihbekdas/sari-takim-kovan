@@ -10,6 +10,7 @@ import pytest
 
 from kovan.application.errors import ExternalServiceError
 from kovan.application.ports.ai import ChatMessage
+from kovan.infrastructure.ai.errors import AI_SERVICE_MESSAGE
 from kovan.infrastructure.ai.openai_compatible import (
     OpenAICompatibleChatModel,
     OpenAICompatibleEmbeddingProvider,
@@ -129,6 +130,27 @@ def test_chat_sends_system_first_and_maps_the_answer(finish: str, expected: str)
     assert completion.finish_reason == expected
 
 
+@pytest.mark.parametrize(
+    "choices",
+    [[], [{"index": 0, "finish_reason": "content_filter"}]],
+    ids=["secenek-yok", "mesaj-yok"],
+)
+def test_blocked_answer_without_choice_or_message_is_a_refusal(choices: list[Any]) -> None:
+    body = {
+        "id": "c1",
+        "object": "chat.completion",
+        "created": 0,
+        "model": "gemini",
+        "choices": choices,
+    }
+    model = OpenAICompatibleChatModel(_client(lambda _: httpx2.Response(200, json=body)), model="g")
+
+    completion = model.complete(system="s", messages=[ChatMessage("user", "?")], max_tokens=10)
+
+    assert (completion.text, completion.finish_reason) == ("", "refusal")
+
+
+@pytest.mark.ac("AC-10.5")
 def test_server_error_becomes_external_service_error() -> None:
     provider = OpenAICompatibleEmbeddingProvider(
         _client(lambda _: httpx2.Response(503, json={"error": {"message": "kapalı"}})),
@@ -140,3 +162,4 @@ def test_server_error_becomes_external_service_error() -> None:
         provider.embed(["metin"])
 
     assert error.value.code == "AI_SERVICE_UNAVAILABLE"
+    assert error.value.message == AI_SERVICE_MESSAGE

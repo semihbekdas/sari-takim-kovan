@@ -23,7 +23,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13. **Sağlayıcı ve model seçimi ekip t
 | Adaptör | Kütüphane | Kapsadığı sağlayıcılar |
 | --- | --- | --- |
 | `AnthropicChatModel` | Resmi `anthropic` Python SDK | Claude |
-| `OpenAICompatibleChatModel` | Resmi `openai` Python SDK + `base_url` | OpenAI (GPT), Google Gemini (OpenAI uyumlu uç nokta), istenirse yerel LM Studio/Ollama |
+| `OpenAICompatibleChatModel` | Resmi `openai` Python SDK + `base_url` | OpenAI (GPT), Google Gemini (OpenAI uyumlu uç nokta), OpenRouter (bge-m3) |
 | `OpenAICompatibleEmbeddingProvider` | Resmi `openai` Python SDK + `base_url` | OpenAI embedding, Gemini embedding, OpenRouter üzerinden BAAI `bge-m3` |
 | `FakeChatModel`, `FakeEmbeddingProvider` | — | Testler ve **fake çalışma modu** |
 
