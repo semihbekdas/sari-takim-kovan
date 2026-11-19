@@ -123,3 +123,16 @@
   5. Yorumlar gerçeği yansıtmıyordu: fabrikanın "composition root'tan çağrıldığı" yazıyordu ama henüz çağrılmıyor; port listesinde var olan `ai` "ileride" diye geçiyordu.
 - **Düzeltme:** Anahtarlar göreve göre adlandırıldı (`CHAT_API_KEY`, `EMBEDDING_API_KEY`), birinin yerine diğerine düşülmüyor. SDK yeniden denemesi 1'e indirildi. Fake düzeltmeleri ve yorumlar güncellendi. AC-11.5'in adaptör kısmı (zaman aşımında kullanıcıya giden mesaj) teste bağlandı. 56 test geçti.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-19 — PR #20 review'u: Codex'in 6 uyarısı ve Özlem'in review'u
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Yapay zekanın hataları (review yakaladı):**
+  1. Sohbet adresi boşken SDK'lar ortamdaki `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` değişkenini kullanıyordu; anahtar ve sorular Kovan'ın ayarlamadığı bir adrese gidebilirdi (Anthropic tarafını Codex söylemedi, denerken bulundu).
+  2. Gemini bir cevabı engellediğinde cevap seçeneği veya mesaj gelmeyebiliyor; kod bu durumda çöküyordu (500).
+  3. Claude'un "bağlam penceresi doldu" bitiş nedeni tam cevap gibi işaretleniyordu.
+  4. `EMBEDDING_DIM` gibi sayısal ayarlar 0 veya negatif olabiliyordu; hata ancak ilk kullanımda çıkıyordu.
+  5. Embedding hatası testi AC-10.5'e bağlı değildi.
+  6. Adaptör açıklaması, kullanmadığımız yerel modelleri (LM Studio/Ollama) destekliyormuş gibi yazıyordu.
+- **Düzeltme:** Adresler her zaman açıkça veriliyor. Engellenen cevap "reddetme", bağlam penceresi dolması "kesildi" sayılıyor. Sayısal ayarlar pozitif olmak zorunda. AC-10.5 etiketi ve kullanıcı mesajı testi eklendi. Yerel model iddiası kaldırıldı. Her biri için test eklendi; 62 test geçti.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
