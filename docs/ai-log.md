@@ -146,3 +146,14 @@
   6. Adaptör açıklaması, kullanmadığımız yerel modelleri (LM Studio/Ollama) destekliyormuş gibi yazıyordu.
 - **Düzeltme:** Adresler her zaman açıkça veriliyor. Engellenen cevap "reddetme", bağlam penceresi dolması "kesildi" sayılıyor. Sayısal ayarlar pozitif olmak zorunda. AC-10.5 etiketi ve kullanıcı mesajı testi eklendi. Yerel model iddiası kaldırıldı. Her biri için test eklendi; 62 test geçti.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+
+### 2026-11-20 — Umut: doküman okuma (#2)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** İP-A ile ilgili dokümanları (README, KURALLAR, PLAN, architecture, domain-design, ADR-003, ADR-004, ADR-007) okumak ve kendi işlerim (#3 docker-compose + Alembic, #4 frontend iskeleti) öncesi eksikleri görmek.
+- **Prompt (özet):** "Bana atanan issue'ları ve ilgili dokümanları anlat; ilk doküman PR'ım için adım adım yardım et."
+- **Sonuç:** İP-A kapsamı ve Sprint 1–2 işlerim netleşti. Dokümanlarda Alembic ve qdrant-client kullanılacağı yazıyor ama `backend/pyproject.toml`'da henüz bağımlılık olarak yoklar; bunlar #3'te eklenecek.
+- **Yapay zekanın hataları / eksikleri:** Önemli bir hata görmedim.
+- **Bizim müdahalemiz:** Okundu, doküman değişikliği yok. Eksik bağımlılıkları #3'ün yapılacaklar listesine aldım.
+- **Ders çıkarımı:** Kodlamaya başlamadan önce dokümanla repodaki mevcut durumu karşılaştırmak, hangi işin bende olduğunu netleştiriyor.
