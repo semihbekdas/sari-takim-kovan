@@ -1,0 +1,40 @@
+# Geliştirme için veritabanları (docs/architecture.md § 11, ADR-003, ADR-004).
+# Backend (uvicorn) ve frontend (vite) yerelde çalışır; burada yalnızca PostgreSQL ve Qdrant var.
+#
+#   docker compose up -d      başlat (arka planda)
+#   docker compose ps         durum (postgres "healthy", qdrant "Up" olmalı)
+#   docker compose down       durdur (veriler kalır)
+#   docker compose down -v    durdur ve verileri sil
+#
+# Şifre yalnızca yerel geliştirme içindir ve .env.example'daki DATABASE_URL ile aynıdır.
+# Portlar sadece 127.0.0.1'e açılır: aynı ağdaki başka bilgisayarlar bağlanamaz.
+
+services:
+  postgres:
+    image: postgres:16-alpine # Testcontainers testleriyle aynı sürüm
+    environment:
+      POSTGRES_USER: kovan
+      POSTGRES_PASSWORD: kovan_dev_password
+      POSTGRES_DB: kovan
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kovan -d kovan"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.20.0
+    ports:
+      - "127.0.0.1:6333:6333" # REST API + panel: http://localhost:6333/dashboard
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  qdrant_storage:
