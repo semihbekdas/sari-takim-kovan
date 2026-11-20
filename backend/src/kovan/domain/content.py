@@ -60,3 +60,21 @@ def check_inline(item: dict[str, Any]) -> None:
         scheme = urlsplit(str(item.get("href", ""))).scheme.lower()
         if scheme not in ALLOWED_LINK_SCHEMES:
             raise invalid_content("Bağlantılar yalnızca http veya https olabilir.")
+
+
+def to_plain_text(blocks: list[dict[str, Any]]) -> str:
+    lines: list[str] = []
+    for block in blocks:
+        lines.append(inline_text(block.get("content", [])))
+        lines.append(to_plain_text(block.get("children", [])))
+    return "\n".join(line for line in lines if line)
+
+
+def inline_text(items: list[dict[str, Any]]) -> str:
+    parts: list[str] = []
+    for item in items:
+        if item.get("type") == "text":
+            parts.append(str(item.get("text", "")))
+        elif item.get("type") == "link":
+            parts.append(inline_text(item.get("content", [])))
+    return "".join(parts)

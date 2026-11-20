@@ -1,6 +1,6 @@
 import pytest
 
-from kovan.domain.content import check_block, check_content
+from kovan.domain.content import check_block, check_content, to_plain_text
 from kovan.domain.errors import DomainRuleError
 
 
@@ -78,3 +78,39 @@ def test_content_larger_than_512_kb_is_rejected() -> None:
         check_content([{"type": "paragraph", "content": [big_text]}])
 
     assert error.value.rule_code == "R-06"
+
+
+def test_plain_text_joins_blocks_line_by_line() -> None:
+    link = {
+        "type": "link",
+        "href": "https://ornek.com",
+        "content": [{"type": "text", "text": "site"}],
+    }
+    text = to_plain_text(
+        [
+            {"type": "heading", "content": [{"type": "text", "text": "Başlık"}]},
+            {"type": "paragraph", "content": [{"type": "text", "text": "Bkz. "}, link]},
+        ]
+    )
+
+    assert text == "Başlık\nBkz. site"
+
+
+def test_plain_text_includes_children_and_skips_empty_blocks() -> None:
+    child = {"type": "bulletListItem", "content": [{"type": "text", "text": "alt madde"}]}
+    text = to_plain_text(
+        [
+            {
+                "type": "bulletListItem",
+                "content": [{"type": "text", "text": "madde"}],
+                "children": [child],
+            },
+            {"type": "paragraph", "content": []},
+        ]
+    )
+
+    assert text == "madde\nalt madde"
+
+
+def test_plain_text_of_empty_content_is_empty() -> None:
+    assert to_plain_text([]) == ""
