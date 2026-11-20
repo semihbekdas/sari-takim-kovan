@@ -110,3 +110,14 @@
 - **Kararlar:** Hatanın mesajı ve satırları loglarda kalıyor (teşhis için gerekli, istemciye hiç gitmiyor); asıl risk olan yerel değişkenler ve SQL parametreleri kaldırıldı.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** İnsan review'u ve otomatik review birlikte, yapay zekanın "çalışan ama güvensiz" yazdığı ayrıntıları yakaladı.
+
+### 2026-11-20 — Özlem: PageContent içerik doğrulama (#6)
+- **Kim:** Özlem
+- **Araç / model:** Claude (claude.ai projeleri, Claude Code)
+- **Amaç:** `domain/content.py`: R-06 içerik doğrulaması, `to_plain_text()` ve `mentioned_page_ids()`; birim testleri.
+- **Prompt (özet):** "Issue #6'yı küçük parçalara böl, her parçanın kodunu ve testini adım adım ver; kodu ben yazıp ben commit edeceğim."
+- **Sonuç:** 6 küçük commit, 22 birim testi (AC-04.4'ün domain kısmı). Kod Claude'un önerisi; dosyaları Özlem yazdı, testleri kendi bilgisayarında çalıştırıp commit etti.
+- **Yapay zekanın hataları / eksikleri:** İlk parçada dosya sonu satırını hesaba katmadığı için `ruff` 2 hata verdi. Bir taslak testte `mypy` tip hatası çıktı (paylaşılmadan önce düzeltildi). İlk adımlarda dosyanın tamamını her seferinde baştan yazdırdı.
+- **Bizim müdahalemiz:** `ruff format` ile hatayı düzelttim ve her commit öncesi çalıştırmayı alışkanlık yaptım. Dosyayı baştan yazmak yerine sadece eklenecek kısmın verilmesini istedim. Unuttuğum import satırlarını `ruff` ve test çıktısına bakarak düzelttim.
+- **Ders çıkarımı:** Commit'ten önce testleri, `ruff` ve `mypy`'yi yerelde çalıştırmak CI'da kırmızı görmeyi
+ önlüyor; işi küçük parçalara bölmek hem anlamayı hem commit takibini kolaylaştırıyor.
