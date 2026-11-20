@@ -1,6 +1,6 @@
 import pytest
 
-from kovan.domain.content import check_block
+from kovan.domain.content import check_block, check_content
 from kovan.domain.errors import DomainRuleError
 
 
@@ -54,3 +54,27 @@ def test_link_that_is_not_http_or_https_is_rejected(href: str) -> None:
     link = {"type": "link", "href": href, "content": []}
     with pytest.raises(DomainRuleError):
         check_block({"type": "paragraph", "content": [link]})
+
+
+def test_valid_nested_list_is_allowed() -> None:
+    child = {"type": "bulletListItem", "content": [{"type": "text", "text": "alt"}]}
+    check_content([{"type": "bulletListItem", "children": [child]}])
+
+
+@pytest.mark.ac("AC-04.4")
+def test_forbidden_block_inside_children_is_rejected() -> None:
+    with pytest.raises(DomainRuleError):
+        check_content([{"type": "paragraph", "children": [{"type": "table"}]}])
+
+
+def test_empty_content_is_allowed() -> None:
+    check_content([])
+
+
+@pytest.mark.ac("AC-04.4")
+def test_content_larger_than_512_kb_is_rejected() -> None:
+    big_text = {"type": "text", "text": "a" * (512 * 1024)}
+    with pytest.raises(DomainRuleError) as error:
+        check_content([{"type": "paragraph", "content": [big_text]}])
+
+    assert error.value.rule_code == "R-06"

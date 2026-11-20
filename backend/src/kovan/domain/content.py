@@ -1,5 +1,6 @@
 """Sayfa içeriği (PageContent) kuralları — docs/domain-design.md § 4, R-06."""
 
+import json
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -19,6 +20,7 @@ ALLOWED_BLOCK_TYPES = frozenset(
 ALLOWED_HEADING_LEVELS = frozenset({1, 2, 3})
 ALLOWED_INLINE_TYPES = frozenset({"text", "link", "pageMention"})
 ALLOWED_LINK_SCHEMES = frozenset({"http", "https"})
+MAX_CONTENT_BYTES = 512 * 1024
 
 
 def invalid_content(message: str) -> DomainRuleError:
@@ -35,6 +37,19 @@ def check_block(block: dict[str, Any]) -> None:
             raise invalid_content("Başlık seviyesi 1, 2 veya 3 olmalı.")
     for item in block.get("content", []):
         check_inline(item)
+    check_blocks(block.get("children", []))
+
+
+def check_blocks(blocks: list[dict[str, Any]]) -> None:
+    for block in blocks:
+        check_block(block)
+
+
+def check_content(blocks: list[dict[str, Any]]) -> None:
+    size = len(json.dumps(blocks, ensure_ascii=False).encode("utf-8"))
+    if size > MAX_CONTENT_BYTES:
+        raise invalid_content("İçerik 512 KB'tan büyük olamaz.")
+    check_blocks(blocks)
 
 
 def check_inline(item: dict[str, Any]) -> None:
