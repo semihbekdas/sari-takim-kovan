@@ -1,6 +1,7 @@
 """Sayfa içeriği (PageContent) kuralları — docs/domain-design.md § 4, R-06."""
 
 from typing import Any
+from urllib.parse import urlsplit
 
 from kovan.domain.errors import DomainRuleError
 
@@ -16,6 +17,8 @@ ALLOWED_BLOCK_TYPES = frozenset(
     }
 )
 ALLOWED_HEADING_LEVELS = frozenset({1, 2, 3})
+ALLOWED_INLINE_TYPES = frozenset({"text", "link", "pageMention"})
+ALLOWED_LINK_SCHEMES = frozenset({"http", "https"})
 
 
 def invalid_content(message: str) -> DomainRuleError:
@@ -30,3 +33,15 @@ def check_block(block: dict[str, Any]) -> None:
         level = block.get("props", {}).get("level")
         if level not in ALLOWED_HEADING_LEVELS:
             raise invalid_content("Başlık seviyesi 1, 2 veya 3 olmalı.")
+    for item in block.get("content", []):
+        check_inline(item)
+
+
+def check_inline(item: dict[str, Any]) -> None:
+    item_type = item.get("type")
+    if item_type not in ALLOWED_INLINE_TYPES:
+        raise invalid_content(f"İzin verilmeyen satır içi tür: {item_type}")
+    if item_type == "link":
+        scheme = urlsplit(str(item.get("href", ""))).scheme.lower()
+        if scheme not in ALLOWED_LINK_SCHEMES:
+            raise invalid_content("Bağlantılar yalnızca http veya https olabilir.")
