@@ -3,6 +3,7 @@
 import json
 from typing import Any
 from urllib.parse import urlsplit
+from uuid import UUID
 
 from kovan.domain.errors import DomainRuleError
 
@@ -78,3 +79,20 @@ def inline_text(items: list[dict[str, Any]]) -> str:
         elif item.get("type") == "link":
             parts.append(inline_text(item.get("content", [])))
     return "".join(parts)
+
+
+def mentioned_page_ids(blocks: list[dict[str, Any]]) -> set[UUID]:
+    ids: set[UUID] = set()
+    for block in blocks:
+        for item in block.get("content", []):
+            if item.get("type") == "pageMention":
+                ids.update(parse_page_id(item.get("props", {}).get("pageId")))
+        ids.update(mentioned_page_ids(block.get("children", [])))
+    return ids
+
+
+def parse_page_id(value: object) -> set[UUID]:
+    try:
+        return {UUID(str(value))}
+    except ValueError:
+        return set()  # Geçersiz kimlik yok sayılır (R-09).

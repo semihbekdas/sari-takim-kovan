@@ -1,6 +1,8 @@
+from uuid import UUID
+
 import pytest
 
-from kovan.domain.content import check_block, check_content, to_plain_text
+from kovan.domain.content import check_block, check_content, mentioned_page_ids, to_plain_text
 from kovan.domain.errors import DomainRuleError
 
 
@@ -114,3 +116,29 @@ def test_plain_text_includes_children_and_skips_empty_blocks() -> None:
 
 def test_plain_text_of_empty_content_is_empty() -> None:
     assert to_plain_text([]) == ""
+
+
+A_PAGE = "3f1c2b6e-8d4a-4c1e-9b2f-1a2b3c4d5e6f"
+B_PAGE = "9a2e7c10-5b3d-4f6a-8e9c-0d1e2f3a4b5c"
+
+
+def mention(page_id: str) -> dict[str, object]:
+    return {"type": "pageMention", "props": {"pageId": page_id}}
+
+
+def test_mentioned_page_ids_finds_mentions_in_blocks_and_children() -> None:
+    child = {"type": "bulletListItem", "content": [mention(B_PAGE)]}
+    ids = mentioned_page_ids(
+        [
+            {"type": "paragraph", "content": [mention(A_PAGE), mention(A_PAGE)]},
+            {"type": "bulletListItem", "content": [], "children": [child]},
+        ]
+    )
+
+    assert ids == {UUID(A_PAGE), UUID(B_PAGE)}
+
+
+def test_mentioned_page_ids_ignores_invalid_ids() -> None:
+    ids = mentioned_page_ids([{"type": "paragraph", "content": [mention("bozuk")]}])
+
+    assert ids == set()
