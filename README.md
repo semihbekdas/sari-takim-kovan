@@ -140,21 +140,21 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 ## 8. Kurulum ve Çalıştırma
 
-> Backend iskeleti hazır. `docker compose`, Alembic ve frontend adımları ilgili işler bitince geçerli olacak *(planlanan)*.
+> Backend iskeleti, `docker compose` (PostgreSQL + Qdrant) ve Alembic hazır. Frontend adımları ilgili iş bitince geçerli olacak *(planlanan)*.
 
-**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (entegrasyon testleri; `docker compose` gelince PostgreSQL ve Qdrant da Docker'da çalışır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
+**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (PostgreSQL ve Qdrant `docker compose` ile çalışır; entegrasyon testleri de Docker kullanır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
 
 ```bash
 git clone https://github.com/semihbekdas/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
-docker compose up -d                 # PostgreSQL + Qdrant (planlanan)
+docker compose up -d                 # PostgreSQL + Qdrant (durum: docker compose ps)
 
 cd backend
 uv sync                              # Python 3.12 yoksa uv kendisi indirir
-uv run alembic upgrade head          # (planlanan)
+uv run alembic upgrade head          # tabloları oluşturur/günceller
 uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
-# /api/v1/health/ready, veritabanına ulaşamazsa 503 döner (docker compose gelince 200)
+# /api/v1/health/ready: PostgreSQL çalışıyorsa 200, ulaşılamazsa 503
 
 cd ../frontend                       # (planlanan)
 npm install
