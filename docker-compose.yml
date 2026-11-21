@@ -2,7 +2,7 @@
 # Backend (uvicorn) ve frontend (vite) yerelde çalışır; burada yalnızca PostgreSQL ve Qdrant var.
 #
 #   docker compose up -d      başlat (arka planda)
-#   docker compose ps         durum (postgres "healthy", qdrant "Up" olmalı)
+#   docker compose ps         durum (ikisi de "healthy" olmalı)
 #   docker compose down       durdur (veriler kalır)
 #   docker compose down -v    durdur ve verileri sil
 #
@@ -28,11 +28,17 @@ services:
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:v1.20.0
+    image: qdrant/qdrant:v1.20.2
     ports:
       - "127.0.0.1:6333:6333" # REST API + panel: http://localhost:6333/dashboard
     volumes:
       - qdrant_storage:/qdrant/storage
+    healthcheck:
+      # İmajda curl yok; bash ile 6333 portunun cevap verip vermediğine bakılır.
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
 volumes:
