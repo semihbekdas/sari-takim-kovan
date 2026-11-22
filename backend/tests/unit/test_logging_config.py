@@ -2,9 +2,11 @@
 
 import json
 import logging
+import logging.config
 
 import pytest
 import structlog
+import uvicorn.config
 
 from kovan.logging_config import configure_logging
 
@@ -44,3 +46,19 @@ def test_library_logs_are_json_with_the_request_id(capsys: pytest.CaptureFixture
     assert record["event"] == "HTTP Request: POST https://api.example.test"
     assert record["request_id"] == "istek-1"
     assert (record["level"], record["logger"]) == ("info", "httpx")
+
+
+def test_uvicorn_logs_are_json_too(capsys: pytest.CaptureFixture[str]) -> None:
+    # `uv run uvicorn ...` uygulamayı yüklemeden önce kendi log ayarını kurar: `uvicorn` ve
+    # `uvicorn.access` logger'larına düz metin yazan handler'lar takar, kayıtları köke iletmez.
+    logging.config.dictConfig(uvicorn.config.LOGGING_CONFIG)
+    configure_logging("INFO")
+
+    logging.getLogger("uvicorn.error").info("Application startup complete.")
+    access = ("127.0.0.1:5000", "GET", "/health/live", "1.1", 200)
+    logging.getLogger("uvicorn.access").info('%s - "%s %s HTTP/%s" %d', *access)
+
+    output = capsys.readouterr()
+    records = [json.loads(line) for line in output.out.strip().splitlines()]
+    assert [record["logger"] for record in records] == ["uvicorn.error", "uvicorn.access"]
+    assert output.err == ""

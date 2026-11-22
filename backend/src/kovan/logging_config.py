@@ -1,7 +1,7 @@
 """Yapısal (JSON) loglama ayarı.
 
 Her log satırı tek satırlık JSON'dur ve istek içindeyken `request_id` taşır. Bu, hem kendi
-kodumuzun (structlog) hem de kütüphanelerin (ör. yapay zeka SDK'larının) standart `logging`
+kodumuzun (structlog) hem de kütüphanelerin (ör. yapay zeka SDK'ları, uvicorn) standart `logging`
 kayıtları için geçerlidir; böylece bütün loglar aynı biçimde okunur ve isteğe bağlanabilir.
 """
 
@@ -25,6 +25,10 @@ _RENDERERS: list[Processor] = [
     structlog.processors.JSONRenderer(ensure_ascii=False),
 ]
 
+# Uvicorn, uygulamayı yüklemeden önce bu logger'lara düz metin yazan kendi handler'larını takar
+# ve kayıtları köke iletmez (`propagate=False`). Handler'ları kaldırılıp kayıtlar köke iletilir.
+_UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
+
 
 def configure_logging(level: str) -> None:
     numeric_level = logging.getLevelNamesMapping()[level.upper()]
@@ -43,3 +47,7 @@ def configure_logging(level: str) -> None:
         )
     )
     logging.basicConfig(handlers=[handler], level=numeric_level, force=True)
+    for name in _UVICORN_LOGGERS:
+        uvicorn_logger = logging.getLogger(name)
+        uvicorn_logger.handlers.clear()
+        uvicorn_logger.propagate = True
