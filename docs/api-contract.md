@@ -87,7 +87,7 @@
 
 > Sabit yollar (`/pages/tree`, `/pages/recent`) router'da `/pages/{id}`'den **önce** tanımlanır; aksi halde FastAPI bunları sayfa kimliği sanıp 422 döner.
 
-> **`@` bağlantıları için ayrı bir uç nokta yoktur.** Bağlantının güncel başlığı ve `@` menüsündeki sayfa listesi, frontend'de zaten yüklü olan `/pages/tree` yanıtından bulunur. Ağaçta olmayan bir sayfa kimliği (silinmiş ya da başka kullanıcıya ait) "silinmiş sayfa" olarak gösterilir (AC-07.3); böylece başka kullanıcının sayfası hakkında bilgi sızmaz.
+> **`@` bağlantıları için ayrı bir uç nokta yoktur.** Bağlantının güncel başlığı ve `@` menüsündeki sayfa listesi, frontend'de zaten yüklü olan `/pages/tree` yanıtından bulunur. Ağaçta olmayan bir sayfa kimliği (silinmiş ya da başka kullanıcıya ait) "silinmiş sayfa" olarak gösterilir (AC-07.3); böylece başka kullanıcının sayfası hakkında bilgi sızmaz. **Bilinen sınır:** Ağaç en fazla 1000 sayfa döndürür; 1000'den fazla sayfası olan bir kullanıcıda ağacın dışında kalan sayfalara verilen bağlantılar da "silinmiş" görünür. Ders projesi ölçeğinde bu sınır kabul edildi; gerekirse kimliğe göre başlık soran bir uç nokta eklenir.
 
 ## Arama — `/search` 🟥
 
