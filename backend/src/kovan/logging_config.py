@@ -26,7 +26,7 @@ _RENDERERS: list[Processor] = [
 ]
 
 # Uvicorn, uygulamayı yüklemeden önce bu logger'lara düz metin yazan kendi handler'larını takar
-# ve kayıtları köke iletmez (`propagate=False`). Handler'ları kaldırılıp kayıtlar köke iletilir.
+# ve kayıtları köke iletmez (`propagate=False`).
 _UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
 
 
@@ -48,6 +48,16 @@ def configure_logging(level: str) -> None:
     )
     logging.basicConfig(handlers=[handler], level=numeric_level, force=True)
     for name in _UVICORN_LOGGERS:
-        uvicorn_logger = logging.getLogger(name)
-        uvicorn_logger.handlers.clear()
-        uvicorn_logger.propagate = True
+        _route_to_root(logging.getLogger(name))
+
+
+def _route_to_root(uvicorn_logger: logging.Logger) -> None:
+    """Uvicorn'un düz metin handler'larını kaldırır; kayıtlar köke, yani JSON handler'a gider.
+
+    Handler'ı olmayan logger'a dokunulmaz: `--no-access-log` erişim logunu handler'larını
+    kaldırıp köke iletmeyerek kapatır; köke bağlamak onu yeniden açardı.
+    """
+    if not uvicorn_logger.handlers:
+        return
+    uvicorn_logger.handlers.clear()
+    uvicorn_logger.propagate = True

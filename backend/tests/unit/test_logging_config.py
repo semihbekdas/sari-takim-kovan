@@ -2,11 +2,10 @@
 
 import json
 import logging
-import logging.config
 
 import pytest
 import structlog
-import uvicorn.config
+import uvicorn
 
 from kovan.logging_config import configure_logging
 
@@ -48,10 +47,17 @@ def test_library_logs_are_json_with_the_request_id(capsys: pytest.CaptureFixture
     assert (record["level"], record["logger"]) == ("info", "httpx")
 
 
+def _start_uvicorn_logging(*, access_log: bool = True) -> None:
+    """`uv run uvicorn ...` gibi, uygulama yüklenmeden önce uvicorn'un kendi log ayarını kurar.
+
+    Ayarı uvicorn'un `Config` sınıfı oluşturulurken uygular: `uvicorn` ve `uvicorn.access`
+    logger'larına düz metin yazan handler'lar takar ve kayıtları köke iletmez.
+    """
+    uvicorn.Config("kovan.main:create_app", factory=True, access_log=access_log)
+
+
 def test_uvicorn_logs_are_json_too(capsys: pytest.CaptureFixture[str]) -> None:
-    # `uv run uvicorn ...` uygulamayı yüklemeden önce kendi log ayarını kurar: `uvicorn` ve
-    # `uvicorn.access` logger'larına düz metin yazan handler'lar takar, kayıtları köke iletmez.
-    logging.config.dictConfig(uvicorn.config.LOGGING_CONFIG)
+    _start_uvicorn_logging()
     configure_logging("INFO")
 
     logging.getLogger("uvicorn.error").info("Application startup complete.")
@@ -62,3 +68,12 @@ def test_uvicorn_logs_are_json_too(capsys: pytest.CaptureFixture[str]) -> None:
     records = [json.loads(line) for line in output.out.strip().splitlines()]
     assert [record["logger"] for record in records] == ["uvicorn.error", "uvicorn.access"]
     assert output.err == ""
+
+
+def test_disabled_uvicorn_access_log_stays_disabled() -> None:
+    # `--no-access-log`: Uvicorn erişim logger'ının handler'larını kaldırır ve köke iletmez.
+    _start_uvicorn_logging(access_log=False)
+    configure_logging("INFO")
+
+    # Uvicorn, erişim logu yazıp yazmayacağına bu kontrolle karar verir.
+    assert not logging.getLogger("uvicorn.access").hasHandlers()
