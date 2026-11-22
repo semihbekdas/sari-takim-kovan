@@ -7,6 +7,8 @@
 
 Herkes **kendi dosyasına** yazar; böylece aynı anda açılan PR'lar bu dosyalarda çakışmaz. Yeni kayıt dosyanın **en altına** eklenir.
 
+Eski `docs/ai-log.md` yalnızca buraya yönlendiren kısa bir not olarak duruyor; ona kayıt eklenmez.
+
 | Dosya | İçerik |
 | --- | --- |
 | [ortak.md](ortak.md) | Projenin başlangıcındaki planlama oturumları ve ekip kararları |
