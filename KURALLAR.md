@@ -152,7 +152,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 - Üretilen kodu **satır satır oku**, çalıştır, testini gör. "Derleniyor" ≠ "doğru".
 - Ajanın `try/except: pass` ile hata gizlemesine, testleri silmesine/atlamasına, gereksiz bağımlılık eklemesine izin verme.
 - **Prompt'lara asla** şifre, API anahtarı, `.env` içeriği, kişisel veri yapıştırma (ders README'sindeki "Aman Dikkat" bölümü).
-- Önemli prompt'ları, yapay zekanın yaptığı hataları ve senin düzeltmelerini [`docs/ai-log.md`](docs/ai-log.md)'ye yaz. README'deki "Yapay Zeka Kullanımı" ve "Zorluklar" bölümleri buradan beslenir.
+- Önemli prompt'ları, yapay zekanın yaptığı hataları ve senin düzeltmelerini kendi dosyana yaz: [`docs/ai-log/<isim>.md`](docs/ai-log/README.md) (herkesin ayrı dosyası olduğu için PR'lar burada çakışmaz). README'deki "Yapay Zeka Kullanımı" ve "Zorluklar" bölümleri buradan beslenir.
 - PR açıklamasındaki "Yapay zeka kullanımı" bölümünü doldur.
 
 ---

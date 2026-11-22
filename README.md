@@ -136,7 +136,7 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 | Codex / GitHub Copilot | Kod üretimi ve editör içi tamamlama |
 | `AGENTS.md` / `CLAUDE.md` | Ajanların uyması gereken mimari, kod ve test kuralları |
 
-**Agentic Engineering yaklaşımı:** Yapay zekanın ürettiği her çıktı, commit'i atan kişi tarafından okunur, test edilir ve gerekirse düzeltilir. Önemli prompt'lar, yapay zekanın hataları ve düzeltmelerimiz **[docs/ai-log.md](docs/ai-log.md)** dosyasındadır.
+**Agentic Engineering yaklaşımı:** Yapay zekanın ürettiği her çıktı, commit'i atan kişi tarafından okunur, test edilir ve gerekirse düzeltilir. Önemli prompt'lar, yapay zekanın hataları ve düzeltmelerimiz **[docs/ai-log/](docs/ai-log/README.md)** klasöründedir (her üyenin ayrı dosyası var).
 
 ## 8. Kurulum ve Çalıştırma
 
@@ -197,7 +197,7 @@ cd ../frontend && npm test             # (planlanan)
 
 ## 11. Karşılaşılan Zorluklar ve Çözümler
 
-> Proje boyunca doldurulacak. Kaynak: [docs/ai-log.md](docs/ai-log.md) ve sprint değerlendirmeleri.
+> Proje boyunca doldurulacak. Kaynak: [docs/ai-log/](docs/ai-log/README.md) ve sprint değerlendirmeleri.
 
 | # | Zorluk | Çözüm | İlgili |
 | --- | --- | --- | --- |
@@ -213,7 +213,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | Kriter (ders rehberi) | Projede nasıl karşılanıyor | Kanıt |
 | --- | --- | --- |
 | **Takım:** yakın ağırlıkta katkı | 3 dengeli dikey iş paketi, herkes kendi modülünün sahibi, haftalık `git shortlog` kontrolü | [PLAN.md](docs/PLAN.md), GitHub Insights |
-| **Dil Modeli:** en az bir yapay zeka aracı, kullanımı belgelenmiş | Ürün içinde embedding + RAG (+ MCP); geliştirmede Claude Code / Codex / Copilot | § 7, [ai-log.md](docs/ai-log.md) |
+| **Dil Modeli:** en az bir yapay zeka aracı, kullanımı belgelenmiş | Ürün içinde embedding + RAG (+ MCP); geliştirmede Claude Code / Codex / Copilot | § 7, [ai-log](docs/ai-log/README.md) |
 | **Geliştirme Süreci:** GitHub, gerçekçi commit geçmişi, anlamlı mesajlar, ≥ 3 PR | Feature branch + PR + review, Conventional Commits, squash yok, haftalara yayılmış iş | [KURALLAR.md](KURALLAR.md), commit geçmişi |
 | **Teknik Borç:** A kalite, ölçüm aracı | SonarQube Cloud her PR'da | § 10, Sonar raporu |
 | **Güvenlik** | Kimlik doğrulama, yetkilendirme testleri, prompt injection önlemi, anahtar yönetimi | § 10, [architecture.md § 9](docs/architecture.md#9-güvenlik) |
@@ -253,7 +253,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | [docs/user-stories.md](docs/user-stories.md) | Kullanıcı hikayeleri ve kabul kriterleri (AC) |
 | [docs/test-strategy.md](docs/test-strategy.md) | Test stratejisi, izlenebilirlik matrisi, RAG değerlendirmesi |
 | [docs/adr/](docs/adr/) | Mimari karar kayıtları (ADR-001 … ADR-010) |
-| [docs/ai-log.md](docs/ai-log.md) | Yapay zeka kullanım günlüğü |
+| [docs/ai-log/](docs/ai-log/README.md) | Yapay zeka kullanım günlüğü (her üyenin ayrı dosyası) |
 
 ---
 
