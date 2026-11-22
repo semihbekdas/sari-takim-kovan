@@ -3,5 +3,6 @@
 Her alan kendi modülünde tanımlanır; böylece ekip üyeleri aynı dosyayı düzenlemez.
 Bir port, onu ilk kullanan özellikle birlikte eklenir (kullanılmayan kod commit'lenmez):
 - `system`: sağlık kontrolü (`ReadinessProbe`)
-- ileride: `users`, `pages`, `links`, `ai` (ADR-006), `vector` (ADR-004) …
+- `ai`: embedding ve sohbet modeli (`EmbeddingProvider`, `ChatModel`; ADR-006)
+- ileride: `users`, `pages`, `links`, `vector` (ADR-004) …
 """

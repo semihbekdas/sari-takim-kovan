@@ -53,7 +53,6 @@
 - **Bizim müdahalemiz:** Kararları ekip verdi: teslim 25 Aralık / hedef 20 Aralık, hafta sonu toplantıları, public repo, bulut dil modeli, çöp kutusunun Should olması, takım adı "Sarı Takım". ✍️ Dokümanları okuyunca yaptığınız ek düzeltmeleri buraya ekleyin.
 - **Ders çıkarımı:** Yapay zekanın ilk ürettiği tasarım "doğru ama fazla" olabiliyor. Kısıtları (süre, ekip, bütçe) açıkça verip çıktıyı aşırı mühendislik açısından ayrıca sorgulamak gerekiyor.
 
-
 ### 2026-11-16 — Backend iskeleti (İP-C altyapı payı)
 - **Kim:** Semih
 - **Araç / model:** Claude Code (Claude Opus 5.5)
@@ -86,6 +85,18 @@
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** Ölçüm aracı, yapay zekanın "çalışan ama güvensiz" yazdığı yapılandırmayı yakaladı (Bölüm 5 ve 18). README'deki "Zorluklar" tablosuna eklendi.
 
+### 2026-11-16 — Yapay zeka adaptörleri ve fake mod (İP-C)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** ADR-006'daki port'lar (`EmbeddingProvider`, `ChatModel`) ve adaptörleri: Claude (resmi `anthropic` SDK), OpenAI uyumlu API'ler (OpenAI, Gemini, OpenRouter/bge-m3) ve API anahtarı gerektirmeyen fake mod; ayarlara göre doğru adaptörü kuran fabrika.
+- **Sonuç:** `backend/src/kovan/infrastructure/ai/`, `application/ports/ai.py`. Adaptörler gerçek SDK'larla ama internete çıkmadan (sahte HTTP katmanı) test edildi; 44 test, kapsam %98.
+- **Kararlar:**
+  - Claude için modelin reddetmesi (refusal) durumunda sunucu taraflı yedek model (`fallbacks="default"`) açık; desteklemeyen modellerde yok sayılır.
+  - Claude'da düşünme kapatılamadığı için maliyet `CHAT_EFFORT=low` ile kontrol ediliyor; `CHAT_MAX_TOKENS` düşünme token'larını da kapsadığı için 800 → 4096 yapıldı.
+  - SDK sürümleri ezberden değil, kurulu paketin kaynak kodundan doğrulandı (`anthropic` 2.x, `openai` 3.x; ikisi de `httpx2` kullanıyor).
+- **Yapay zekanın hataları ve düzeltmeleri:** `.env`'de boş bırakılan `CHAT_EFFORT=` uygulamanın açılmasını engelleyecekti → boş değerler "ayarlanmamış" sayıldı, testi eklendi. Claude mesaj tipleri için mypy belirsizlik hatası → açık tiplerle düzeltildi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
 ### 2026-11-17 — Özlem: doküman okuma (#5)
 - **Kim:** Özlem
 - **Araç / model:** Claude (claude.ai, Claude Code)
@@ -96,7 +107,7 @@
 - **Bizim müdahalemiz:** Belirsizliği gidermek için metodun #13 (parçalama) ile birlikte yazılacağını belirten bir not eklenmesine karar verdim.
 - **Ders çıkarımı:** Görev kartı ile doküman arasında fark varsa kodlamaya başlamadan önce netleştirmek gerekir.
 
-  ### 2026-11-18 — PR #1 review'u: Codex'in 5 uyarısı ve Özlem'in sorusu
+### 2026-11-18 — PR #1 review'u: Codex'in 5 uyarısı ve Özlem'in sorusu
 - **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
 - **Araç / model:** Claude Code (Claude Opus 5.5)
 - **Ne oldu?** PR #1'e Codex otomatik review'u 5 uyarı bıraktı. Özlem review'unda, Docker yokken entegrasyon testinin atlanmasının KURALLAR § 5'teki "`skip` yasak" kuralıyla çeliştiğini sordu ve diğer uyarılara da bakılmasını istedi.
@@ -111,13 +122,37 @@
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 - **Ders çıkarımı:** İnsan review'u ve otomatik review birlikte, yapay zekanın "çalışan ama güvensiz" yazdığı ayrıntıları yakaladı.
 
+### 2026-11-18 — Yapay zeka adaptörleri: repo incelemesi bulguları
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5), beş ayrı alt ajanla repo incelemesi
+- **Yapay zekanın hataları (inceleme yakaladı):**
+  1. `EMBEDDING_API_KEY` boşken OpenAI anahtarı, `EMBEDDING_BASE_URL` başka bir sağlayıcıyı gösterse bile oraya gönderiliyordu.
+  2. SDK'ların varsayılan 2 yeniden denemesi yüzünden kullanıcı 503'ü ~90 sn sonra görebiliyordu.
+  3. Fake embedding "İ" harfini yanlış bölüyordu ("İndeksler" ile "indeksler" hiç benzemiyordu).
+  4. Fake sohbet modeli, uygulamanın fake modunda çağrı kaydını sınırsız büyütüyordu.
+  5. Yorumlar gerçeği yansıtmıyordu: fabrikanın "composition root'tan çağrıldığı" yazıyordu ama henüz çağrılmıyor; port listesinde var olan `ai` "ileride" diye geçiyordu.
+- **Düzeltme:** Anahtarlar göreve göre adlandırıldı (`CHAT_API_KEY`, `EMBEDDING_API_KEY`), birinin yerine diğerine düşülmüyor. SDK yeniden denemesi 1'e indirildi. Fake düzeltmeleri ve yorumlar güncellendi. AC-11.5'in adaptör kısmı (zaman aşımında kullanıcıya giden mesaj) teste bağlandı. 56 test geçti.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-19 — PR #20 review'u: Codex'in 6 uyarısı ve Özlem'in review'u
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Yapay zekanın hataları (review yakaladı):**
+  1. Sohbet adresi boşken SDK'lar ortamdaki `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` değişkenini kullanıyordu; anahtar ve sorular Kovan'ın ayarlamadığı bir adrese gidebilirdi (Anthropic tarafını Codex söylemedi, denerken bulundu).
+  2. Gemini bir cevabı engellediğinde cevap seçeneği veya mesaj gelmeyebiliyor; kod bu durumda çöküyordu (500).
+  3. Claude'un "bağlam penceresi doldu" bitiş nedeni tam cevap gibi işaretleniyordu.
+  4. `EMBEDDING_DIM` gibi sayısal ayarlar 0 veya negatif olabiliyordu; hata ancak ilk kullanımda çıkıyordu.
+  5. Embedding hatası testi AC-10.5'e bağlı değildi.
+  6. Adaptör açıklaması, kullanmadığımız yerel modelleri (LM Studio/Ollama) destekliyormuş gibi yazıyordu.
+- **Düzeltme:** Adresler her zaman açıkça veriliyor. Engellenen cevap "reddetme", bağlam penceresi dolması "kesildi" sayılıyor. Sayısal ayarlar pozitif olmak zorunda. AC-10.5 etiketi ve kullanıcı mesajı testi eklendi. Yerel model iddiası kaldırıldı. Her biri için test eklendi; 62 test geçti.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
 ### 2026-11-20 — Özlem: PageContent içerik doğrulama (#6)
 - **Kim:** Özlem
-- **Araç / model:** Claude (claude.ai projeleri, Claude Code)
+- **Araç / model:** Claude Code
 - **Amaç:** `domain/content.py`: R-06 içerik doğrulaması, `to_plain_text()` ve `mentioned_page_ids()`; birim testleri.
-- **Prompt (özet):** "Issue #6'yı küçük parçalara böl, her parçanın kodunu ve testini adım adım ver; kodu ben yazıp ben commit edeceğim."
-- **Sonuç:** 6 küçük commit, 22 birim testi (AC-04.4'ün domain kısmı). Kod Claude'un önerisi; dosyaları Özlem yazdı, testleri kendi bilgisayarında çalıştırıp commit etti.
-- **Yapay zekanın hataları / eksikleri:** İlk parçada dosya sonu satırını hesaba katmadığı için `ruff` 2 hata verdi. Bir taslak testte `mypy` tip hatası çıktı (paylaşılmadan önce düzeltildi). İlk adımlarda dosyanın tamamını her seferinde baştan yazdırdı.
-- **Bizim müdahalemiz:** `ruff format` ile hatayı düzelttim ve her commit öncesi çalıştırmayı alışkanlık yaptım. Dosyayı baştan yazmak yerine sadece eklenecek kısmın verilmesini istedim. Unuttuğum import satırlarını `ruff` ve test çıktısına bakarak düzelttim.
-- **Ders çıkarımı:** Commit'ten önce testleri, `ruff` ve `mypy`'yi yerelde çalıştırmak CI'da kırmızı görmeyi
- önlüyor; işi küçük parçalara bölmek hem anlamayı hem commit takibini kolaylaştırıyor.
+- **Prompt (özet):** "Issue #6'yı küçük parçalara böl, her parçanın kodunu ve testini adım adım birlikte yazalım."
+- **Sonuç:** PR #21. İş küçük commit'lere bölündü; testler her adımda yerelde çalıştırıldı.
+- **Yapay zekanın hataları / eksikleri:** İlk taslakta dosya sonu satırı eksikti (`ruff`). Bozuk şekilli girdi (ör. `props: null`) 500 veriyordu, link içeriği kontrol edilmiyordu, çok derin iç içe blok `RecursionError` veriyordu. "İzin verilir" testlerinde assert yoktu. Davranışlar sınıf yerine ayrı fonksiyonlardı.
+- **Bizim müdahalemiz:** `ruff format`'ı her commit öncesi çalıştırmayı alışkanlık yaptım. Review'da Umut ve Semih'in bulduklarını düzelttim: şekil kontrolü, link içeriği, iç içe sınırı (20, R-06'ya eklendi), assert'li testler ve `PageContent` değer nesnesi.
+- **Ders çıkarımı:** Bozuk girdi ve uç durumları ayrıca denemek gerekiyor. Görev kartındaki tasarımı (değer nesnesi) baştan izlemek sonradan yeniden yazmayı önlüyor.

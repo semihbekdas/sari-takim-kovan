@@ -10,6 +10,8 @@ dependencies = [
     "sqlalchemy>=2.0",
     "psycopg[binary]>=3.2",
     "structlog>=24.1",
+    "anthropic>=1.0",
+    "openai>=1.50",
 ]
 
 [dependency-groups]
@@ -103,9 +105,9 @@ type = "forbidden"
 source_modules = ["kovan.api"]
 forbidden_modules = ["kovan.infrastructure"]
 
-# Not: qdrant_client, openai ve anthropic bağımlılık olarak eklendiğinde bu listeye de eklenir.
+# Not: qdrant_client bağımlılık olarak eklendiğinde bu listeye de eklenir.
 [[tool.importlinter.contracts]]
 name = "İç katmanlar framework ve dış kütüphanelerden bağımsız"
 type = "forbidden"
 source_modules = ["kovan.domain", "kovan.application"]
-forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "structlog"]
+forbidden_modules = ["fastapi", "pydantic", "sqlalchemy", "structlog", "anthropic", "openai"]

@@ -13,8 +13,16 @@ def make_test_settings(**overrides: Any) -> Settings:
     """Testler için ayarlar: Geliştiricinin `.env` dosyası okunmaz (`_env_file=None`).
 
     Böylece gerçek API anahtarı olan bir makinede bile testler aynı, güvenli ayarlarla çalışır.
+    Ortam değişkenleri de okunduğu için yapay zeka ayarları açıkça "fake" ve anahtarsız verilir.
     """
-    values: dict[str, Any] = {"database_url": UNREACHABLE_DATABASE_URL, "log_level": "WARNING"}
+    values: dict[str, Any] = {
+        "database_url": UNREACHABLE_DATABASE_URL,
+        "log_level": "WARNING",
+        "chat_provider": "fake",
+        "embedding_provider": "fake",
+        "chat_api_key": None,
+        "embedding_api_key": None,
+    }
     values.update(overrides)
     return Settings(_env_file=None, **values)
 
