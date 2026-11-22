@@ -41,4 +41,4 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 
 **Değiş tokuşlar:**
 - Ders örneğine göre biraz daha fazla kod.
-- Parametre değişince tüm sayfaların yeniden indekslenmesi gerekir (`reindex --all`).
+- Parametre değişince tüm sayfaların yeniden indekslenmesi gerekir (ADR-005, "Kurtarma").

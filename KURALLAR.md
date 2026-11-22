@@ -92,7 +92,7 @@ Her hafta sonu toplantısında:
 ```bash
 git shortlog -sn --all --no-merges     # kişi başı commit sayısı
 ```
-GitHub → **Insights → Contributors** sayfasına da bakılır. Dengesizlik varsa bir sonraki haftanın iş dağılımı buna göre düzeltilir.
+GitHub → **Insights → Contributors** sayfasına da bakılır. Dengesizlik varsa bir sonraki haftanın iş dağılımı buna göre düzeltilir; ortak işlerde ve Should işlerinde öncelik commit'i az olan üyededir (PLAN § 4).
 
 ---
 
@@ -128,10 +128,10 @@ Ayrıntı: [`docs/architecture.md`](docs/architecture.md), [`docs/adr/`](docs/ad
 Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 
 - Her **Must** kabul kriteri (AC) en az bir teste bağlanır; Should işleri yapılırsa onların AC'leri de. Test, AC kimliğini taşır: `@pytest.mark.ac("AC-04.3")`.
-- Test türleri: **birim** (domain/application), **entegrasyon** (gerçek PostgreSQL + Qdrant, Testcontainers), **kabul** (API senaryoları); *(Should)* birkaç Playwright duman testi.
+- Test türleri: **birim** (domain/application), **entegrasyon** (gerçek PostgreSQL + Qdrant, Testcontainers), **kabul** (API senaryoları); *(Could)* birkaç Playwright duman testi.
 - Testler gerçek yapay zeka API'si çağırmaz; fake sağlayıcılar kullanılır.
 - Hata yolları da test edilir (geçersiz girdi, yetkisiz erişim, servis kapalı) — *negative path testing*.
-- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**. Tek istisna: Docker gerektiren entegrasyon testleri **yerelde** Docker kapalıysa atlanır; **CI'da Docker zorunludur**, yoksa test hata verir.
+- Assert içermeyen test, `skip` ile kapatılmış test, coverage'tan dosya hariç tutma **yasak**. Tek istisna: Docker gerektiren entegrasyon testleri **yerelde** Docker kapalıysa atlanır; **CI'da Docker zorunludur**, yoksa test hata verir. Sonar'ın kapsam koşulu yalnızca backend içindir: Frontend kodu analiz edilir ama kapsam hesabına girmez (ADR-010).
 - Yeni kod, mevcut testleri kırmadan gelir.
 
 ---
@@ -140,7 +140,7 @@ Ayrıntı: [`docs/test-strategy.md`](docs/test-strategy.md)
 
 - Davranış değiştiren her PR, ilgili dokümanı da günceller (`api-contract.md`, `domain-design.md`, `user-stories.md` …).
 - Geri dönülmesi zor her karar → `docs/adr/` altına yeni ADR (ders Bölüm 7).
-- `docs/PLAN.md` her hafta sonu toplantısında güncellenir (ilerleme + skor kartı).
+- `docs/PLAN.md` her hafta sonu toplantısında güncellenir (ilerleme tablosu).
 - `README.md` her sprint sonunda güncel tutulur.
 
 ---
@@ -193,7 +193,7 @@ Bir iş ancak şunların hepsi sağlanınca biter:
 | Ne zaman | Ne |
 | --- | --- |
 | **Hafta içi** | Küçük commit'ler, PR'lar, review'lar; takıldığın yeri ekip grubuna yaz |
-| **Hafta sonu toplantısı** (Cumartesi veya Pazar, ~45 dk) | 1) Geçen sprintin demosu: herkes kendi işini 5 dk gösterir · 2) **Kriter skor kartı** puanlaması ve `git shortlog` ile katkı kontrolü · 3) Yeni sprintin işleri ve sahipleri · 4) Hocaya sorulacak sorular · 5) `PLAN.md` güncellemesi |
+| **Hafta sonu toplantısı** (Cumartesi veya Pazar, ~45 dk) | 1) Geçen sprintin demosu: herkes kendi işini 5 dk gösterir · 2) Ders kriterleri tablosu (README § 12) üzerinden eksikler ve `git shortlog` ile katkı kontrolü · 3) Yeni sprintin işleri ve sahipleri · 4) Hocaya sorulacak sorular · 5) `PLAN.md` güncellemesi |
 
 ---
 

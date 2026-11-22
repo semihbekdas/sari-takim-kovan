@@ -8,7 +8,7 @@
 - Gövdeler **JSON**, alan adları `snake_case`. İstisna: `content` içindeki BlockNote blokları kendi biçiminde (camelCase alanlarla) olduğu gibi saklanır.
 - Kimlik doğrulama: `kovan_session` çerezi (`HttpOnly; SameSite=Strict; Path=/api`, prod'da `Secure`). Aksi belirtilmedikçe tüm uç noktalar oturum ister; yoksa **401**.
 - RESTful: oluşturma `POST`, tam güncelleme `PUT`, kısmi işlem `PATCH`, silme `DELETE` (hocanın lesson01 API standardı).
-- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`. İstisna: Boyutu üst sınırlı olan ağaç (≤ 1000), geri bağlantılar (≤ 100) ve başlıklar (≤ 100 kimlik) düz liste döner (`/pages/tree`, `/pages/{id}/backlinks`, `/pages/titles`).
+- Listeleme uç noktaları **sayfalıdır**: `?limit=20&offset=0` (limit ≤ 100). Yanıt: `{ "items": [...], "total": 57, "limit": 20, "offset": 0 }`. İstisna: Boyutu üst sınırlı olan ağaç (≤ 1000) ve *(Should)* geri bağlantılar (≤ 100) düz liste döner (`/pages/tree`, `/pages/{id}/backlinks`).
 - Başka kullanıcının kaynağı **404** döner (403 değil).
 - Her yanıtta `X-Request-ID` başlığı vardır.
 
@@ -62,8 +62,7 @@
 | GET | `/pages/{id}` | — | **200** `Page` | 404 | 🟥 US-03 |
 | PUT | `/pages/{id}` | `{title, content, version}` | **200** `Page` | 404, 409, 422 | 🟥 US-04 |
 | DELETE | `/pages/{id}` | — | **204** (sayfa + alt sayfalar silindi işaretlenir) | 404 | 🟥 US-06 |
-| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` (en fazla 100, en son düzenlenen önce) | 404 | 🟥 US-08 |
-| GET | `/pages/titles` | `?ids=…&ids=…` (tekrarlanan parametre, ≤ 100) | **200** `{id, title, deleted}[]` (bağlantı gösterimi için) | — | 🟥 US-07 |
+| GET | `/pages/{id}/backlinks` | — | **200** `PageSummary[]` (en fazla 100, en son düzenlenen önce) | 404 | 🟧 US-08 |
 | PATCH | `/pages/{id}/move` | `{parent_id: uuid \| null}` | **200** `Page` | 404, 422 | 🟧 US-05 |
 | GET | `/pages/recent` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-14 |
 | GET | `/trash` | `limit, offset` | **200** sayfalı `PageSummary` | — | 🟧 US-06 |
@@ -86,15 +85,15 @@
 { "id": "…", "title": "…", "breadcrumbs": [ … ], "updated_at": "…" }
 ```
 
-> Sabit yollar (`/pages/tree`, `/pages/titles`, `/pages/recent`) router'da `/pages/{id}`'den **önce** tanımlanır; aksi halde FastAPI bunları sayfa kimliği sanıp 422 döner.
+> Sabit yollar (`/pages/tree`, `/pages/recent`) router'da `/pages/{id}`'den **önce** tanımlanır; aksi halde FastAPI bunları sayfa kimliği sanıp 422 döner.
 
-> `/pages/titles`: Editördeki `@` bağlantılarının güncel başlığını ve silinmiş olup olmadığını göstermek için (AC-07.3). Kullanıcıya ait olmayan kimlikler `deleted: true` gibi davranır, bilgi sızdırılmaz.
+> **`@` bağlantıları için ayrı bir uç nokta yoktur.** Bağlantının güncel başlığı ve `@` menüsündeki sayfa listesi, frontend'de zaten yüklü olan `/pages/tree` yanıtından bulunur. Ağaçta olmayan bir sayfa kimliği (silinmiş ya da başka kullanıcıya ait) "silinmiş sayfa" olarak gösterilir (AC-07.3); böylece başka kullanıcının sayfası hakkında bilgi sızmaz.
 
 ## Arama — `/search` 🟥
 
 | Metot | Yol | Sorgu | Başarılı | Hatalar | Hikaye |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/search` | `q` (1–200 karakter), `mode=keyword\|semantic` (varsayılan `keyword`), `limit`, `offset` | **200** sayfalı `SearchResult` | 422, 503 (semantic) | US-09, US-10 |
+| GET | `/search` | `q` (1–200 karakter), `limit`, `offset` · Should: `mode=semantic\|keyword` (varsayılan `semantic`) | **200** sayfalı `SearchResult` | 422, 503 | US-10 · 🟧 US-09 |
 
 ```jsonc
 // SearchResult
@@ -103,8 +102,8 @@
   "score": 0.82 }
 ```
 
-- `keyword` modunda `heading_path` boştur (`null`) ve `score` PostgreSQL tam metin sıralama puanıdır.
-- `semantic` modunda en fazla 20 sonuç döner (`total` ≤ 20); `score` kosinüs benzerliğidir.
+- Arama **anlamsaldır**: En fazla 20 sonuç döner (`total` ≤ 20); `score` kosinüs benzerliğidir.
+- *(Should)* `mode=keyword`: `heading_path` boştur (`null`) ve `score` PostgreSQL tam metin sıralama puanıdır.
 
 ## Sohbet — `/chat`
 
@@ -132,10 +131,10 @@
 | GET | `/health` | Canlılık (oturum gerekmez) |
 | GET | `/health/ready` | PostgreSQL + Qdrant erişimi; biri erişilemezse **503** (oturum gerekmez) |
 
-## Yönetim (CLI, HTTP değil) *(planlanan)*
+## Yönetim (CLI, HTTP değil) *(Should)*
 
 ```bash
-uv run python -m kovan.cli reindex --all          # Qdrant'ı PostgreSQL'den baştan üret
-uv run python -m kovan.cli reindex --page <id>
 uv run python -m kovan.cli token-report           # Should: token kullanımı ve tahmini maliyet
 ```
+
+> Ayrı bir `reindex` komutu yoktur. Qdrant türetilmiş veridir; indeksin baştan üretilmesi iki adımdır: [ADR-005](adr/ADR-005-surum-isaretli-indeksleme.md), "Kurtarma".
