@@ -63,8 +63,11 @@ def test_content_does_not_change_when_input_list_changes() -> None:
 
 
 def test_contents_with_same_blocks_are_equal() -> None:
-    assert PageContent([{"type": "quote"}]) == PageContent([{"type": "quote"}])
-    assert PageContent([{"type": "quote"}]) != PageContent([])
+    first = PageContent([{"type": "quote"}])
+    second = PageContent([{"type": "quote"}])
+
+    assert first == second
+    assert first != PageContent([])
 
 
 # --- Reddedilen içerik (R-06) ---------------------------------------------
