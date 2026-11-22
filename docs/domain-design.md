@@ -138,7 +138,7 @@ Must aşamasında sohbet **durumsuzdur** (her soru bağımsız). Sohbet geçmiş
 | **R-03** | Başlık kırpıldıktan sonra en fazla 200 karakterdir; boşsa **"Adsız"** olur. | `Page` | 422 | Must |
 | **R-04** | Üst sayfa aynı kullanıcıya ait olmalı ve silinmiş olmamalıdır. | `PageService` | 404 | Must |
 | **R-05** | Hiyerarşide **döngü olamaz**: Bir sayfa kendi altına veya alt sayfalarından birinin altına taşınamaz. | `PageService.move` | 422 | Should (taşıma ile) |
-| **R-06** | İçerik yalnızca izin verilen blok ve satır içi türleri içerir; JSON boyutu ≤ **512 KB**. | `PageContent` | 422 | Must |
+| **R-06** | İçerik yalnızca izin verilen blok ve satır içi türleri içerir; JSON boyutu ≤ **512 KB**; bloklar en fazla **20** kat iç içe olabilir. | `PageContent` | 422 | Must |
 | **R-07** | Güncelleme, istemcinin gönderdiği `version` güncel sürüme eşitse yapılır (iyimser kilitleme). | `Page.update` | 409 | Must |
 | **R-08** | Silinen sayfa **alt sayfalarıyla birlikte** silinmiş işaretlenir; ağaçta, aramada, sohbette ve geri bağlantılarda görünmez. (Should: çöp kutusundan geri alınınca hepsi geri gelir.) | `PageService.delete/restore` | — | Must |
 | **R-09** | Bağlantılar içerikten türetilir; yalnızca aynı kullanıcının sayfalarına verilebilir; sayfanın kendine verdiği bağlantı yok sayılır. | `LinkService` | Geçersiz hedef yok sayılır | Must |
