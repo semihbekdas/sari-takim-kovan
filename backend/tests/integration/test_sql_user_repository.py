@@ -4,6 +4,7 @@ import uuid
 
 import pytest
 from sqlalchemy import Engine
+from sqlalchemy.exc import IntegrityError
 
 from kovan.domain.errors import ConflictError
 from kovan.infrastructure.db.users import SqlUserRepository
@@ -37,3 +38,13 @@ def test_add_with_taken_email_raises_email_taken(clean_users: Engine) -> None:
         add_user(repository, "ayse@ornek.com")
 
     assert error.value.code == "EMAIL_TAKEN"
+
+
+@pytest.mark.integration
+def test_other_integrity_errors_are_not_reported_as_email_taken(clean_users: Engine) -> None:
+    repository = SqlUserRepository(clean_users)
+    user_id = uuid.uuid4()
+    repository.add(user_id=user_id, email="a@ornek.com", display_name="Ayşe", password_hash="h")
+
+    with pytest.raises(IntegrityError):
+        repository.add(user_id=user_id, email="b@ornek.com", display_name="Ayşe", password_hash="h")
