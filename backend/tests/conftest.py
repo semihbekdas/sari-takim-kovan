@@ -4,11 +4,12 @@ import pytest
 from alembic import command
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine
+from sqlalchemy import Engine, delete
 from testcontainers.community.postgres import PostgresContainer
 
 from kovan.config import Settings
 from kovan.infrastructure.db.engine import create_db_engine
+from kovan.infrastructure.db.tables import users
 from kovan.main import create_app
 from tests.fakes import make_test_settings
 from tests.integration.containers import require_docker
@@ -54,3 +55,11 @@ def db_engine(postgres_url: str) -> Iterator[Engine]:
         yield engine
     finally:
         engine.dispose()
+
+
+@pytest.fixture
+def clean_users(db_engine: Engine) -> Engine:
+    """Testten önce `users` tablosunu boşaltır; böylece testler birbirini etkilemez."""
+    with db_engine.begin() as connection:
+        connection.execute(delete(users))
+    return db_engine

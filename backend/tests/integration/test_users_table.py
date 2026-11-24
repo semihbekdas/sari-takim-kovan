@@ -3,7 +3,7 @@
 import uuid
 
 import pytest
-from sqlalchemy import Engine, delete, insert, select
+from sqlalchemy import Engine, insert, select
 from sqlalchemy.exc import IntegrityError
 
 from kovan.infrastructure.db.tables import users
@@ -16,13 +16,6 @@ def new_user(email: str) -> dict[str, object]:
         "display_name": "Ayşe Y.",
         "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$test",
     }
-
-
-@pytest.fixture
-def clean_users(db_engine: Engine) -> Engine:
-    with db_engine.begin() as connection:
-        connection.execute(delete(users))
-    return db_engine
 
 
 @pytest.mark.integration
