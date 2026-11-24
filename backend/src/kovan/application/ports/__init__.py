@@ -4,5 +4,6 @@ Her alan kendi modülünde tanımlanır; böylece ekip üyeleri aynı dosyayı d
 Bir port, onu ilk kullanan özellikle birlikte eklenir (kullanılmayan kod commit'lenmez):
 - `system`: sağlık kontrolü (`ReadinessProbe`)
 - `ai`: embedding ve sohbet modeli (`EmbeddingProvider`, `ChatModel`; ADR-006)
-- ileride: `users`, `pages`, `links`, `vector` (ADR-004) …
+- `users`: kullanıcı deposu ve şifre hash'leme (`UserRepository`, `PasswordHasher`)
+- ileride: `pages`, `links`, `vector` (ADR-004) …
 """
