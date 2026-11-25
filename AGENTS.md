@@ -47,14 +47,14 @@ backend/src/kovan/
 - Her davranış değişikliği testle gelir. Testler ilgili kabul kriterini işaretler: `@pytest.mark.ac("AC-xx.y")`.
 - Domain/application için birim test; repository, Qdrant, indeksleme döngüsü ve API için Testcontainers ile entegrasyon/kabul testi.
 - Testler **gerçek yapay zeka API'si çağırmaz**: `FakeEmbeddingProvider` ve `FakeChatModel` (`infrastructure/ai/fake.py`) kullanılır; hata senaryoları için testte `ExternalServiceError` fırlatan küçük bir fake yazılır. Test ayarları `tests/fakes.py`'deki `make_test_settings()` ile kurulur (geliştiricinin `.env` dosyası okunmaz).
-- Assert'siz test yazma, test silme/atlama, coverage'tan dosya hariç tutma **yasak**.
+- Assert'siz test yazma, test silme/atlama, coverage'tan dosya hariç tutma **yasak**. (Sonar'ın kapsam koşulu yalnızca backend içindir; frontend'de mantık içeren kısımlar test edilir, ADR-010.)
 
 ## Çalışma biçimi
 
 - Değişiklikleri küçük tut (bir PR ≈ tek iş, ≤ 400 satır). Kullanıcı istemedikçe birden fazla özelliği aynı anda yazma.
 - Davranış değişirse ilgili dokümanı da güncelle.
 - **Kullanıcı açıkça istemedikçe commit veya push yapma.** Commit her zaman kullanıcının kendi hesabıyla atılır; değişiklikleri kullanıcı inceler. Commit tarihleriyle asla oynama, push'lanmış geçmişi yeniden yazma.
-- İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, `docs/ai-log.md`'ye ne yazılmalı.
+- İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, kullanıcının `docs/ai-log/<isim>.md` dosyasına ne yazılmalı.
 
 ## Komutlar
 

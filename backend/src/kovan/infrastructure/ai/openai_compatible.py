@@ -65,8 +65,8 @@ class OpenAICompatibleEmbeddingProvider:
             # Ayar düzeltilene kadar hiçbir sayfa indekslenemez.
             raise ValueError(
                 f"EMBEDDING_DIM={self._dimension} ama '{self._model}' {wrong} boyutlu "
-                "vektör döndü. .env'deki EMBEDDING_DIM'i düzeltip "
-                "`uv run python -m kovan.cli reindex --all` çalıştırın."
+                "vektör döndü. .env'deki EMBEDDING_DIM'i düzeltip indeksi yeniden üretin "
+                '(docs/adr/ADR-005, "Kurtarma").'
             )
 
 
