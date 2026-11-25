@@ -2,7 +2,7 @@
 
 ## Durum
 
-Kabul Edildi *(Accepted)* — 2026-11-13: port'lar, fake mod ve hata yönetimi. **Açık kalan:** sağlayıcı ve model seçimi ekip tarafından kesinleştirilecek (§ Açık karar).
+Kabul Edildi *(Accepted)* — 2026-11-13: port'lar, fake mod ve hata yönetimi. **2026-11-22:** Embedding modeli seçildi (OpenAI `text-embedding-3-small`). **Açık kalan:** sohbet modeli (§ Açık karar).
 
 ## Bağlam
 
@@ -29,7 +29,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13: port'lar, fake mod ve hata yönetimi. 
 
 3. **Varsayılan mod `fake`** (`CHAT_PROVIDER=fake`, `EMBEDDING_PROVIDER=fake`): Anahtarsız çalışır; testler, CI ve günlük geliştirme bu modda. Gerçek yapay zeka `.env`'ye anahtar ve sağlayıcı girilince devreye girer.
 4. Dış servis hataları (zaman aşımı `AI_TIMEOUT_SECONDS` = 30 sn, 429, 5xx, bağlantı hatası) SDK'nın tek yeniden denemesinden sonra (en kötü durumda ~60 sn) `ExternalServiceError`'a çevrilir → API'de **503**, indeksleme döngüsünde yeniden deneme (ADR-005). Model güvenlik nedeniyle cevap vermeyi reddederse (`stop_reason == "refusal"`) kullanıcıya "Bu soruya cevap üretilemedi" mesajı döner.
-5. Embedding modeli değişirse vektör boyutu değişebilir → `EMBEDDING_DIM` güncellenir ve `reindex --all` çalıştırılır.
+5. Embedding modeli değişirse vektör boyutu değişebilir → `EMBEDDING_DIM` güncellenir ve indeks yeniden üretilir (ADR-005, "Kurtarma").
 6. Token kullanımı her çağrıda yapay zeka adaptörlerinde loglanır (Should, US-16).
 
 ## Seçenekler ve maliyet
@@ -54,30 +54,36 @@ Claude 5.5 modelleriyle ilgili uygulama notları: Opus 5.5'te düşünme kapatı
 
 > **Claude'un embedding modeli yoktur.** "Claude mu, GPT mi?" sorusu sadece sohbet modeli için geçerli. Embedding için aşağıdakilerden biri seçilir. Notlarımız **Türkçe** olduğu için Türkçe performansı belirleyici.
 
-| Aday | Boyut | Fiyat (1M token) | Türkçe | Not |
+| Aday | Boyut | Fiyat (1M token) | Türkçe arama (yayımlanmış sonuç) | Not |
 | --- | --- | --- | --- | --- |
-| **OpenAI `text-embedding-3-small`** | 1536 | ~$0.02 | Türkçe için yayımlanmış bir karşılaştırma bulamadık | En basit seçenek: ek adaptör gerekmez, kararlı, iyi belgelenmiş |
-| **BAAI `bge-m3`** (açık kaynak; OpenRouter vb. üzerinden API) | 1024 | ~$0.01 | Türkçe karşılaştırmalarda üst sıralarda (TR-TEB, Türkçe soru-cevap testleri) | Çok dilli, 8K bağlam. Model açık kaynak, biz barındırmıyoruz; bir API sağlayıcısı üzerinden kullanılır |
-| **Voyage AI `voyage-4-lite`** | 1024 | ~$0.02; **ilk 200M token ücretsiz** | Çok dilli olarak tanıtılıyor | Anthropic'in önerdiği sağlayıcı. Anahtar MongoDB Atlas'tan alınır; ödeme yöntemi eklenmezse hız limiti düşük olabilir. OpenAI uyumlu uç nokta üzerinden denenir; uyumsuzluk çıkarsa küçük bir adaptör eklenir |
-| Google `gemini-embedding-001` | 3072 (küçültülebilir) | Ücretsiz katman var | — | Ücretsiz katmanda kota düşük, 429 hataları bildiriliyor. Yedek seçenek |
+| **OpenAI `text-embedding-3-small`** ✅ *seçildi* | 1536 | $0.02 | TR-MTEB'de arama puanı **64,99**: tablonun en yükseği (`multilingual-e5-large` 60,62). Model 768 boyuta indirilmiş hâliyle ölçülmüş | Kodda varsayılan model: ek adaptör ve ayar gerekmez, kararlı, iyi belgelenmiş. Hesaba en az $5 kredi yüklenir (1 yıl geçerli) |
+| BAAI `bge-m3` (açık kaynak; OpenRouter üzerinden `baai/bge-m3`) · *yedek* | 1024 | $0.01 | TR-TEB'de arama puanı 59,30: açık kaynak modeller arasında ikinci (`multilingual-e5-large` 58,57). TR-TEB yalnızca açık kaynak modelleri ölçer | Sorguya ayrı talimat gerektirmez, yani `embed(texts)` arayüzümüze doğrudan uyar. OpenRouter kredi alımında %5,5 (en az $0.80) ücret alır |
+| Qwen `qwen3-embedding-8b` (OpenRouter) | 4096 | $0.01 | TR-TEB'de genel sıralamada birinci (64,58), aramada 59,62 | Sorgular için talimat metni öneriyor; talimatsız kullanımda %1–5 düşüş bildiriyor. Arayüzümüze sorgu/doküman ayrımı eklemek gerekir |
+| Voyage AI `voyage-4-lite` | 1024 | $0.02; **ilk 200M token ücretsiz** | Yayımlanmış Türkçe sonuç bulunamadı | Anthropic'in önerdiği sağlayıcı. Anahtar MongoDB Atlas'tan alınır; OpenAI uyumlu adaptörümüzle çalışıp çalışmadığı denenmedi |
+| Google `gemini-embedding-001` | 3072 (küçültülebilir) | $0.15; ücretsiz katman var | Yayımlanmış Türkçe sonuç bulunamadı | Ücretsiz katmanda kota düşük, 429 hataları bildiriliyor |
+
+Fiyatlar 22 Kasım 2026'da sağlayıcıların kendi sayfalarından alındı (Kaynaklar).
 
 Bizim ölçeğimizde (birkaç yüz sayfa) **hepsi pratikte bedava**: Tüm proje boyunca 1–2 milyon token'ı geçmemesi beklenir, yani adayların hepsi < $0.05 tutar. Bu yüzden seçimi fiyat değil **Türkçe arama kalitesi** belirler.
 
-#### Embedding seçimi: küçük bir karşılaştırma
+#### Embedding seçimi (22 Kasım 2026)
 
-Fazla abartmadan, 3 aday tek bir küçük betikle denenir:
+**Karar: OpenAI `text-embedding-3-small`.** Gerekçe:
 
-1. **Adaylar:** OpenAI `text-embedding-3-small`, `bge-m3`, `voyage-4-lite`.
-2. **Veri:** RAG değerlendirme setinin ilk hali: ~15 kurgusal Türkçe sayfa ve ~21 soru; kişi başı 5 sayfa + 7 soru (test-strategy § 6).
-3. **Betik:** `eval/compare_embeddings.py`. Qdrant gerekmez; parçaları her modelle embed edip kosinüs benzerliğini bellekte hesaplar.
-4. **Ölçüt:** Hit@5 ve MRR. Fark %5'ten azsa **en basit olan** seçilir (ek adaptör gerektirmeyen).
-5. **Maliyet:** Toplam birkaç sent. **Zaman:** Sprint 2; ekip birlikte yapar (her üye bir adayı dener).
-6. Sonuç tablosu README'ye ve bu ADR'ye yazılır. Bu tablo sunumda da "veriye dayalı karar" örneği olur.
+1. **Türkçe kanıt.** TR-MTEB (EMNLP 2025, Tablo 2) Türkçe arama görevlerinde bu modele 64,99 veriyor; tablodaki en yüksek puan. `bge-m3`'ün ölçüldüğü TR-TEB'de (LREC 2026, Tablo 4) `bge-m3` ile `multilingual-e5-large` arasındaki fark 0,7 puan. İki tabloda da bulunan `multilingual-e5-large` ölçü alınırsa `text-embedding-3-small` en az `bge-m3` kadar iyi görünüyor. Bu dolaylı bir karşılaştırmadır: İki ayrı çalışma, iki ayrı veri kümesi.
+2. **Basitlik.** Kodda varsayılan model; `.env`'ye yalnızca `EMBEDDING_PROVIDER=openai_compatible` ve anahtar girilir.
+3. **Maliyet.** Proje boyunca beklenen 1–2 milyon token yaklaşık $0.02–0.04 tutar.
+
+**Karşı kanıt.** Türkçe içermeyen çok dilli arama ölçümü MIRACL tersini gösteriyor: `bge-m3` 69,2; `text-embedding-3-large` 54,9; `text-embedding-3-small` 44,0. Karar bu yüzden Türkçe ölçümlere dayandırıldı ve kendi verimizle doğrulanacak.
+
+**Vazgeçilen plan.** İlk planda üç aday (OpenAI, `bge-m3`, Voyage) üç ayrı hesapla denenecekti. Yayımlanmış Türkçe sonuçlar adayları zaten sıraladığı için bundan vazgeçildi: Ödev ölçeğinde üç hesap, üç anahtar ve üç ölçüm gereksiz iş.
+
+**Doğrulama.** Seçilen model kendi değerlendirme setimizle ölçülür: ~15 kurgusal Türkçe sayfa ve ~21 soru (kişi başı 5 sayfa + 7 soru), `eval/compare_embeddings.py`, ölçütler Hit@5 ve MRR, hedef Hit@5 ≥ 0,8 (test-strategy § 6). Hedef tutmazsa aynı betikle `bge-m3` denenir; bunun için yalnızca `EMBEDDING_BASE_URL=https://openrouter.ai/api/v1`, `EMBEDDING_MODEL=baai/bge-m3` ve `EMBEDDING_DIM=1024` değişir, sonra indeks yeniden üretilir (ADR-005, "Kurtarma"). Sonuç tablosu README'ye ve bu ADR'ye yazılır.
 
 ### Açık karar (ekip)
 
-- **Sohbet:** Claude mı, GPT mi, Gemini mi; hangi model? `.env` örneğinde `CHAT_MODEL=claude-opus-5-5` yazıyor; daha ucuz bir model seçmek ekibin bütçe kararıdır.
-- **Embedding:** Yukarıdaki küçük karşılaştırmayla seçilir. Karşılaştırma yapılana kadar geliştirme fake modda sürer.
+- **Sohbet:** Claude mı, GPT mi, Gemini mi; hangi model? `.env` örneğinde `CHAT_MODEL=claude-opus-5-5` yazıyor; daha ucuz bir model seçmek ekibin bütçe kararıdır. Embedding için açılan OpenAI anahtarı bir GPT modeliyle sohbet için de kullanılabilir (`CHAT_PROVIDER=openai_compatible`); böylece tek anahtar yeter. Karar, "Sayfalarına Sor" bağlanırken (Sprint 3) verilir.
+- **Embedding:** ✅ Seçildi (yukarıda). Günlük geliştirme ve testler yine fake modda sürer.
 - Seçim yapılınca bu ADR'nin "Durum" satırı güncellenir.
 
 ## Değerlendirilen alternatifler
@@ -108,5 +114,7 @@ Fazla abartmadan, 3 aday tek bir küçük betikle denenir:
 - Anthropic — [Embeddings](https://platform.claude.com/docs/en/build-with-claude/embeddings) ("Anthropic does not offer its own embedding model"; Voyage AI önerisi)
 - Google — [Gemini API OpenAI compatibility](https://aistudio.google.com/docs/openai) (OpenAI SDK ile sohbet ve embedding)
 - OpenAI — [text-embedding-3-small](https://developers.openai.com/api/docs/models/text-embedding-3-small)
-- [TR-TEB: Turkish Text Embedding Benchmark](https://www.researchgate.net/publication/407438143_TR-TEB_Turkish_Text_Embedding_Benchmark) · [TR-MTEB (EMNLP 2025 Findings)](https://aclanthology.org/2025.findings-emnlp.471.pdf) · [Türkçe soru-cevap getirme karşılaştırması (bge-m3)](https://github.com/ezgiieyice/ensemble-embeddings-semantic-search)
-- [OpenRouter — BAAI bge-m3](https://openrouter.ai/baai/bge-m3) · [Voyage AI fiyatlandırma](https://docs.voyageai.com/docs/pricing)
+- [TR-MTEB (EMNLP 2025 Findings)](https://aclanthology.org/2025.findings-emnlp.471.pdf), Tablo 2 · [TR-TEB: Turkish Text Embedding Benchmark (LREC 2026)](https://aclanthology.org/2026.lrec-1.862/), Tablo 4 · [Türkçe soru-cevap getirme karşılaştırması (bge-m3)](https://github.com/ezgiieyice/ensemble-embeddings-semantic-search)
+- MIRACL sonuçları: [BGE M3-Embedding makalesi](https://arxiv.org/abs/2402.03216), Tablo 1 · [OpenAI: New embedding models and API updates](https://openai.com/index/new-embedding-models-and-api-updates/)
+- [BAAI/bge-m3 model kartı](https://huggingface.co/BAAI/bge-m3) · [Qwen3-Embedding-8B model kartı](https://huggingface.co/Qwen/Qwen3-Embedding-8B)
+- [OpenRouter embedding modelleri ve fiyatları](https://openrouter.ai/collections/embedding-models) · [OpenRouter SSS (ücretler)](https://openrouter.ai/docs/faq) · [Voyage AI fiyatlandırma](https://docs.voyageai.com/docs/pricing) · [Gemini API fiyatlandırma](https://aistudio.google.com/docs/pricing) · [OpenAI ön ödemeli faturalandırma](https://help.openai.com/en/articles/8264644-how-does-prepaid-billing-work)

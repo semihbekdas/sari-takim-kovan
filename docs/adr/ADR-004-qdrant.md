@@ -17,7 +17,7 @@ Vektörler **Qdrant**'ta tutulur:
 - Payload: `owner_id`, `page_id`, `page_title`, `heading_path`, `chunk_no`, `text`, `page_version`; `owner_id` ve `page_id` için **payload indeksi**.
 - Nokta kimliği deterministik: `uuid5(page_id:chunk_no)` (idempotent upsert, ADR-005).
 - Qdrant'a erişim yalnızca `VectorIndex` portu üzerinden; portun `search` metodu **`owner_id` parametresi olmadan çağrılamaz**.
-- Qdrant **türetilmiş veridir**: Kaynak PostgreSQL'dir; `reindex` komutu ile baştan üretilebilir.
+- Qdrant **türetilmiş veridir**: Kaynak PostgreSQL'dir; indeks her zaman baştan üretilebilir (ADR-005, "Kurtarma").
 
 ## Değerlendirilen alternatifler
 
@@ -35,5 +35,5 @@ Vektörler **Qdrant**'ta tutulur:
 - Docker ile tek satırda ayağa kalkar, Testcontainers ile test edilir.
 
 **Değiş tokuşlar:**
-- İki ayrı veri deposu → **tutarlılık sorunu** (sayfa silinip vektörü kalabilir). Çözüm: ADR-005 (sürüm işaretli indeksleme + aramada PostgreSQL doğrulaması + `reindex`).
+- İki ayrı veri deposu → **tutarlılık sorunu** (sayfa silinip vektörü kalabilir). Çözüm: ADR-005 (sürüm işaretli indeksleme + aramada PostgreSQL doğrulaması + indeksin baştan üretilebilmesi).
 - Embedding modeli değişirse koleksiyon boyutu değişir → tam yeniden indeksleme gerekir.

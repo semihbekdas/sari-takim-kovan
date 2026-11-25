@@ -8,7 +8,7 @@
 ## 1. Test piramidi
 
 ```
-             ▲    Uçtan uca (Playwright, Should)   3 duman senaryosu
+             ▲    Uçtan uca (Playwright, Could)    3 duman senaryosu
            ▲▲▲    Kabul (API senaryoları)           her Must AC ≥ 1 test, gerçek DB + fake yapay zeka
         ▲▲▲▲▲▲    Entegrasyon (Testcontainers)      repository'ler, Qdrant adaptörü, indeksleme döngüsü
    ▲▲▲▲▲▲▲▲▲▲▲    Birim (pytest / Vitest)           domain kuralları, servisler, chunking, prompt, UI mantığı
@@ -20,7 +20,7 @@
 | **Entegrasyon** | SQL repository'leri, Qdrant adaptörü (`owner_id` filtresi!), indeksleme döngüsü (yeniden deneme, idempotency, eski parçaların silinmesi) | pytest + **Testcontainers** (PostgreSQL, Qdrant) | Gerçek PostgreSQL ve Qdrant, **fake** embedding | `backend/tests/integration/` |
 | **Kabul (API)** | Kabul kriterleri, HTTP üzerinden (kayıt → sayfa → indeks → arama → sohbet) | pytest + FastAPI `TestClient` | Gerçek DB'ler, **fake** yapay zeka | `backend/tests/acceptance/` |
 | **Frontend** | Otomatik kaydetme (debounce), 409 uyarısı, bağlantı gösterimi, API istemcisi | Vitest + Testing Library (API istemcisi mock'lanır) | Yok | `frontend/tests/` |
-| **Uçtan uca** *(Should)* | 3 duman senaryosu: giriş → sayfa yaz → ara; bağlantı + geri bağlantı; sohbet + kaynak | Playwright | Tüm sistem, fake yapay zeka | `frontend/e2e/` |
+| **Uçtan uca** *(Could)* | 3 duman senaryosu: giriş → sayfa yaz → ara; bağlantı + geri bağlantı; sohbet + kaynak | Playwright | Tüm sistem, fake yapay zeka | `frontend/e2e/` |
 | **RAG değerlendirme** | Getirme kalitesi (Hit@5, MRR), "bulamadım" doğruluğu, prompt injection | Kendi betiğimiz | **Gerçek** embedding ve dil modeli (ücretli, elle çalıştırılır) | `eval/` |
 
 ## 2. Fake'ler (testler internete çıkmaz, para harcamaz)
@@ -60,13 +60,13 @@ def test_move_page_under_own_descendant_raises_cycle_error(page_service, tree):
 | --- | --- |
 | `domain` + `application` | ≥ %90 |
 | Backend genel | ≥ %80 |
-| Frontend | ≥ %50 (mantık içeren hook'lar ve API istemcisi öncelikli) |
+| Frontend | Oran hedefi yok; mantık içeren kısımlar test edilir (otomatik kaydetme, 409 uyarısı, bağlantı gösterimi, API istemcisi) |
 
-Kapsam bir araçtır, amaç değildir. Sonar'daki quality gate kapsam koşulu frontend yüzünden kırmızıya düşerse backend ve frontend iki ayrı Sonar projesi olarak analiz edilir (ADR-010).
+Kapsam bir araçtır, amaç değildir. Frontend kodu da Sonar'da analiz edilir (güvenilirlik, güvenlik ve bakım kolaylığı dereceleri); Sonar'ın kapsam koşulu ise yalnızca backend için geçerlidir (`sonar.coverage.exclusions=frontend/**`). Gerekçe: Ekran bileşenlerini %80 kapsama çıkarmak bu projede getirdiğinden fazla iş demektir; frontend'de mantık içeren kısımlar Vitest ile test edilir (ADR-010).
 
 ## 5. AC izlenebilirlik matrisi
 
-Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.py`, `grep` mantığında) güncellenecek *(planlanan, Ortak / Sprint 4)*. Şimdilik: `grep -rn 'pytest.mark.ac' backend/tests`. Tablodaki test adları planlanan adlardır:
+Tablo, kod dondurmadan önce `grep -rn 'pytest.mark.ac' backend/tests` çıktısından bir kez güncellenir *(Ortak / Sprint 4)*; ayrı bir betik yazılmaz. Tablodaki test adları planlanan adlardır:
 
 | AC | Seviye | Planlanan test |
 | --- | --- | --- |
@@ -93,13 +93,13 @@ Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.p
 | AC-05.3 | Kabul | `test_create_page_under_other_users_parent_returns_404` |
 | AC-05.4 🟧 | Kabul | `test_move_page_moves_whole_subtree` |
 | AC-05.5 🟧 | Birim | `test_move_page_under_own_descendant_raises_cycle_error` |
-| AC-06.1 | Kabul | `test_deleted_page_and_children_hidden_from_tree_search_chat_backlinks` |
+| AC-06.1 | Kabul | `test_deleted_page_and_children_hidden_from_tree_search_chat` |
 | AC-06.2 | Entegrasyon | `test_deleted_page_vectors_removed_by_index_loop` |
 | AC-06.3–06.5 🟧 | Kabul | `test_trash_*` |
-| AC-07.1–07.2 | Frontend + E2E | `page-mention.test.tsx`, `e2e/links.spec.ts` |
-| AC-07.3 | Kabul + Frontend | `test_titles_endpoint_marks_deleted_pages` |
-| AC-08.1–08.4 | Birim + Kabul | `test_backlinks_*` |
-| AC-09.1–09.3 | Kabul | `test_keyword_search_*` |
+| AC-07.1–07.2 | Frontend | `page-mention.test.tsx` |
+| AC-07.3 | Frontend | `page-mention.test.tsx › shows deleted page` (başlıklar sayfa ağacından) |
+| AC-08.1–08.4 🟧 | Birim + Kabul | `test_backlinks_*` |
+| AC-09.1–09.3 🟧 | Kabul | `test_keyword_search_*` |
 | AC-10.1 | RAG değerlendirme | `eval/questions.yaml` (eşanlamlı sorular) |
 | AC-10.2 | Entegrasyon + Kabul | `test_semantic_search_never_returns_other_users_chunks` |
 | AC-10.3 | Kabul | `test_search_reflects_updated_content_after_indexing` |
@@ -116,13 +116,13 @@ Tablo, `@pytest.mark.ac` işaretlerinden basit bir betikle (`scripts/ac_matrix.p
 | AC-12.3 | Entegrasyon | `test_indexing_same_version_twice_is_idempotent` |
 | AC-12.4 | Entegrasyon | `test_rapid_saves_trigger_single_embedding_call_after_settle` |
 | AC-12.5 | Entegrasyon | `test_shrinking_content_removes_stale_chunks` |
-| AC-13.x, AC-14.1, AC-15.x, AC-16.x 🟧 | Kabul / Birim | İlgili Should işi başlarken eklenir |
+| AC-13.x, AC-14.1, AC-16.x 🟧 · AC-15.x 🟨 | Kabul / Birim | İlgili iş başlarken eklenir |
 
 ## 6. RAG değerlendirmesi
 
 - `eval/dataset/<isim>/*.md`: Her üyenin 5 kurgusal sayfası (toplam ~15). **Gerçek kişisel veri kullanılmaz.** Biçim: `eval/README.md`.
 - `eval/questions/<isim>.toml`: Her üyenin 7 sorusu (toplam ~21), her biri için beklenen kaynak sayfa(lar). Türler: `normal`, `synonym` (AC-10.1), `not_found` (AC-11.2), `injection` (AC-11.4).
-- Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu. Embedding adayları `eval/compare_embeddings.py` ile karşılaştırılır.
+- Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu. Seçilen embedding modeli (ADR-006) `eval/compare_embeddings.py` ile ölçülür; hedef tutmazsa aynı betikle ikinci bir model denenir.
 - Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K`, `SEARCH_MIN_SCORE` ve parça boyutu bu sete göre ayarlanır; sonuç tablosu README'ye yazılır.
 - Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez).
 
@@ -133,5 +133,5 @@ ruff check · ruff format --check · mypy · lint-imports
 pytest (unit + integration + acceptance) --cov
 vitest · eslint · tsc --noEmit        (frontend iskeleti gelince)
 SonarQube Cloud analizi + quality gate
-(Should: Playwright duman testleri, main'e merge sonrası)
+(Could: Playwright duman testleri, main'e merge sonrası)
 ```
