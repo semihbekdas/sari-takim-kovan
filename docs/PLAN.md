@@ -60,7 +60,7 @@ Sprintler Pazartesi başlar, hafta sonu toplantısıyla biter. Takvim **4 büyü
 ## 5. Sprint 0: dokümanlar ve ilk PR'lar
 
 - Doküman seti **14 Kasım'da tek bir başlangıç commit'iyle** `main`'e eklendi (ekip kararı: hız).
-- Dengeyi korumak için **her üye kendi iş paketiyle ilgili dokümanları okur** ve düzeltme/ekleme yaparsa bunu **kendi branch'inden PR** ile gönderir (örn. `docs/mimari-duzeltmeleri`). Değişiklik yoksa `docs/ai-log.md`'ye "okundu" kaydını PR ile ekler.
+- Dengeyi korumak için **her üye kendi iş paketiyle ilgili dokümanları okur** ve düzeltme/ekleme yaparsa bunu **kendi branch'inden PR** ile gönderir (örn. `docs/mimari-duzeltmeleri`). Değişiklik yoksa kendi `docs/ai-log/<isim>.md` dosyasına "okundu" kaydını PR ile ekler.
 - Böylece ilk PR'lar ve review'lar yine Sprint 0–1'de gelir; "en az 3 PR" şartı erken karşılanır.
 - Sonraki sprintlerde commit dengesi iş paketleri üzerinden sağlanır (§ 3, § 4).
 

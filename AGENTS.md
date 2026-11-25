@@ -54,7 +54,7 @@ backend/src/kovan/
 - Değişiklikleri küçük tut (bir PR ≈ tek iş, ≤ 400 satır). Kullanıcı istemedikçe birden fazla özelliği aynı anda yazma.
 - Davranış değişirse ilgili dokümanı da güncelle.
 - **Kullanıcı açıkça istemedikçe commit veya push yapma.** Commit her zaman kullanıcının kendi hesabıyla atılır; değişiklikleri kullanıcı inceler. Commit tarihleriyle asla oynama, push'lanmış geçmişi yeniden yazma.
-- İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, `docs/ai-log.md`'ye ne yazılmalı.
+- İşin sonunda kısa bir özet ver: ne değişti, hangi testler eklendi, hangi AC'ler karşılandı, kullanıcının `docs/ai-log/<isim>.md` dosyasına ne yazılmalı.
 
 ## Komutlar
 

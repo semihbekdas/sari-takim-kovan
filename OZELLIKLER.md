@@ -124,7 +124,7 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 | Nerede | Nasıl |
 | --- | --- |
 | **Ürünün içinde** | Bulut **embedding API**'si ile sayfaların vektörlere çevrilmesi, Qdrant'ta anlamsal arama, bulut **dil modeli** (Claude / GPT / Gemini) ile kaynaklı cevap (RAG), (Could) MCP server |
-| **Geliştirirken** | Claude Code, Codex, GitHub Copilot ile kod, test ve doküman üretimi. Kurallar `AGENTS.md`'de; prompt'lar ve yapay zekanın hataları `docs/ai-log.md`'de |
+| **Geliştirirken** | Claude Code, Codex, GitHub Copilot ile kod, test ve doküman üretimi. Kurallar `AGENTS.md`'de; prompt'lar ve yapay zekanın hataları `docs/ai-log/`'da |
 
 **Yerelde model çalıştırmak gerekmiyor.** Güçlü bilgisayarı olmayan ekip üyesi uygulamayı API anahtarı olmadan da **"fake" modda** çalıştırabilir (testler ve günlük geliştirme bu modda). Gerçek yapay zeka sadece `.env`'ye anahtar girilince devreye girer (ADR-006).
 
