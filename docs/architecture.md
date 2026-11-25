@@ -33,13 +33,13 @@ flowchart TB
         fe[Frontend SPA<br/>React + TS + BlockNote]
         api[Backend API<br/>FastAPI]
         worker[İndeksleme döngüsü<br/>aynı süreçte arka plan görevi]
-        mcp[MCP Server<br/>Should, salt-okunur]
+        mcp[MCP Server<br/>Could, salt-okunur]
         pg[(PostgreSQL)]
         qd[(Qdrant)]
     end
 
     chat[[Dil modeli API<br/>Claude / GPT / Gemini]]
-    emb[[Embedding API<br/>OpenAI uyumlu: OpenAI / Gemini / bge-m3]]
+    emb[[Embedding API<br/>OpenAI text-embedding-3-small]]
 
     user --> fe
     fe -- "REST/JSON, httpOnly çerez" --> api
@@ -64,23 +64,23 @@ flowchart TB
 | PostgreSQL | PostgreSQL 16+ | **Kaynak veri** |
 | Qdrant | Qdrant | Vektör indeksi (PostgreSQL'den her zaman yeniden üretilebilir) |
 | Dil modeli API | Anthropic (Claude) veya OpenAI uyumlu (GPT, Gemini) | Kaynaklı cevap üretme |
-| Embedding API | OpenAI uyumlu (OpenAI, Gemini) | Metin → vektör |
-| MCP Server *(Should)* | Python MCP SDK | AI asistanlarına `search_pages`, `get_page`; aynı `application` servislerini kullanır |
+| Embedding API | OpenAI `text-embedding-3-small` (OpenAI uyumlu adaptörle; seçim: ADR-006) | Metin → vektör |
+| MCP Server *(Could)* | Python MCP SDK | AI asistanlarına `search_pages`, `get_page`; aynı `application` servislerini kullanır |
 
-> **İlke:** PostgreSQL kaynak veridir; Qdrant **türetilmiş bir indekstir**. Qdrant tamamen silinse bile `reindex --all` komutuyla PostgreSQL'den yeniden oluşturulur.
+> **İlke:** PostgreSQL kaynak veridir; Qdrant **türetilmiş bir indekstir**. Qdrant tamamen silinse bile PostgreSQL'den yeniden oluşturulur (ADR-005, "Kurtarma").
 
 ## 4. Backend katmanları
 
 | Katman | Sorumluluk | Bağımlı olabileceği | Yasak |
 | --- | --- | --- | --- |
 | `domain` | `User`, `Page`, `PageContent`, `PageLink`, kurallar (R-01…R-13), `DomainRuleError` | Sadece Python standart kütüphanesi | FastAPI, Pydantic, SQLAlchemy, Qdrant, OpenAI, Anthropic |
-| `application` | Servisler (`AuthService`, `PageService`, `LinkService`, `SearchService`, `ChatService`, `IndexingService`), saf fonksiyonlar (`chunking.py`, `prompting.py`), **port arayüzleri** | `domain` | `infrastructure`, `api`, framework'ler |
+| `application` | Servisler (`AuthService`, `PageService`, `RetrievalService`, `SearchService`, `ChatService`, `IndexingService`; Should: `LinkService`), saf fonksiyonlar (`chunking.py`, `prompting.py`), **port arayüzleri** | `domain` | `infrastructure`, `api`, framework'ler |
 | `infrastructure` | Port uygulamaları: SQL repository'leri, `QdrantVectorIndex`, `AnthropicChatModel`, `OpenAICompatibleChatModel`, `OpenAICompatibleEmbeddingProvider`, `Fake…` sağlayıcılar, `Argon2PasswordHasher`, `JwtTokenService`, indeksleme döngüsü | `application`, `domain`, dış kütüphaneler | `api` |
 | `api` | Router'lar, Pydantic şemaları, hata → HTTP eşlemesi, `current_user` | `application`, `domain` | `infrastructure` |
 | `main.py` | Composition root: yapılandırmaya göre adaptörleri seçip servislere bağlar | Hepsi | — |
 
 **Port arayüzleri** (`application/ports/` paketi, alan başına bir modül, Python `Protocol`). Her port, onu ilk kullanan özellikle birlikte eklenir:
-`ReadinessProbe`, `UserRepository`, `PageRepository`, `LinkRepository`, `VectorIndex`, `EmbeddingProvider`, `ChatModel`, `PasswordHasher`, `TokenService` · *(Should)* `ChatHistoryRepository`. Zaman, ona ihtiyaç duyan servise parametre olarak verilir (testte sabit bir an); ayrı bir `Clock` port'u yoktur.
+`ReadinessProbe`, `UserRepository`, `PageRepository`, `VectorIndex`, `EmbeddingProvider`, `ChatModel`, `PasswordHasher`, `TokenService` · *(Should)* `LinkRepository`, `ChatHistoryRepository`. Zaman, ona ihtiyaç duyan servise parametre olarak verilir (testte sabit bir an); ayrı bir `Clock` port'u yoktur.
 
 **Denetim:** import-linter sözleşmeleri ([mimari-secimi.md § 7](mimari-secimi.md#7-uyumu-nasıl-kanıtlayacağız)), CI'da zorunlu.
 
@@ -97,8 +97,8 @@ kovan/
 │   │   │   ├── ports/         system.py (ReadinessProbe), ai.py (EmbeddingProvider, ChatModel), ileride users.py, pages.py, vector.py …
 │   │   │   ├── health.py      ReadinessService
 │   │   │   ├── errors.py      uygulama hataları (ör. ExternalServiceError → 503)
-│   │   │   ├── auth_service.py, page_service.py, link_service.py,
-│   │   │   ├── search_service.py, chat_service.py, indexing_service.py
+│   │   │   ├── auth_service.py, page_service.py, indexing_service.py,
+│   │   │   ├── retrieval_service.py, search_service.py, chat_service.py   (Should: link_service.py)
 │   │   │   └── chunking.py, prompting.py        (saf fonksiyonlar)
 │   │   ├── infrastructure/
 │   │   │   ├── db/          tablo tanımları (SQLAlchemy Core), repository'ler
@@ -110,7 +110,7 @@ kovan/
 │   │   ├── config.py        pydantic-settings
 │   │   ├── container.py     servislerin tutulduğu kap (API buradan okur)
 │   │   ├── logging_config.py JSON loglama (structlog)
-│   │   ├── cli.py           reindex, token raporu
+│   │   ├── cli.py           (Should) token raporu
 │   │   └── main.py          composition root
 │   ├── migrations/          Alembic
 │   ├── tests/  unit/ integration/ acceptance/
@@ -121,7 +121,7 @@ kovan/
 │   │   ├── api/       tipli API istemcisi
 │   │   └── components/
 │   ├── tests/          Vitest
-│   ├── e2e/            Playwright (Should)
+│   ├── e2e/            Playwright (Could)
 │   └── package.json
 ├── eval/               RAG değerlendirme seti + betik
 ├── docs/
@@ -142,12 +142,12 @@ sequenceDiagram
     FE->>S: PUT /pages/{id} {title, content, version}
     S->>S: PageContent doğrula (R-06)
     S->>DB: BEGIN
-    S->>DB: UPDATE pages SET title, content, plain_text, version = version+1,<br/>index_attempts = 0, index_error = NULL, index_retry_at = NULL, updated_at = now()<br/>WHERE id = :id AND owner_id = :owner AND version = :istemcinin_surumu
+    S->>DB: UPDATE pages SET title, content, version = version+1,<br/>index_attempts = 0, index_error = NULL, index_retry_at = NULL, updated_at = now()<br/>WHERE id = :id AND owner_id = :owner AND version = :istemcinin_surumu
     alt 0 satır güncellendi
         S->>DB: ROLLBACK
         S-->>FE: 409 VERSION_CONFLICT (R-07) · sayfa yoksa 404
     else 1 satır güncellendi
-        S->>DB: page_links'i içerikten yeniden yaz (R-09)
+        S->>DB: (Should) page_links'i içerikten yeniden yaz (R-09)
         S->>DB: COMMIT
         S-->>FE: 200 Page (yeni version, index_status: "PENDING")
     end
@@ -191,10 +191,15 @@ sequenceDiagram
 
 ### 5.3 Anlamsal arama
 
-1. `SearchService.semantic(owner_id, q)` → `EmbeddingProvider.embed([q])`
-2. `VectorIndex.search(vector, owner_id=…, limit=20)` → Qdrant, **`owner_id` filtresi zorunlu** (R-12)
-3. Skor eşiğinin (`SEARCH_MIN_SCORE`) altındakiler atılır; sonuçlar **sayfa bazında** gruplanır (her sayfanın en iyi parçası).
-4. Sayfa kimlikleri PostgreSQL'den doğrulanır: Silinmiş sayfalar **hemen** çıkarılır (indeksleme henüz temizlememiş olsa bile).
+**Parça getirme** anlamsal arama ile "Sayfalarına Sor"un ortak adımıdır ve tek yerde yazılır: `RetrievalService.retrieve(owner_id, query, limit)`.
+
+1. `EmbeddingProvider.embed([query])`
+2. `VectorIndex.search(vector, owner_id=…, limit)` → Qdrant, **`owner_id` filtresi zorunlu** (R-12)
+3. Sayfa kimlikleri PostgreSQL'den doğrulanır: Silinmiş sayfaların parçaları **hemen** çıkarılır (indeksleme henüz temizlememiş olsa bile).
+
+`SearchService.semantic(owner_id, q)` bu adımı çağırır, sonra:
+
+4. Skor eşiğinin (`SEARCH_MIN_SCORE`) altındakiler atılır; sonuçlar **sayfa bazında** gruplanır (her sayfanın en iyi parçası).
 5. Sonuç: `{page_id, title, heading_path, snippet, score}`, en fazla 20 sonuç (`total` ≤ 20).
 
 ### 5.4 "Sayfalarına Sor" (RAG)
@@ -203,7 +208,7 @@ sequenceDiagram
 sequenceDiagram
     participant FE as Frontend
     participant C as ChatService
-    participant S as SearchService
+    participant S as RetrievalService
     participant L as ChatModel
     FE->>C: POST /chat {question}
     C->>S: parçaları getir: retrieve(owner_id, soru, limit = RAG_TOP_K)<br/>(sayfaya göre gruplamadan; silinmişler hariç)
@@ -235,7 +240,7 @@ Sistem talimatının ana kuralları (`application/prompting.py`, birim testli):
 
 Alanlar ve kurallar: [domain-design.md](domain-design.md)
 
-- **PostgreSQL:** `users`, `pages` (içerik `jsonb`, `plain_text`, `search_vector` için GIN indeks, indeks durumu alanları), `page_links`, *(Should)* `chat_sessions`, `chat_messages`. Erişim **SQLAlchemy Core** ile (ORM değil, ADR-003).
+- **PostgreSQL:** `users`, `pages` (içerik `jsonb`, indeks durumu alanları). *(Should)* `page_links` (geri bağlantılar), `pages.plain_text` + `search_vector` ve GIN indeksi (kelime araması), `chat_sessions`, `chat_messages`. Erişim **SQLAlchemy Core** ile (ORM değil, ADR-003).
 - **Qdrant:** Tek koleksiyon `page_chunks`, mesafe **Cosine**, boyut `EMBEDDING_DIM`; `owner_id` ve `page_id` için payload indeksi.
 
 ## 7. Hata yönetimi ve loglama (ders Bölüm 3–4)
@@ -266,7 +271,7 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `CHAT_MODEL` | `claude-opus-5-5` | Model kimliği (seçenekler ve fiyatlar: ADR-006) |
 | `CHAT_BASE_URL` | *(OpenAI uyumlu ise)* | Örn. OpenAI veya Gemini uç noktası |
 | `EMBEDDING_PROVIDER` | `fake` \| `openai_compatible` | Embedding sağlayıcısı |
-| `EMBEDDING_BASE_URL` / `EMBEDDING_MODEL` / `EMBEDDING_DIM` | `https://api.openai.com/v1` / `text-embedding-3-small` / `1536` | Model değişirse `uv run python -m kovan.cli reindex --all` gerekir |
+| `EMBEDDING_BASE_URL` / `EMBEDDING_MODEL` / `EMBEDDING_DIM` | `https://api.openai.com/v1` / `text-embedding-3-small` / `1536` | Model değişirse indeks yeniden üretilir (ADR-005, "Kurtarma") |
 | `CHAT_API_KEY` / `EMBEDDING_API_KEY` | *(gizli)* | Asla commit'lenmez. Her anahtar yalnızca kendi sağlayıcısına gönderilir (sohbet: `CHAT_PROVIDER` / `CHAT_BASE_URL`, embedding: `EMBEDDING_BASE_URL`); biri boşsa diğerine düşülmez |
 | `RAG_TOP_K` / `SEARCH_MIN_SCORE` | `6` / `0.35` | Değerlendirme setiyle ayarlanır |
 | `CHAT_MAX_TOKENS` / `CHAT_EFFORT` / `AI_TIMEOUT_SECONDS` | `4096` / `low` / `30` | Cevap üst sınırı (Claude'da düşünme token'ları dahil), Claude effort seviyesi, istek zaman aşımı (SDK başarısız isteği bir kez yeniden dener; en kötü durumda ~2 × zaman aşımı) |
@@ -290,7 +295,7 @@ Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`, `INDEX_SETTLE_SE
 | **Prompt injection** | İçerik ayraçlı veri olarak verilir; sistem talimatı içerikteki talimatları yok sayar; dil modelinin **hiçbir aracı/yetkisi yok** (yalnızca metin üretir) → enjeksiyon aksiyona dönüşemez | AC-11.4 |
 | **API anahtarı sızıntısı** (repo public!) | Anahtarlar yalnızca `.env`; GitHub secret scanning + push protection açık; CI'da gerçek anahtar yok (testler fake); sağlayıcı panelinde harcama limiti | KURALLAR § 8 |
 | **Kişisel verinin bulut sağlayıcıya gitmesi** | Sağlayıcıya yalnızca soru + ilgili parçalar gider; demo ve değerlendirme verisi **kurgusal**; README'de kullanıcıya açıkça belirtilir | README § 7 |
-| MCP üzerinden kötüye kullanım *(Should)* | Salt-okunur araçlar; yalnızca stdio ile yerelde çalışır (ağa açık değil); yapılandırılan tek kullanıcının verisine erişir | US-15 |
+| MCP üzerinden kötüye kullanım *(Could)* | Salt-okunur araçlar; yalnızca stdio ile yerelde çalışır (ağa açık değil); yapılandırılan tek kullanıcının verisine erişir | US-15 |
 
 ## 10. Maliyet kontrolü
 
