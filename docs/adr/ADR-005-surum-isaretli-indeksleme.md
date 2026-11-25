@@ -26,7 +26,7 @@ Sayfa değişince vektör indeksinin (Qdrant) de güncellenmesi gerekir. Saf yak
 4. **Dış API çağrısı sırasında satır kilitlenmez.** İndeksleme sırasında yeni bir kayıt gelirse `version` yine `indexed_version`'dan büyük kalır ve sayfa bir sonraki turda tekrar işlenir (nihai tutarlılık).
 5. **İdempotent:** Nokta kimlikleri `uuid5(page_id:chunk_no)`; aynı sürümün iki kez işlenmesi aynı sonucu verir.
 6. **Silme anında görünmezlik:** Arama ve sohbet, Qdrant sonuçlarını PostgreSQL'den doğrular; silinmiş sayfalar indeksleme beklenmeden hemen elenir.
-7. **Kurtarma:** `uv run python -m kovan.cli reindex --all` *(planlanan)* Qdrant koleksiyonunu PostgreSQL'den baştan üretir (embedding modeli değişince de kullanılır).
+7. **Kurtarma:** Qdrant türetilmiş veri olduğu için indeks iki adımla baştan üretilir. (a) Qdrant koleksiyonu silinir: `curl -X DELETE http://localhost:6333/collections/page_chunks`. (b) Bütün sayfalar "indekslenmedi" işaretlenir: `UPDATE pages SET indexed_version = NULL, index_attempts = 0, index_error = NULL, index_retry_at = NULL;`. Uygulama yeniden başlatılınca koleksiyon yeniden oluşturulur ve döngü bütün sayfaları sırayla indeksler. Embedding modeli veya `EMBEDDING_DIM` değişince de aynı adımlar uygulanır. Ayrı bir `reindex` komutu yazılmaz: İki satırlık bir işlem için komut, testleri ve bakımıyla birlikte bu projede gereksiz kod olurdu (22 Kas 2026).
 8. **Kalıcı silme** *(çöp kutusu, Should)*: Satırı silmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir; Qdrant'a ulaşılamazsa satır silinmez ve istek 503 döner. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler öksüz kalırdı.
 
 ## Değerlendirilen alternatifler

@@ -9,14 +9,14 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 - Ders şartı: en az bir veritabanı.
 - Veri hem **ilişkisel** (kullanıcı → sayfa, sayfa hiyerarşisi, sayfa → sayfa bağlantıları) hem de **belge benzeri** (BlockNote blok dizisi).
 - Sayfa kaydı ve bağlantıların yeniden yazılması **tek transaction**'da olmalı; indeksleme durumu da aynı satırda tutulacak (ADR-005).
-- Kelime araması gerekiyor (F-18).
+- Kelime araması planlanıyor (F-18, Should).
 - Hocanın lesson05 örneğinde EF Core yerine **Dapper** (mikro-ORM) seçilmişti; gerekçe SQL üzerinde kontrol ve sadelikti.
 
 ## Karar
 
 - Ana veritabanı **PostgreSQL**.
-- Sayfa içeriği tek bir **`jsonb`** kolonunda (BlockNote blok dizisi) saklanır; blok başına satır tutulmaz. Kelime araması için içerikten türetilen `plain_text` kolonu da saklanır (parçalama başlık yapısına ihtiyaç duyduğu için `content`'ten yapılır).
-- Kelime araması PostgreSQL **full-text search** ile (`tsvector` + GIN indeks, `simple` sözlük).
+- Sayfa içeriği tek bir **`jsonb`** kolonunda (BlockNote blok dizisi) saklanır; blok başına satır tutulmaz. *(Should)* Kelime araması yapılırsa içerikten türetilen `plain_text` kolonu da saklanır (parçalama başlık yapısına ihtiyaç duyduğu için `content`'ten yapılır).
+- *(Should)* Kelime araması PostgreSQL **full-text search** ile (`tsvector` + GIN indeks, `simple` sözlük).
 - Hiyerarşi `parent_id` ile; alt ağaç ve breadcrumb sorguları **recursive CTE** ile.
 - Veri erişimi **SQLAlchemy 2.x Core** ile: tablo tanımları + açık `select`/`insert`/`update` ifadeleri, repository'lerde domain nesnelerine elle eşleme. **ORM (Session, lazy loading) kullanılmaz.** Şema değişiklikleri **Alembic** migration'larıyla.
 - Birincil anahtarlar **UUID** (uygulama tarafında üretilir).

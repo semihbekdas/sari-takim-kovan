@@ -26,7 +26,7 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 1. Ayşe kayıt olur, giriş yapar.
 2. Sol menüden **"Dersler"** adında bir sayfa açar, altına **"Veritabanı"** ve **"Yapay Zeka"** alt sayfalarını ekler.
 3. "Veritabanı" sayfasına başlıklar, maddeler, kod blokları içeren notlarını yazar. Yazdıkça **otomatik kaydedilir**.
-4. Notun içinde `@Yapay Zeka` yazarak diğer sayfaya **bağlantı** verir. "Yapay Zeka" sayfasının altında *"Bu sayfaya bağlantı verenler: Veritabanı"* görünür.
+4. Notun içinde `@Yapay Zeka` yazarak diğer sayfaya **bağlantı** verir; bağlantıya tıklayınca o sayfa açılır.
 5. Arama kutusuna *"tabloları bölme kuralları"* yazar. Sayfada bu kelimeler geçmese de **anlamca en yakın** "Normalizasyon" bölümü bulunur.
 6. **"Sayfalarına Sor"** ekranında *"3NF ile BCNF farkı ne demiştim?"* diye sorar. Kovan, Ayşe'nin kendi notlarından bir cevap üretir ve altında **[1] Veritabanı › Normalizasyon** şeklinde tıklanabilir kaynak gösterir.
 7. Notlarda olmayan bir şey sorarsa uydurmaz: *"Sayfalarında bu konuda bilgi bulamadım."*
@@ -37,6 +37,8 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 
 Öncelikler **MoSCoW** yöntemine göre:
 **🟥 Must** (teslimde kesin olacak) · **🟧 Should** (planlandı, Must'lar bitince) · **🟨 Could** (zaman kalırsa) · **⬜ Won't** (bu dönem yok).
+
+> **Kapsam güncellemesi (22 Kasım):** Must listesi, ders rehberindeki P0007 tanımının istediği dört şeye göre daraltıldı: blok tabanlı sayfalar, sayfalar arası bağlantı, anlamsal arama ve RAG. Geri bağlantılar (F-16) ve kelime araması (F-18) Must'tan Should'a, MCP server (F-26) Should'tan Could'a alındı. Gerekçe ve yeni takvim: [docs/PLAN.md § 7](docs/PLAN.md).
 
 ### 3.1 Hesap ve güvenlik
 
@@ -69,14 +71,14 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 | # | Özellik | Öncelik |
 | --- | --- | --- |
 | F-15 | Editörde `@` yazınca sayfa seçip **bağlantı** ekleme, tıklayınca o sayfaya gitme | 🟥 Must |
-| F-16 | **Geri bağlantılar** (backlinks): "Bu sayfaya bağlantı verenler" paneli | 🟥 Must |
+| F-16 | **Geri bağlantılar** (backlinks): "Bu sayfaya bağlantı verenler" paneli | 🟧 Should |
 | F-17 | Silinmiş sayfaya giden bağlantının "silinmiş sayfa" olarak gösterilmesi | 🟥 Must |
 
 ### 3.4 Arama ve yapay zeka (projenin kalbi)
 
 | # | Özellik | Öncelik |
 | --- | --- | --- |
-| F-18 | **Kelime araması**: başlık ve içerikte geçen kelimeyi bulma, sonuçta özet | 🟥 Must |
+| F-18 | **Kelime araması**: başlık ve içerikte geçen kelimeyi bulma, sonuçta özet | 🟧 Should |
 | F-19 | **Anlamsal arama**: kelimeler birebir geçmese de anlamca yakın içerikleri bulma (embedding + Qdrant) | 🟥 Must |
 | F-20 | **Arka planda indeksleme**: Sayfa düzenlemesi bitince otomatik olarak yapay zeka indeksine işlenir; sayfada "İndeksleniyor / Güncel / Hata" durumu görünür | 🟥 Must |
 | F-21 | **"Sayfalarına Sor" sohbeti** (RAG): soruya kullanıcının kendi notlarından cevap ve **tıklanabilir kaynak** | 🟥 Must |
@@ -84,7 +86,7 @@ Kullanıcı notlarını sayfa sayfa yazar. Kovan bu sayfaları arka planda yapay
 | F-23 | Yapay zeka servisi kapalıysa çökmeme: anlaşılır hata mesajı, indekslemenin sonra yeniden denenmesi | 🟥 Must |
 | F-24 | Yapay zeka **token kullanımının** loglanması ve maliyet özeti (ders Bölüm 16) | 🟧 Should |
 | F-25 | **Sohbet geçmişi**: önceki soru-cevapların saklanması ve tekrar açılması | 🟧 Should |
-| F-26 | **MCP Server**: Claude Code / Copilot gibi bir asistanın Kovan'daki sayfalarda arama yapabilmesi (sadece okuma) | 🟧 Should |
+| F-26 | **MCP Server**: Claude Code / Copilot gibi bir asistanın Kovan'daki sayfalarda arama yapabilmesi (sadece okuma) | 🟨 Could |
 | F-27 | **Hibrit arama**: kelime + anlamsal sonuçların birleştirilmesi | 🟨 Could |
 | F-28 | Sohbet cevabının kelime kelime akarak gelmesi (streaming) | 🟨 Could |
 
@@ -108,8 +110,8 @@ Kapsamın şişmemesi için bilinçli olarak dışarıda bırakıldı:
 | **Giriş / Kayıt** | E-posta, şifre, (kayıtta) görünen ad |
 | **Ana yerleşim** | Solda sayfa ağacı + "Yeni sayfa" + Arama + Sayfalarına Sor (+ Should: Çöp kutusu); sağda içerik |
 | **Ana sayfa** | Karşılama; (Should) son düzenlenen sayfalar |
-| **Sayfa** | Başlık, breadcrumb, blok editör, kaydetme ve indeks durumu, altta geri bağlantılar paneli |
-| **Arama** | Arama kutusu, "Kelime / Anlamsal" seçimi, sonuç listesi (başlık + özet + skor) |
+| **Sayfa** | Başlık, breadcrumb, blok editör, kaydetme ve indeks durumu; (Should) altta geri bağlantılar paneli |
+| **Arama** | Arama kutusu, anlamsal arama sonuç listesi (başlık + özet + skor); (Should) "Kelime / Anlamsal" seçimi |
 | **Sayfalarına Sor** | Soru kutusu, cevap, her cevabın altında kaynak sayfa bağlantıları; (Should) solda sohbet geçmişi |
 | **Çöp kutusu** (Should) | Silinen sayfalar, geri al / kalıcı sil |
 
@@ -121,7 +123,7 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 
 | Nerede | Nasıl |
 | --- | --- |
-| **Ürünün içinde** | Bulut **embedding API**'si ile sayfaların vektörlere çevrilmesi, Qdrant'ta anlamsal arama, bulut **dil modeli** (Claude / GPT / Gemini) ile kaynaklı cevap (RAG), (Should) MCP server |
+| **Ürünün içinde** | Bulut **embedding API**'si ile sayfaların vektörlere çevrilmesi, Qdrant'ta anlamsal arama, bulut **dil modeli** (Claude / GPT / Gemini) ile kaynaklı cevap (RAG), (Could) MCP server |
 | **Geliştirirken** | Claude Code, Codex, GitHub Copilot ile kod, test ve doküman üretimi. Kurallar `AGENTS.md`'de; prompt'lar ve yapay zekanın hataları `docs/ai-log.md`'de |
 
 **Yerelde model çalıştırmak gerekmiyor.** Güçlü bilgisayarı olmayan ekip üyesi uygulamayı API anahtarı olmadan da **"fake" modda** çalıştırabilir (testler ve günlük geliştirme bu modda). Gerçek yapay zeka sadece `.env`'ye anahtar girilince devreye girer (ADR-006).
@@ -151,11 +153,13 @@ Ders şartı: *"En az bir yapay zeka aracı; geliştirmede, üründe veya ikisin
 | Takım adı | ✅ **Sarı Takım** (hocanın verdiği ad) |
 | Dil modeli | ✅ **Bulut API** (Claude / GPT / Gemini); yerel model zorunlu değil |
 | Çöp kutusu | ✅ Ekranı **Should**; silme Must |
+| Embedding modeli | ✅ OpenAI **`text-embedding-3-small`** (22 Kasım). Yayımlanmış Türkçe karşılaştırmada arama puanı en yüksek model; kalite kendi değerlendirme setimizle ölçülecek ([ADR-006](docs/adr/ADR-006-llm-saglayici.md)) |
+| Kapsam | ✅ 22 Kasım'da daraltıldı (§ 3'teki not) |
 
 ### Hâlâ açık olanlar ❓
 
 - [ ] **Sohbet modeli ve sağlayıcı**: Claude mı, GPT mi, Gemini mi? Fiyat karşılaştırması [ADR-006](docs/adr/ADR-006-llm-saglayici.md)'da. Kod hepsini destekleyecek; yalnızca `.env` değişir.
-- [ ] **Embedding sağlayıcısı**: Claude'un embedding modeli yok. OpenAI `text-embedding-3-small`, BAAI `bge-m3` ve Voyage `voyage-4-lite` Sprint 2'de Türkçe notlarla küçük bir karşılaştırmayla denenip en iyisi seçilecek (ADR-006).
+- [x] **Embedding sağlayıcısı**: OpenAI `text-embedding-3-small` seçildi (yukarıdaki tablo, ADR-006).
 - [x] API anahtarlarının yönetimi: Sağlayıcı panelinde ortak bir organizasyon/proje, harcama limiti, herkesin kendi anahtarı (KURALLAR § 8). *Panel kurulumu, sağlayıcı seçilince yapılır.*
 - [x] İş paketlerinin kişilere dağıtımı: eşit dağıtıldı ([docs/PLAN.md](docs/PLAN.md) § 3).
 - [x] İsim: **Kovan** (kesinleşti; repo `sari-takim-kovan`, Python paketi `kovan`).

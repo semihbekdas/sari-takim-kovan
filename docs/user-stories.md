@@ -70,7 +70,7 @@
 
 | AC | Kriter |
 | --- | --- |
-| AC-06.1 🟥 | **Eğer** onay penceresinde onaylayıp bir sayfayı silersem, **o zaman** sayfa ve tüm alt sayfaları sol menüde, aramada, sohbette ve geri bağlantılarda **hemen** görünmez olur (R-08). |
+| AC-06.1 🟥 | **Eğer** onay penceresinde onaylayıp bir sayfayı silersem, **o zaman** sayfa ve tüm alt sayfaları sol menüde, aramada ve sohbette **hemen** görünmez olur (R-08). |
 | AC-06.2 🟥 | **Diyelim ki** bir sayfayı sildim, **o zaman** indeksleme sonrasında Qdrant'ta o sayfaya ait hiç vektör kalmaz. |
 | AC-06.3 🟧 | **Eğer** çöp kutusunu açarsam, **o zaman** silinen sayfalarımı silinme zamanına göre görürüm. |
 | AC-06.4 🟧 | **Eğer** çöpteki bir sayfayı geri alırsam, **o zaman** alt sayfalarıyla eski yerine döner ve yeniden aranabilir olur. |
@@ -94,7 +94,7 @@
 | AC-07.2 | **Eğer** bağlantıya tıklarsam, **o zaman** hedef sayfaya giderim. |
 | AC-07.3 | **Diyelim ki** hedef sayfa silindi, **o zaman** bağlantı üstü çizili "silinmiş sayfa" olarak görünür ve tıklanınca sayfa açılmaz. |
 
-### US-08 Geri bağlantılar 🟥 (F-16)
+### US-08 Geri bağlantılar 🟧 (F-16)
 **Bir kullanıcı olarak** bir sayfaya hangi sayfaların bağlantı verdiğini görmek istiyorum.
 
 | AC | Kriter |
@@ -108,7 +108,7 @@
 
 ## Arama ve yapay zeka
 
-### US-09 Kelime araması 🟥 (F-18)
+### US-09 Kelime araması 🟧 (F-18)
 | AC | Kriter |
 | --- | --- |
 | AC-09.1 | **Eğer** bir kelimeyle ararsam, **o zaman** başlığında veya içeriğinde geçen sayfalarım kısa bir özetle listelenir. |
@@ -164,7 +164,7 @@
 | AC-13.2 | **Eğer** eski bir oturumu açarsam, **o zaman** mesajları sırasıyla ve kaynaklarıyla görürüm. |
 | AC-13.3 | **O zaman** başka kullanıcının oturumlarına erişemem (404). |
 
-### US-15 MCP Server 🟧 (F-26)
+### US-15 MCP Server 🟨 (F-26)
 **Bir geliştirici olarak** Claude Code / Copilot'tan Kovan'daki notlarımda arama yapmak istiyorum (ders Bölüm 12–13).
 
 | AC | Kriter |

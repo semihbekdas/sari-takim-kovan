@@ -10,8 +10,8 @@
 erDiagram
     USER ||--o{ PAGE : "sahibidir"
     PAGE ||--o{ PAGE : "alt sayfası (parent_id)"
-    PAGE ||--o{ PAGE_LINK : "kaynak"
-    PAGE ||--o{ PAGE_LINK : "hedef"
+    PAGE ||--o{ PAGE_LINK : "kaynak (Should)"
+    PAGE ||--o{ PAGE_LINK : "hedef (Should)"
     USER ||--o{ CHAT_SESSION : "sahibidir (Should)"
     CHAT_SESSION ||--o{ CHAT_MESSAGE : "içerir (Should)"
 ```
@@ -21,7 +21,7 @@ erDiagram
 | User | Entity | PostgreSQL `users` |
 | Page | **Aggregate root** (indeks durumu dahil) | PostgreSQL `pages` |
 | PageContent | Value object | `pages.content` (JSONB) |
-| PageLink | Entity (içerikten türetilir) | PostgreSQL `page_links` |
+| PageLink | Entity *(Should)*, içerikten türetilir | PostgreSQL `page_links` |
 | Chunk | Value object | Qdrant `page_chunks` |
 | ChatSession / ChatMessage | Entity *(Should)* | PostgreSQL `chat_sessions`, `chat_messages` |
 | Citation | Value object | Sohbet cevabı (Should: `chat_messages.citations`) |
@@ -49,7 +49,7 @@ Tüm kimlikler **UUID v4** (Qdrant nokta kimlikleri hariç, bkz. Chunk). Tüm za
 | `parent_id` | UUID? | Üst sayfa; `null` ise kök sayfa | `null` | R-04, R-05 |
 | `title` | Text | Sayfa başlığı | `Veritabanı` | R-03 |
 | `content` | [PageContent](#4-pagecontent-value-object) | Blok içerik | `[{type:"heading",…}]` | R-06 |
-| `plain_text` | Text | İçerikten türetilen düz metin (kelime araması için) | `Normalizasyon …` | Sadece sistem yazar |
+| `plain_text` *(Should)* | Text | İçerikten türetilen düz metin; kelime araması (F-18) ile birlikte eklenir | `Normalizasyon …` | Sadece sistem yazar |
 | `version` | Integer | İyimser kilitleme sürümü; içerik/görünürlük her değiştiğinde +1 | `7` | R-07, R-10 |
 | `deleted_at` | Timestamp? | Silinme (çöpe atılma) zamanı | `null` | R-08 |
 | `indexed_version` | Integer? | Qdrant'a en son işlenen sürüm | `7` | R-10 |
@@ -77,13 +77,15 @@ BlockNote editörünün ürettiği blok dizisi. Değişmezdir; doğrulama oluşt
 > Frontend'deki BlockNote şeması **aynı blok listesiyle** yapılandırılır (ADR-007). Böylece kullanıcı editörde backend'in reddedeceği bir blok (tablo, görsel vb.) ekleyemez.
 
 Davranışlar (saf fonksiyonlar, birim testli):
-- `to_plain_text()` → kelime araması için düz metin
-- `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (PageLink üretimi)
+- `to_plain_text()` → düz metin (*Should:* kelime araması için `plain_text` sütununa yazılır)
+- `mentioned_page_ids()` → içerikteki `pageMention` hedefleri (*Should:* PageLink üretimi)
 - `to_sections()` → başlık hiyerarşisine göre bölümler (parçalama, ADR-009)
 
 > **Not:** `to_sections()` parçalama (ADR-009) tarafından kullanılır ve onunla birlikte yazılır.
 
-## 5. PageLink *(Entity)*
+## 5. PageLink *(Entity — Should)*
+
+Geri bağlantılar (F-16) yapılırsa eklenir. `@` bağlantısının kendisi (F-15) bu tabloya ihtiyaç duymaz: Hedef sayfanın kimliği içerikteki `pageMention`'da durur.
 
 Sayfalar arası bağlantı. **Elle oluşturulmaz**; sayfa her kaydedildiğinde içerikteki `pageMention`'lardan yeniden türetilir (R-09).
 
@@ -140,8 +142,8 @@ Must aşamasında sohbet **durumsuzdur** (her soru bağımsız). Sohbet geçmiş
 | **R-05** | Hiyerarşide **döngü olamaz**: Bir sayfa kendi altına veya alt sayfalarından birinin altına taşınamaz. | `PageService.move` | 422 | Should (taşıma ile) |
 | **R-06** | İçerik yalnızca izin verilen blok ve satır içi türleri içerir; JSON boyutu ≤ **512 KB**; bloklar en fazla **20** kat iç içe olabilir. | `PageContent` | 422 | Must |
 | **R-07** | Güncelleme, istemcinin gönderdiği `version` güncel sürüme eşitse yapılır (iyimser kilitleme). | `Page.update` | 409 | Must |
-| **R-08** | Silinen sayfa **alt sayfalarıyla birlikte** silinmiş işaretlenir; ağaçta, aramada, sohbette ve geri bağlantılarda görünmez. (Should: çöp kutusundan geri alınınca hepsi geri gelir.) | `PageService.delete/restore` | — | Must |
-| **R-09** | Bağlantılar içerikten türetilir; yalnızca aynı kullanıcının sayfalarına verilebilir; sayfanın kendine verdiği bağlantı yok sayılır. | `LinkService` | Geçersiz hedef yok sayılır | Must |
+| **R-08** | Silinen sayfa **alt sayfalarıyla birlikte** silinmiş işaretlenir; ağaçta, aramada ve sohbette görünmez. (Should: geri bağlantılarda da görünmez; çöp kutusundan geri alınınca hepsi geri gelir.) | `PageService.delete/restore` | — | Must |
+| **R-09** | Bağlantılar içerikten türetilir; yalnızca aynı kullanıcının sayfalarına verilebilir; sayfanın kendine verdiği bağlantı yok sayılır. | `LinkService` | Geçersiz hedef yok sayılır | Should (geri bağlantılar ile) |
 | **R-10** | İçeriği veya görünürlüğü değiştiren her işlem `version`'ı artırır ve sayfayı "indeksleme bekliyor" durumuna sokar (`indexed_version IS DISTINCT FROM version`; hiç indekslenmemiş sayfada `indexed_version` NULL'dır). İndeks, düzenleme **en az 10 sn durduktan sonra** güncellenir. | `PageService`, `IndexingService` | — | Must |
 | **R-11** | Başarısız indeksleme en fazla **5** kez denenir (bekleme: `5 × 2^n` sn, n = o ana kadarki başarısız deneme sayısı → 5, 10, 20, 40 sn). 5. başarısızlıkta durum `FAILED` olur; sayfa tekrar düzenlenince sayaç ve bekleme sıfırlanır. | `IndexingService` | — | Must |
 | **R-12** | Her arama ve vektör sorgusu kullanıcının `owner_id`'si ile filtrelenir. | `SearchService`, `VectorIndex` | — | Must |
@@ -167,9 +169,6 @@ CREATE TABLE pages (
     parent_id       uuid NULL REFERENCES pages(id) ON DELETE CASCADE,
     title           varchar(200) NOT NULL,
     content         jsonb NOT NULL DEFAULT '[]',
-    plain_text      text NOT NULL DEFAULT '',
-    search_vector   tsvector GENERATED ALWAYS AS (
-                      to_tsvector('simple', coalesce(title, '') || ' ' || plain_text)) STORED,
     version         integer NOT NULL DEFAULT 1,
     deleted_at      timestamptz NULL,
     indexed_version integer NULL,
@@ -180,9 +179,15 @@ CREATE TABLE pages (
     updated_at      timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ix_pages_owner_parent ON pages (owner_id, parent_id) WHERE deleted_at IS NULL;
-CREATE INDEX ix_pages_search ON pages USING gin (search_vector);
 CREATE INDEX ix_pages_needs_index ON pages (updated_at) WHERE indexed_version IS DISTINCT FROM version;
 
+-- Should: kelime araması (F-18); ayrı bir migration ile eklenir
+ALTER TABLE pages ADD COLUMN plain_text text NOT NULL DEFAULT '';
+ALTER TABLE pages ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (
+    to_tsvector('simple', coalesce(title, '') || ' ' || plain_text)) STORED;
+CREATE INDEX ix_pages_search ON pages USING gin (search_vector);
+
+-- Should: geri bağlantılar (F-16)
 CREATE TABLE page_links (
     source_page_id uuid NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
     target_page_id uuid NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
