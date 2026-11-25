@@ -74,7 +74,10 @@ def test_new_page_starts_at_version_1_and_is_not_indexed_yet() -> None:
 
 
 def test_each_new_page_gets_its_own_id() -> None:
-    assert new_page().id != new_page().id
+    first = new_page()
+    second = new_page()
+
+    assert first.id != second.id
 
 
 # Kaydetme — R-07, R-10, R-11
