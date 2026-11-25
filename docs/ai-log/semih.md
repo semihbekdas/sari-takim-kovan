@@ -85,3 +85,11 @@
   6. Adaptör açıklaması, kullanmadığımız yerel modelleri (LM Studio/Ollama) destekliyormuş gibi yazıyordu.
 - **Düzeltme:** Adresler her zaman açıkça veriliyor. Engellenen cevap "reddetme", bağlam penceresi dolması "kesildi" sayılıyor. Sayısal ayarlar pozitif olmak zorunda. AC-10.5 etiketi ve kullanıcı mesajı testi eklendi. Yerel model iddiası kaldırıldı. Her biri için test eklendi; 62 test geçti.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-25 — Değerlendirme seti (Semih'in payı) ve ölçüm betiği (Ortak, #17)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Sonuç:** `eval/README.md` (herkesin kullanacağı biçim), `eval/dataset/semih/` (5 kurgusal sayfa), `eval/questions/semih.toml` (7 soru: 3 normal, 2 eşanlamlı, 1 notlarda yok, 1 prompt injection), `eval/compare_embeddings.py` (Hit@1, Hit@5, MRR ve "notlarda yok" eşiği için skor). Sayfa kimliği `üye/dosya-adı` (farklı üyelerin aynı adlı dosyaları karışmaz); hatalı soru dosyası açıklayıcı hatayla durur.
+- **Gözlem:** Sahte (kelime tabanlı) embedding ile Hit@1 = 0.33; Türkçe ekler ("3NF'de", "değişti/yenilendi") kelime eşleşmesini bozuyor. Gerçek embedding modelinin neden gerekli olduğunu gösteren somut bir ölçüm.
+- **Yapay zekanın hataları / eksikleri:** İlk taslak üç modeli üç ayrı hesapla karşılaştırmayı planlıyordu; ödev ölçeğinde gereksiz bulundu (PR #28). Betik artık tek modeli ölçüyor.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
