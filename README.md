@@ -156,9 +156,9 @@ uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
 # /api/v1/health/ready: PostgreSQL çalışıyorsa 200, ulaşılamazsa 503
 
-cd ../frontend                       # (planlanan)
+cd ../frontend                       # ikinci bir terminalde
 npm install
-npm run dev                          # http://localhost:5173
+npm run dev                          # http://localhost:5173 (/api istekleri backend'e yönlenir)
 ```
 
 Gerçek yapay zeka için `.env` içinde `CHAT_PROVIDER`, `EMBEDDING_PROVIDER`, model adları ve API anahtarları doldurulur ([architecture.md § 8](docs/architecture.md#8-yapılandırma)). **`.env` asla commit'lenmez.**
@@ -182,7 +182,10 @@ uv run ruff check . && uv run ruff format --check .   # lint + biçim
 uv run mypy                            # tip kontrolü (strict)
 uv run lint-imports                    # mimari katman kuralları
 
-cd ../frontend && npm test             # (planlanan)
+cd ../frontend
+npm test                               # Vitest
+npm run lint                           # eslint + prettier
+npm run typecheck                      # tsc --noEmit (strict)
 ```
 
 *Sonuçlar (test sayısı, kapsam, RAG metrikleri) sprintler ilerledikçe buraya eklenecek.*
@@ -191,7 +194,7 @@ cd ../frontend && npm test             # (planlanan)
 
 - **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
 - **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **ruff, mypy:** CI'da zorunlu; **eslint** frontend iskeleti gelince eklenecek *(planlanan)*.
+- **ruff, mypy:** CI'da zorunlu. **eslint + prettier + tsc** frontend'de hazır (`npm run lint`, `npm run typecheck`); CI'a #16'da eklenecek *(planlanan)*.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 
