@@ -54,6 +54,9 @@ jobs:
 
       # Fork'tan veya Dependabot'tan açılan PR'larda GitHub secret'ları paylaşmaz; token olmadan
       # analiz yapılamaz. Bu yüzden analiz main'e push'ta ve repo içinden açılan PR'larda çalışır.
+      - name: Değerlendirme betiği çalışıyor mu (fake mod)
+        run: uv run --frozen --no-sync python ../eval/compare_embeddings.py --provider fake
+
       - name: SonarQube Cloud analizi
         if: >-
           github.event_name == 'push' ||
