@@ -103,8 +103,9 @@ def test_delete_page_removes_only_that_page(index: QdrantVectorIndex) -> None:
 
 def test_point_id_is_deterministic_per_page_and_chunk() -> None:
     page = uuid4()
+    first_call, second_call = point_id(page, 0), point_id(page, 0)
 
-    assert point_id(page, 0) == point_id(page, 0)
+    assert first_call == second_call
     assert point_id(page, 0) != point_id(page, 1)
     assert point_id(page, 0) != point_id(uuid4(), 0)
 
