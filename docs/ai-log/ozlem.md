@@ -11,3 +11,13 @@
 - **Yapay zekanın hataları / eksikleri:** Dokümanlarda `to_sections()` PageContent altında yazıyordu ama #6'da yoktu ve ADR-009 bölme işini `chunk_page`'e veriyordu.
 - **Bizim müdahalemiz:** Belirsizliği gidermek için metodun #13 (parçalama) ile birlikte yazılacağını belirten bir not eklenmesine karar verdim.
 - **Ders çıkarımı:** Görev kartı ile doküman arasında fark varsa kodlamaya başlamadan önce netleştirmek gerekir.
+
+### 2026-11-20 — Özlem: PageContent içerik doğrulama (#6)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** `domain/content.py`: R-06 içerik doğrulaması, `to_plain_text()` ve `mentioned_page_ids()`; birim testleri.
+- **Prompt (özet):** "Issue #6'yı küçük parçalara böl, her parçanın kodunu ve testini adım adım birlikte yazalım."
+- **Sonuç:** PR #21. İş küçük commit'lere bölündü; testler her adımda yerelde çalıştırıldı.
+- **Yapay zekanın hataları / eksikleri:** İlk taslakta dosya sonu satırı eksikti (`ruff`). Bozuk şekilli girdi (ör. `props: null`) 500 veriyordu, link içeriği kontrol edilmiyordu, çok derin iç içe blok `RecursionError` veriyordu. "İzin verilir" testlerinde assert yoktu. Davranışlar sınıf yerine ayrı fonksiyonlardı.
+- **Bizim müdahalemiz:** `ruff format`'ı her commit öncesi çalıştırmayı alışkanlık yaptım. Review'da Umut ve Semih'in bulduklarını düzelttim: şekil kontrolü, link içeriği, iç içe sınırı (20, R-06'ya eklendi), assert'li testler ve `PageContent` değer nesnesi.
+- **Ders çıkarımı:** Bozuk girdi ve uç durumları ayrıca denemek gerekiyor. Görev kartındaki tasarımı (değer nesnesi) baştan izlemek sonradan yeniden yazmayı önlüyor.
