@@ -15,10 +15,10 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 ## Karar
 
 - **Backend testleri:** pytest, pytest-cov, FastAPI `TestClient`, **Testcontainers** (gerçek PostgreSQL ve Qdrant), fake yapay zeka sağlayıcıları (ADR-006). Her test ilgili kabul kriterini `@pytest.mark.ac("AC-xx.y")` ile işaretler.
-- **Frontend testleri:** Vitest + Testing Library. *(Should)* 3 Playwright duman testi.
+- **Frontend testleri:** Vitest + Testing Library. *(Could)* 3 Playwright duman testi.
 - **Statik analiz:** ruff (lint + format), mypy, eslint, `tsc --noEmit`.
 - **Mimari denetim:** **import-linter** (ADR-001, [mimari-secimi.md § 7](../mimari-secimi.md#7-uyumu-nasıl-kanıtlayacağız)).
-- **Kod kalitesi:** **SonarQube Cloud**, GitHub Actions'tan her PR'da analiz. Hedef: güvenilirlik, güvenlik ve bakım kolaylığı derecelendirmeleri **A**, quality gate yeşil. Frontend kapsamı ortak quality gate'i kırmızıya düşürürse backend ve frontend iki ayrı Sonar projesi olarak analiz edilir. Rapor ekran görüntüsü README'ye eklenir.
+- **Kod kalitesi:** **SonarQube Cloud**, GitHub Actions'tan her PR'da analiz. Hedef: güvenilirlik, güvenlik ve bakım kolaylığı derecelendirmeleri **A**, quality gate yeşil. Frontend kodu da analiz edilir, ama kapsam koşulu yalnızca backend için geçerlidir (`sonar.coverage.exclusions=frontend/**`): Ekran bileşenlerini %80 kapsama çıkarmak bu projede getirdiğinden fazla iş demektir; frontend'de mantık içeren kısımlar (otomatik kaydetme, 409 uyarısı, API istemcisi) Vitest ile test edilir (22 Kas 2026). Rapor ekran görüntüsü README'ye eklenir.
 - **Güvenlik taraması:** GitHub secret scanning + push protection, Dependabot uyarıları.
 - **CI:** GitHub Actions; kırmızı CI ile merge yapılamaz (branch koruması). CI gerçek API anahtarı **kullanmaz**.
 

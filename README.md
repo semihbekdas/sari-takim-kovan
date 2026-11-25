@@ -51,11 +51,11 @@ Tam liste ve öncelikler: **[OZELLIKLER.md](OZELLIKLER.md)**
 - 🔐 Kayıt / giriş; her kullanıcı yalnızca kendi verisini görür
 - 📝 Blok tabanlı editör (BlockNote), otomatik kaydetme, çakışma koruması
 - 🌳 Alt sayfalar, sayfa ağacı, breadcrumb, silme (*Should:* çöp kutusu, taşıma)
-- 🔗 Sayfalar arası bağlantı ve geri bağlantılar
-- 🔎 Kelime araması + **anlamsal arama**
+- 🔗 Sayfalar arası bağlantı (*Should:* geri bağlantılar)
+- 🔎 **Anlamsal arama** (*Should:* kelime araması)
 - 🤖 **"Sayfalarına Sor"**: kaynak gösteren RAG sohbeti
 - ⚙️ Arka planda, hataya dayanıklı ve maliyet dostu indeksleme
-- 🧩 *(Should)* Token kullanım raporu, sohbet geçmişi, MCP Server
+- 🧩 *(Should)* Token kullanım raporu, sohbet geçmişi · *(Could)* MCP Server
 
 ## 4. Mimari Tasarım
 
@@ -106,7 +106,7 @@ Ders şartı: *en az bir veritabanı.* Kovan **iki** veritabanı kullanır:
 
 | Veritabanı | Ne tutar |
 | --- | --- |
-| **PostgreSQL** | `users`, `pages` (içerik JSONB, düz metin, indeks durumu), `page_links`; *(Should)* `chat_sessions`, `chat_messages` |
+| **PostgreSQL** | `users`, `pages` (içerik JSONB, indeks durumu); *(Should)* `page_links`, `chat_sessions`, `chat_messages` |
 | **Qdrant** | Sayfa parçalarının vektörleri + `owner_id`, `page_id`, başlık yolu gibi meta veriler |
 
 Şema ve kurallar: [docs/domain-design.md](docs/domain-design.md)
@@ -119,10 +119,10 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 | Bileşen | Kullanım |
 | --- | --- |
-| Embedding API (OpenAI / bge-m3 / Voyage; ekip ölçerek seçecek, ADR-006) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
+| Embedding API (OpenAI `text-embedding-3-small`; seçim gerekçesi [ADR-006](docs/adr/ADR-006-llm-saglayici.md)) | Sayfa parçalarını ve kullanıcı sorusunu vektöre çevirir |
 | Qdrant | Kosinüs benzerliği ile anlamsal arama (ders Bölüm 9–10) |
 | Dil modeli API (Claude / GPT / Gemini; ekip seçecek) | Getirilen parçalardan **kaynaklı** cevap üretir (RAG) |
-| *(Should)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (ders Bölüm 12–13) |
+| *(Could)* MCP Server | Yapay zeka asistanlarının Kovan'da salt-okunur arama yapması (ders Bölüm 12–13) |
 
 - **Fake mod:** API anahtarı olmadan uygulama ve testler sahte (deterministik) yapay zeka ile çalışır. Güçlü bilgisayar veya yerel model gerekmez.
 - **Gizlilik:** Gerçek modda soru ve ilgili not parçaları seçilen bulut sağlayıcıya gönderilir. Demo ve değerlendirme verileri kurgusaldır.
@@ -136,7 +136,7 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 | Codex / GitHub Copilot | Kod üretimi ve editör içi tamamlama |
 | `AGENTS.md` / `CLAUDE.md` | Ajanların uyması gereken mimari, kod ve test kuralları |
 
-**Agentic Engineering yaklaşımı:** Yapay zekanın ürettiği her çıktı, commit'i atan kişi tarafından okunur, test edilir ve gerekirse düzeltilir. Önemli prompt'lar, yapay zekanın hataları ve düzeltmelerimiz **[docs/ai-log.md](docs/ai-log.md)** dosyasındadır.
+**Agentic Engineering yaklaşımı:** Yapay zekanın ürettiği her çıktı, commit'i atan kişi tarafından okunur, test edilir ve gerekirse düzeltilir. Önemli prompt'lar, yapay zekanın hataları ve düzeltmelerimiz **[docs/ai-log/](docs/ai-log/README.md)** klasöründedir (her üyenin ayrı dosyası var).
 
 ## 8. Kurulum ve Çalıştırma
 
@@ -156,9 +156,9 @@ uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
 # /api/v1/health/ready: PostgreSQL çalışıyorsa 200, ulaşılamazsa 503
 
-cd ../frontend                       # (planlanan)
+cd ../frontend                       # ikinci bir terminalde
 npm install
-npm run dev                          # http://localhost:5173
+npm run dev                          # http://localhost:5173 (/api istekleri backend'e yönlenir)
 ```
 
 Gerçek yapay zeka için `.env` içinde `CHAT_PROVIDER`, `EMBEDDING_PROVIDER`, model adları ve API anahtarları doldurulur ([architecture.md § 8](docs/architecture.md#8-yapılandırma)). **`.env` asla commit'lenmez.**
@@ -172,7 +172,7 @@ Strateji: **[docs/test-strategy.md](docs/test-strategy.md)** · Hikayeler ve kab
 | Birim | pytest, Vitest | Domain kuralları, servisler, chunking, prompt oluşturma, UI mantığı |
 | Entegrasyon | pytest + Testcontainers | PostgreSQL repository'leri, Qdrant adaptörü, indeksleme döngüsü |
 | Kabul | pytest (API senaryoları) | Her Must kabul kriteri (AC) en az bir teste bağlı |
-| Uçtan uca *(Should)* | Playwright | 3 duman senaryosu |
+| Uçtan uca *(Could)* | Playwright | 3 duman senaryosu |
 | RAG değerlendirme | Kendi değerlendirme setimiz | Hit@5 (doğru sayfa ilk 5 sonuçta mı), MRR (doğru sayfanın sırasının tersinin ortalaması: 1. sıra = 1, 2. sıra = 0,5; 0 ile 1 arası) |
 
 ```bash
@@ -182,7 +182,10 @@ uv run ruff check . && uv run ruff format --check .   # lint + biçim
 uv run mypy                            # tip kontrolü (strict)
 uv run lint-imports                    # mimari katman kuralları
 
-cd ../frontend && npm test             # (planlanan)
+cd ../frontend
+npm test                               # Vitest
+npm run lint                           # eslint + prettier
+npm run typecheck                      # tsc --noEmit (strict)
 ```
 
 *Sonuçlar (test sayısı, kapsam, RAG metrikleri) sprintler ilerledikçe buraya eklenecek.*
@@ -191,13 +194,13 @@ cd ../frontend && npm test             # (planlanan)
 
 - **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
 - **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **ruff, mypy:** CI'da zorunlu; **eslint** frontend iskeleti gelince eklenecek *(planlanan)*.
+- **ruff, mypy:** CI'da zorunlu. **eslint + prettier + tsc** frontend'de hazır (`npm run lint`, `npm run typecheck`); CI'a #16'da eklenecek *(planlanan)*.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 
 ## 11. Karşılaşılan Zorluklar ve Çözümler
 
-> Proje boyunca doldurulacak. Kaynak: [docs/ai-log.md](docs/ai-log.md) ve sprint değerlendirmeleri.
+> Proje boyunca doldurulacak. Kaynak: [docs/ai-log/](docs/ai-log/README.md) ve sprint değerlendirmeleri.
 
 | # | Zorluk | Çözüm | İlgili |
 | --- | --- | --- | --- |
@@ -213,7 +216,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | Kriter (ders rehberi) | Projede nasıl karşılanıyor | Kanıt |
 | --- | --- | --- |
 | **Takım:** yakın ağırlıkta katkı | 3 dengeli dikey iş paketi, herkes kendi modülünün sahibi, haftalık `git shortlog` kontrolü | [PLAN.md](docs/PLAN.md), GitHub Insights |
-| **Dil Modeli:** en az bir yapay zeka aracı, kullanımı belgelenmiş | Ürün içinde embedding + RAG (+ MCP); geliştirmede Claude Code / Codex / Copilot | § 7, [ai-log.md](docs/ai-log.md) |
+| **Dil Modeli:** en az bir yapay zeka aracı, kullanımı belgelenmiş | Ürün içinde embedding + RAG; geliştirmede Claude Code / Codex / Copilot | § 7, [ai-log](docs/ai-log/README.md) |
 | **Geliştirme Süreci:** GitHub, gerçekçi commit geçmişi, anlamlı mesajlar, ≥ 3 PR | Feature branch + PR + review, Conventional Commits, squash yok, haftalara yayılmış iş | [KURALLAR.md](KURALLAR.md), commit geçmişi |
 | **Teknik Borç:** A kalite, ölçüm aracı | SonarQube Cloud her PR'da | § 10, Sonar raporu |
 | **Güvenlik** | Kimlik doğrulama, yetkilendirme testleri, prompt injection önlemi, anahtar yönetimi | § 10, [architecture.md § 9](docs/architecture.md#9-güvenlik) |
@@ -226,7 +229,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 
 ## 13. Proje Yönetimi ve Ekip
 
-- Plan, sprintler, iş paketleri, riskler, skor kartı: **[docs/PLAN.md](docs/PLAN.md)**
+- Plan, sprintler, iş paketleri, riskler, ilerleme: **[docs/PLAN.md](docs/PLAN.md)**
 - Ekip çalışma kuralları: **[KURALLAR.md](KURALLAR.md)**
 - Takım: **Sarı Takım** · Repo: `sari-takim-kovan`
 - Toplantılar: hafta sonu · Kod dondurma: 13 Aralık · Teslim: 25 Aralık
@@ -234,9 +237,9 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | Üye | İş paketi | Sorumluluk |
 | --- | --- | --- |
 | Umut | İP-A Sayfalar & Editör | docker-compose + frontend iskeleti; sayfa API'si, sayfa ağacı, editör, otomatik kaydetme, silme, `@` bağlantısı |
-| Özlem | İP-B Kimlik, İçerik & Arama | Kayıt/giriş, içerik doğrulama, chunking, geri bağlantılar, kelime ve anlamsal arama |
-| Semih | İP-C Yapay Zeka | Backend iskeleti, CI + SonarQube Cloud; yapay zeka adaptörleri, Qdrant, indeksleme, "Sayfalarına Sor" |
-| Herkes | Ortak | Değerlendirme seti ve embedding karşılaştırması, güvenlik gözden geçirmesi, README, sunum |
+| Özlem | İP-B Kimlik, İçerik & Arama | Kayıt/giriş ve ekranları, içerik doğrulama, chunking, anlamsal arama uç noktası ve arama ekranı |
+| Semih | İP-C Yapay Zeka | Backend iskeleti, CI + SonarQube Cloud; yapay zeka adaptörleri, Qdrant, indeksleme, parça getirme, "Sayfalarına Sor" |
+| Herkes | Ortak | Değerlendirme seti ve embedding modelinin bu setle ölçülmesi, güvenlik gözden geçirmesi, README, sunum |
 
 ## 14. Doküman Haritası
 
@@ -245,7 +248,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | [OZELLIKLER.md](OZELLIKLER.md) | Uygulama özellikleri (MoSCoW), ekranlar, kararlar |
 | [KURALLAR.md](KURALLAR.md) | Git, commit, PR, kod, test, doküman, yapay zeka ve güvenlik kuralları |
 | [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Yapay zeka ajanları için proje talimatları |
-| [docs/PLAN.md](docs/PLAN.md) | Sprint planı, iş paketleri, riskler, skor kartı |
+| [docs/PLAN.md](docs/PLAN.md) | Sprint planı, iş paketleri, riskler, ilerleme |
 | [docs/mimari-secimi.md](docs/mimari-secimi.md) | Mimari araştırması ve seçim gerekçesi |
 | [docs/architecture.md](docs/architecture.md) | Mimari tasarım, akışlar, güvenlik, yapılandırma |
 | [docs/domain-design.md](docs/domain-design.md) | Entity'ler, alanlar, domain kuralları (R-01 … R-13), şema |
@@ -253,7 +256,7 @@ Ders rehberindeki her değerlendirme kriteri ve projedeki karşılığı:
 | [docs/user-stories.md](docs/user-stories.md) | Kullanıcı hikayeleri ve kabul kriterleri (AC) |
 | [docs/test-strategy.md](docs/test-strategy.md) | Test stratejisi, izlenebilirlik matrisi, RAG değerlendirmesi |
 | [docs/adr/](docs/adr/) | Mimari karar kayıtları (ADR-001 … ADR-010) |
-| [docs/ai-log.md](docs/ai-log.md) | Yapay zeka kullanım günlüğü |
+| [docs/ai-log/](docs/ai-log/README.md) | Yapay zeka kullanım günlüğü (her üyenin ayrı dosyası) |
 
 ---
 
