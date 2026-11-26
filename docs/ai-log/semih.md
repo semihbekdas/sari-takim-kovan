@@ -103,3 +103,15 @@
 - **Gözlem:** Sahte (kelime tabanlı) embedding ile Hit@1 = 0.33; Türkçe ekler ("3NF'de", "değişti/yenilendi") kelime eşleşmesini bozuyor. Gerçek embedding modelinin neden gerekli olduğunu gösteren somut bir ölçüm.
 - **Yapay zekanın hataları / eksikleri:** İlk taslak üç modeli üç ayrı hesapla karşılaştırmayı planlıyordu; ödev ölçeğinde gereksiz bulundu (PR #28). Betik artık tek modeli ölçüyor.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-27 — PR #29 review'u: Özlem'in 2 notu ve Codex'in 4 uyarısı (#17)
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Fable 5.2)
+- **Yapay zekanın hataları (review yakaladı):**
+  1. `sonar.exclusions` iki ayrı satırda kalıyordu; yalnızca sonuncusu geçerli olduğu için `backend/migrations/**` dışlaması kayboluyordu (Özlem).
+  2. Türüyle uyuşmayan soru (ör. `normal` ama `expected_pages = []`) hata vermiyor, sessizce öteki gruba sayılıp metrikleri bozuyordu (Özlem ve Codex).
+  3. Arama eşiği için raporlanan skor beklenen sayfanın değil, en yakın sayfanın skoruydu; beklenen sayfa 2.–5. sıradayken eşik yanlış seçilebilirdi.
+  4. Betik `backend/` dışında durduğu için `ruff` ve `mypy` kapsamına girmiyordu.
+  5. Betik her bölümü tek parça sayıyor; uygulama ise 1000 karakteri aşan bölümü bölüyor. Uzun bir bölümde ölçüm uygulamayı yansıtmazdı.
+- **Düzeltme:** Dışlamalar tek satırda. Soru türü ile `expected_pages` uyumu kontrol ediliyor. Rapor beklenen sayfaların ortalama ve en düşük skorunu, her soru için de beklenen sayfanın skorunu veriyor. CI'da `ruff` ve `mypy` betiği de denetliyor. 1000 karakteri aşan bölümde betik duruyor; parça boyutunu bu setle ayarlama iddiası ADR-009 ve test stratejisinden çıkarıldı.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK

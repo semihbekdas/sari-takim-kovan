@@ -123,8 +123,8 @@ Tablo, kod dondurmadan önce `grep -rn 'pytest.mark.ac' backend/tests` çıktıs
 - `eval/dataset/<isim>/*.md`: Her üyenin 5 kurgusal sayfası (toplam ~15). **Gerçek kişisel veri kullanılmaz.** Biçim: `eval/README.md`.
 - `eval/questions/<isim>.toml`: Her üyenin 7 sorusu (toplam ~21), her biri için beklenen kaynak sayfa(lar). Türler: `normal`, `synonym` (AC-10.1), `not_found` (AC-11.2), `injection` (AC-11.4).
 - Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu. Seçilen embedding modeli (ADR-006) `eval/compare_embeddings.py` ile ölçülür; hedef tutmazsa aynı betikle ikinci bir model denenir.
-- Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K`, `SEARCH_MIN_SCORE` ve parça boyutu bu sete göre ayarlanır; sonuç tablosu README'ye yazılır.
-- Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez). Betiğin bozulmadığı CI'da fake modda denenir; fake modun sonuçları kaliteyi göstermez. `eval/` Sonar analizinin dışındadır.
+- Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K` ve `SEARCH_MIN_SCORE` bu sete göre ayarlanır; parça boyutu varsayılanında kalır ve sayfaların bölümleri bu sınırı aşmaz (ADR-009). Sonuç tablosu README'ye yazılır.
+- Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez). Betik CI'da `ruff` ve `mypy` ile denetlenir ve fake modda çalıştırılır; fake modun sonuçları kaliteyi göstermez. `eval/` Sonar analizinin dışındadır.
 
 ## 7. CI'da çalışan kontroller
 
