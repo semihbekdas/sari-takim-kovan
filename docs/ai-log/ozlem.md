@@ -39,7 +39,7 @@
 - **Prompt (özet):** "#11'in ikinci kısmını katmanlara göre küçük commit'lerle yaz: domain → servis → altyapı → API."
 - **Sonuç:** `domain/users.py`, `application/auth_service.py`, `application/ports/users.py`, `infrastructure/security/argon2.py`, `infrastructure/db/users.py`, `api/routers/auth.py`; birim, entegrasyon ve kabul testleri. `argon2-cffi` bağımlılığı eklendi (ADR-008).
 - **Yapay zekanın hataları / eksikleri:** Serviste görünen ad `strip()` ediliyordu; şemadaki 2–50 kontrolünden sonra ad 1 karaktere düşebilirdi, kaldırıldı. Repository her `IntegrityError`'ı "e-posta kayıtlı" sayabilirdi; yalnızca `ux_users_email` ihlalinin 409 olması sağlandı ve testi eklendi.
-- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Bizim müdahalemiz:** Kodu katmanlara göre küçük commit'lerle ilerletmeye ben karar verdim. Testleri çalıştırıp büyük harfli e-postayla kayıt olunca 409 döndüğünü ve şifrenin veritabanında Argon2 hash olarak durduğunu kontrol ettim.
 - **Ders çıkarımı:** Aynı kural iki katmanda (şema ve servis) farklı uygulanırsa tutarsızlık çıkıyor; kuralın tek yeri olmalı.
 
 ### 2026-11-26 — Özlem: giriş, çıkış ve `/auth/me` (#12)
