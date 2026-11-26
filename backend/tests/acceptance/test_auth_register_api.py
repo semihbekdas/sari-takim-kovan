@@ -11,7 +11,12 @@ from kovan.api.deps import get_auth_service
 from kovan.application.auth_service import AuthService
 from kovan.infrastructure.db.tables import users
 from kovan.main import create_app
-from tests.fakes import FakePasswordHasher, InMemoryUserRepository, make_test_settings
+from tests.fakes import (
+    FakePasswordHasher,
+    FakeSessionTokenService,
+    InMemoryUserRepository,
+    make_test_settings,
+)
 
 REGISTER_URL = "/api/v1/auth/register"
 VALID_BODY = {"email": "Ayse@Ornek.com", "password": "gizli-sifre", "display_name": "Ayşe Y."}
@@ -28,7 +33,7 @@ def db_client(clean_users: Engine, postgres_url: str) -> Iterator[TestClient]:
 @pytest.fixture
 def fake_client(app: FastAPI, client: TestClient) -> TestClient:
     """Bellekteki kullanıcı deposuyla çalışan uygulama: Docker gerekmez."""
-    service = AuthService(InMemoryUserRepository(), FakePasswordHasher())
+    service = AuthService(InMemoryUserRepository(), FakePasswordHasher(), FakeSessionTokenService())
     app.dependency_overrides[get_auth_service] = lambda: service
     return client
 
