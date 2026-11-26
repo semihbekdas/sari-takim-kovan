@@ -4,7 +4,7 @@ import pytest
 from alembic import command
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine
+from sqlalchemy import Connection, Engine
 from testcontainers.community.postgres import PostgresContainer
 
 from kovan.config import Settings
@@ -54,3 +54,18 @@ def db_engine(postgres_url: str) -> Iterator[Engine]:
         yield engine
     finally:
         engine.dispose()
+
+
+@pytest.fixture
+def db_connection(db_engine: Engine) -> Iterator[Connection]:
+    """Test sonunda geri alınan (rollback) bir işlem içindeki bağlantı.
+
+    Testin yazdığı her şey test bitince silinir; testler birbirini etkilemez ve sırası önemsizdir.
+    Repository'ler işlem açmadığı için bu bağlantıyla doğrudan kullanılabilir.
+    """
+    with db_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            yield connection
+        finally:
+            transaction.rollback()

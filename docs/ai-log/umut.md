@@ -41,3 +41,13 @@
 - **Yapay zekanın hataları / eksikleri:** İlk açıklaması fazla hızlı ve teknikti; neyin neden yapıldığını adım adım anlatmasını istedim.
 - **Bizim müdahalemiz:** Testleri ve CI kontrollerini (ruff, mypy, lint-imports, pytest) kendi bilgisayarımda çalıştırıp sonuçları okudum; PR'ı "Closes" değil "Part of #9" ile açtım ki #9 erken kapanmasın.
 - **Ders çıkarımı:** Bağımlılığı olan büyük bir işi, bağımlılık gerektirmeyen parçadan başlayarak bölmek beklerken de ilerlemeyi sağlıyor.
+
+### 2026-11-26 — Umut: pages tablosu ve repository (#9, 2/3)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** `pages` tablosunu Özlem'in `users` tablosunun (#34) üstüne kurmak; sayfaları veritabanına yazan/okuyan repository'yi ve Semih'in #23'te önerdiği "her test geri alınan işlem içinde" fixture'ını eklemek.
+- **Prompt (özet):** "#9'un 2. parçasını hazırla; #34 merge olmadan da ilerleyebilelim."
+- **Sonuç:** `tables.py`'de `pages` (domain-design § 9: FK'ler `ON DELETE CASCADE`, iki kısmi indeks), Alembic migration'ı, `SqlPageRepository` (`add`, `get`, `update`; `update` sürüm kontrolünü `UPDATE … WHERE version = :beklenen` ile tek adımda yapıyor, R-07), `db_connection` fixture'ı, 9 entegrasyon testi (sahiplik R-04, silinmiş sayfa R-08, sürüm çakışması R-07, bilinmeyen kullanıcı FK hatası).
+- **Yapay zekanın hataları / eksikleri:** İlk taslakta `PageRepository` port'unu da ekledi; ama port'u kullanan servis henüz yok ("kullanılmayan kod commit'lenmez") ve aynı satırı Semih'in #30'u da değiştiriyordu. Port 3. parçaya, servisle birlikte bırakıldı. Ayrıca Özlem'in dalının #31'den önceki `main`'e dayandığını ilk denemede atladı (import hatası); dala `main` merge edilerek çözüldü.
+- **Bizim müdahalemiz:** Testleri kendi bilgisayarımda Docker ile çalıştırdım; PR'ı #34'e bağlı olduğunu belirterek açtım.
+- **Ders çıkarımı:** Başkasının dalının üstüne çalışırken önce o dalın hangi `main`'e dayandığına bakmak gerekiyor.
