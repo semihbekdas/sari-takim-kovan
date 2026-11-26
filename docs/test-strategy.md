@@ -131,7 +131,7 @@ Tablo, kod dondurmadan önce `grep -rn 'pytest.mark.ac' backend/tests` çıktıs
 ```
 ruff check · ruff format --check · mypy · lint-imports
 pytest (unit + integration + acceptance) --cov
-vitest · eslint · tsc --noEmit        (frontend iskeleti gelince)
+vitest · eslint · prettier · tsc --noEmit
 SonarQube Cloud analizi + quality gate
 (Could: Playwright duman testleri, main'e merge sonrası)
 ```

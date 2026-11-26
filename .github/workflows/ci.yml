@@ -62,3 +62,32 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  frontend:
+    name: Frontend (lint, tip, test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Güvenlik: Yalnızca package-lock.json'daki sabit sürümler kurulur (npm ci) ve paketlerin
+      # kurulum betikleri çalıştırılmaz (--ignore-scripts).
+      - name: Bağımlılıkları kur
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Lint ve biçim (eslint, prettier)
+        run: npm run lint
+
+      - name: Tip kontrolü (tsc)
+        run: npm run typecheck
+
+      - name: Testler (Vitest)
+        run: npm test

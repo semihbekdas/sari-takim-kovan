@@ -194,7 +194,7 @@ npm run typecheck                      # tsc --noEmit (strict)
 
 - **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
 - **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **ruff, mypy:** CI'da zorunlu. **eslint + prettier + tsc** frontend'de hazır (`npm run lint`, `npm run typecheck`); CI'a #16'da eklenecek *(planlanan)*.
+- **ruff, mypy** (backend) ve **eslint, prettier, tsc, Vitest** (frontend): CI'da zorunlu.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 
