@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     database_url: str
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
+    # Vektör veritabanı (ADR-004)
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_timeout_seconds: PositiveInt = 5
+
     # Yapay zeka (ADR-006). Varsayılan "fake": API anahtarı gerekmez.
     chat_provider: Literal["fake", "anthropic", "openai_compatible"] = "fake"
     chat_model: str = "claude-opus-5-5"

@@ -140,25 +140,25 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 
 ## 8. Kurulum ve Çalıştırma
 
-> Backend iskeleti hazır. `docker compose`, Alembic ve frontend adımları ilgili işler bitince geçerli olacak *(planlanan)*.
+> Backend iskeleti, `docker compose` (PostgreSQL + Qdrant) ve Alembic hazır. Frontend adımları ilgili iş bitince geçerli olacak *(planlanan)*.
 
-**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (entegrasyon testleri; `docker compose` gelince PostgreSQL ve Qdrant da Docker'da çalışır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
+**Gereksinimler:** Python 3.12 + [uv](https://docs.astral.sh/uv/) (backend) · Docker (PostgreSQL ve Qdrant `docker compose` ile çalışır; entegrasyon testleri de Docker kullanır) · Node.js 22 LTS (frontend gelince). Yerel yapay zeka modeli **gerekmez**.
 
 ```bash
 git clone https://github.com/semihbekdas/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
-docker compose up -d                 # PostgreSQL + Qdrant (planlanan)
+docker compose up -d                 # PostgreSQL + Qdrant (durum: docker compose ps)
 
 cd backend
 uv sync                              # Python 3.12 yoksa uv kendisi indirir
-uv run alembic upgrade head          # (planlanan)
+uv run alembic upgrade head          # tabloları oluşturur/günceller
 uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
-# /api/v1/health/ready, veritabanına ulaşamazsa 503 döner (docker compose gelince 200)
+# /api/v1/health/ready: PostgreSQL ve Qdrant çalışıyorsa 200, biri ulaşılamazsa 503
 
-cd ../frontend                       # (planlanan)
+cd ../frontend                       # ikinci bir terminalde
 npm install
-npm run dev                          # http://localhost:5173
+npm run dev                          # http://localhost:5173 (/api istekleri backend'e yönlenir)
 ```
 
 Gerçek yapay zeka için `.env` içinde `CHAT_PROVIDER`, `EMBEDDING_PROVIDER`, model adları ve API anahtarları doldurulur ([architecture.md § 8](docs/architecture.md#8-yapılandırma)). **`.env` asla commit'lenmez.**
@@ -182,7 +182,10 @@ uv run ruff check . && uv run ruff format --check .   # lint + biçim
 uv run mypy                            # tip kontrolü (strict)
 uv run lint-imports                    # mimari katman kuralları
 
-cd ../frontend && npm test             # (planlanan)
+cd ../frontend
+npm test                               # Vitest
+npm run lint                           # eslint + prettier
+npm run typecheck                      # tsc --noEmit (strict)
 ```
 
 *Sonuçlar (test sayısı, kapsam, RAG metrikleri) sprintler ilerledikçe buraya eklenecek.*
@@ -191,7 +194,7 @@ cd ../frontend && npm test             # (planlanan)
 
 - **SonarQube Cloud:** Her PR'da CI'dan analiz edilir ([proje sayfası](https://sonarcloud.io/summary/new_code?id=semihbekdas_sari-takim-kovan)). Hedef güvenilirlik, güvenlik ve bakım kolaylığında **A**. *(Rapor ekran görüntüsü buraya eklenecek.)*
 - **CI (GitHub Actions):** Her PR'da lint, biçim, tip kontrolü, mimari kurallar, testler ve kapsam ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **ruff, mypy:** CI'da zorunlu; **eslint** frontend iskeleti gelince eklenecek *(planlanan)*.
+- **ruff, mypy** (backend) ve **eslint, prettier, tsc, Vitest** (frontend): CI'da zorunlu.
 - **import-linter:** Mimari katman kuralları CI'da zorunlu.
 - **Güvenlik önlemleri:** Argon2id şifre hash, httpOnly çerez, her sorguda `owner_id` filtresi, parametreli SQL, kullanıcı içeriğinin HTML olarak basılmaması, prompt injection'a karşı içeriğin modele "veri" olarak verilmesi, API anahtarlarının yalnızca `.env`'de tutulması ve GitHub push protection. Tehdit modeli: [architecture.md § 9](docs/architecture.md#9-güvenlik).
 

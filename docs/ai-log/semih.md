@@ -86,6 +86,16 @@
 - **Düzeltme:** Adresler her zaman açıkça veriliyor. Engellenen cevap "reddetme", bağlam penceresi dolması "kesildi" sayılıyor. Sayısal ayarlar pozitif olmak zorunda. AC-10.5 etiketi ve kullanıcı mesajı testi eklendi. Yerel model iddiası kaldırıldı. Her biri için test eklendi; 62 test geçti.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
 
+### 2026-11-25 — Qdrant vektör indeksi (İP-C, #14)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** `VectorIndex` port'u ve Qdrant adaptörü: koleksiyonu kurma ve doğrulama, sayfa parçalarını yazma, sayfa silme, **yalnızca sahibinin notlarında** arama; `/health/ready`'ye Qdrant kontrolü.
+- **Sonuç:** `infrastructure/vector/qdrant_index.py`, `application/ports/vector.py`. Testler Docker gerektirmeyen bellek içi Qdrant ile; gerçek sunucu testi Testcontainers ile (CI'da).
+- **Kararlar:** Nokta kimlikleri `uuid5(sayfa:parça)` ile deterministik (aynı sayfanın tekrar indekslenmesi kopya üretmez, AC-12.3). Koleksiyon zaten varsa boyutu `EMBEDDING_DIM` ile karşılaştırılır; farklıysa açık hata. Geçici Qdrant hataları (bağlantı, 429, 5xx) `VECTOR_STORE_UNAVAILABLE` (503) olur. Uygulama açılırken Qdrant'a bağlanmaya çalışmaz.
+- **Yapay zekanın hataları / eksikleri:** İlk taslak sayfayı yeniden yazarken önce eski parçaları siliyordu; yazma başarısız olursa sayfa aramadan kayboluyordu. Kalıcı hatalar (400, 404) da "geçici kesinti" sayılıyordu. İkisi de kod incelemesinde bulundu.
+- **Düzeltme:** Önce yeni parçalar yazılıyor, sonra fazla kalan eski parçalar siliniyor. Yalnızca bağlantı hatası, 429 ve 5xx geçici sayılıyor. Her biri için test eklendi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
 ### 2026-11-25 — Değerlendirme seti (Semih'in payı) ve ölçüm betiği (Ortak, #17)
 - **Kim:** Semih
 - **Araç / model:** Claude Code (Claude Opus 5.5)
