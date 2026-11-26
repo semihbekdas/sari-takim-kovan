@@ -41,3 +41,13 @@
 - **Yapay zekanın hataları / eksikleri:** Serviste görünen ad `strip()` ediliyordu; şemadaki 2–50 kontrolünden sonra ad 1 karaktere düşebilirdi, kaldırıldı. Repository her `IntegrityError`'ı "e-posta kayıtlı" sayabilirdi; yalnızca `ux_users_email` ihlalinin 409 olması sağlandı ve testi eklendi.
 - **Bizim müdahalemiz:** Kodu katmanlara göre küçük commit'lerle ilerletmeye ben karar verdim. Testleri çalıştırıp büyük harfli e-postayla kayıt olunca 409 döndüğünü ve şifrenin veritabanında Argon2 hash olarak durduğunu kontrol ettim.
 - **Ders çıkarımı:** Aynı kural iki katmanda (şema ve servis) farklı uygulanırsa tutarsızlık çıkıyor; kuralın tek yeri olmalı.
+
+### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** Semih'in PR #21 review notu: blok/satır içi `type` veya başlık `level`'ı liste ya da nesne gelirse `in frozenset` kontrolü `TypeError` verip 500 dönüyordu.
+- **Prompt (özet):** "Semih'in #21 notunu düzelt: isinstance kontrolü ve testler."
+- **Sonuç:** `domain/content.py`'ye `_is_one_of` yardımcı fonksiyonu; üç kontrol (blok türü, satır içi tür, başlık seviyesi) bunu kullanıyor. 5 yeni test, düzeltmeden önce hepsi düşüyordu.
+- **Yapay zekanın hataları / eksikleri:** #21'deki ilk sürümde değerin tipine bakılmadan `in` kullanılmıştı. Test yazarken ek bir hata çıktı: Python'da `True == 1` olduğu için `level: true` geçerli başlık sayılıyordu; o da düzeltildi.
+- **Bizim müdahalemiz:** Semih'in review notunu takip ettim; level: true hatasını testte görünce onun da düzeltilmesini istedim.
+- **Ders çıkarımı:** JSON'dan gelen her alanın tipi, kullanılmadan önce kontrol edilmeli; `bool`'un `int` sayılması gibi Python özellikleri test edilmeli.
