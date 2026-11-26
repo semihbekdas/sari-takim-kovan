@@ -119,6 +119,21 @@ def test_unexpected_shapes_are_rejected(blocks: object) -> None:
 
 
 @pytest.mark.ac("AC-04.4")
+@pytest.mark.parametrize(
+    "blocks",
+    [
+        [{"type": ["paragraph"]}],
+        [{"type": {"name": "paragraph"}}],
+        [{"type": "paragraph", "content": [{"type": ["text"], "text": "abc"}]}],
+        [{"type": "heading", "props": {"level": [1]}}],
+        [{"type": "heading", "props": {"level": True}}],
+    ],
+)
+def test_type_or_level_that_is_not_text_or_number_is_rejected(blocks: object) -> None:
+    assert_rejected(blocks)
+
+
+@pytest.mark.ac("AC-04.4")
 @pytest.mark.parametrize("depth", [21, 3000])
 def test_too_deep_nesting_is_rejected(depth: int) -> None:
     assert_rejected(nested_blocks(depth))
