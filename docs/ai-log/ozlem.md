@@ -29,5 +29,5 @@
 - **Prompt (özet):** "#11'i iki PR'a böl; önce `users` tablosunu, migration'ını ve tablo testlerini hazırla."
 - **Sonuç:** `infrastructure/db/tables.py`, migration `08ffb3ff6603`, `tests/integration/test_users_table.py`. #9 ve #12 bu tabloya bağlı olduğu için ayrı PR yapıldı.
 - **Yapay zekanın hataları / eksikleri:** Autogenerate fonksiyon tabanlı indeksi (`lower(email)`) üretmedi; migration'a elle eklendi. Tablo testleri önce kendi temizleme fixture'ını kullanıyordu, register testleri gelince ortak `conftest.py`'ye taşındı.
-- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Bizim müdahalemiz:** İşi iki PR'a bölmeye ben karar verdim: önce users tablosu, sonra kayıt uç noktası. Migration'daki lower(email) benzersiz indeksini ve testleri kontrol ettim, büyük/küçük harf farklı aynı e-postanın reddedildiğini doğruladım.
 - **Ders çıkarımı:** Autogenerate çıktısı her zaman gözden geçirilmeli; `tables.py` ↔ migration uyumu testi bunu yakalıyor.
