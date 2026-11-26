@@ -13,6 +13,12 @@ class RegisterRequest(BaseModel):
     display_name: str = Field(min_length=2, max_length=50)
 
 
+class LoginRequest(BaseModel):
+    # Biçim kontrolü yok: Hatalı e-posta da genel 401 alır (AC-02.2).
+    email: str
+    password: str
+
+
 class UserResponse(BaseModel):
     """`password_hash` bilerek yok: Hiçbir yanıtta dışarı verilmez."""
 
