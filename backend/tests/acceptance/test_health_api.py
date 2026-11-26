@@ -45,8 +45,10 @@ def test_ready_returns_503_when_a_dependency_is_down(app: FastAPI, client: TestC
     assert response.json() == {"status": "not_ready", "checks": {"database": "down"}}
 
 
-def test_ready_with_real_probe_reports_unreachable_database_as_down(client: TestClient) -> None:
+def test_ready_with_real_probes_reports_unreachable_dependencies_as_down(
+    client: TestClient,
+) -> None:
     response = client.get("/api/v1/health/ready")
 
     assert response.status_code == 503
-    assert response.json()["checks"] == {"database": "down"}
+    assert response.json()["checks"] == {"database": "down", "qdrant": "down"}
