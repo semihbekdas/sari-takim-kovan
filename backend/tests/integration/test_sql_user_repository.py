@@ -48,3 +48,22 @@ def test_other_integrity_errors_are_not_reported_as_email_taken(clean_users: Eng
 
     with pytest.raises(IntegrityError):
         repository.add(user_id=user_id, email="b@ornek.com", display_name="Ayşe", password_hash="h")
+
+
+@pytest.mark.integration
+def test_get_by_email_and_id_find_saved_user(clean_users: Engine) -> None:
+    repository = SqlUserRepository(clean_users)
+    user = repository.add(
+        user_id=uuid.uuid4(), email="ayse@ornek.com", display_name="Ayşe", password_hash="h"
+    )
+
+    assert repository.get_by_email("ayse@ornek.com") == user
+    assert repository.get_by_id(user.id) == user
+
+
+@pytest.mark.integration
+def test_get_returns_none_for_unknown_user(clean_users: Engine) -> None:
+    repository = SqlUserRepository(clean_users)
+
+    assert repository.get_by_email("yok@ornek.com") is None
+    assert repository.get_by_id(uuid.uuid4()) is None
