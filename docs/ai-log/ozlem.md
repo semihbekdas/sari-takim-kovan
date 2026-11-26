@@ -21,3 +21,13 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslakta dosya sonu satırı eksikti (`ruff`). Bozuk şekilli girdi (ör. `props: null`) 500 veriyordu, link içeriği kontrol edilmiyordu, çok derin iç içe blok `RecursionError` veriyordu. "İzin verilir" testlerinde assert yoktu. Davranışlar sınıf yerine ayrı fonksiyonlardı.
 - **Bizim müdahalemiz:** `ruff format`'ı her commit öncesi çalıştırmayı alışkanlık yaptım. Review'da Umut ve Semih'in bulduklarını düzelttim: şekil kontrolü, link içeriği, iç içe sınırı (20, R-06'ya eklendi), assert'li testler ve `PageContent` değer nesnesi.
 - **Ders çıkarımı:** Bozuk girdi ve uç durumları ayrıca denemek gerekiyor. Görev kartındaki tasarımı (değer nesnesi) baştan izlemek sonradan yeniden yazmayı önlüyor.
+
+### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** Semih'in PR #21 review notu: blok/satır içi `type` veya başlık `level`'ı liste ya da nesne gelirse `in frozenset` kontrolü `TypeError` verip 500 dönüyordu.
+- **Prompt (özet):** "Semih'in #21 notunu düzelt: isinstance kontrolü ve testler."
+- **Sonuç:** `domain/content.py`'ye `_is_one_of` yardımcı fonksiyonu; üç kontrol (blok türü, satır içi tür, başlık seviyesi) bunu kullanıyor. 5 yeni test, düzeltmeden önce hepsi düşüyordu.
+- **Yapay zekanın hataları / eksikleri:** #21'deki ilk sürümde değerin tipine bakılmadan `in` kullanılmıştı. Test yazarken ek bir hata çıktı: Python'da `True == 1` olduğu için `level: true` geçerli başlık sayılıyordu; o da düzeltildi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+- **Ders çıkarımı:** JSON'dan gelen her alanın tipi, kullanılmadan önce kontrol edilmeli; `bool`'un `int` sayılması gibi Python özellikleri test edilmeli.
