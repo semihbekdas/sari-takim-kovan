@@ -16,7 +16,7 @@
 
 | Seviye | Ne test edilir | Araç | Bağımlılıklar | Klasör |
 | --- | --- | --- | --- | --- |
-| **Birim** | Domain kuralları (R-xx), `PageContent`, `chunk_page`, `build_prompt`, atıf ayrıştırma, servisler (port'lar fake) | pytest | Yok (milisaniyeler) | `backend/tests/unit/` |
+| **Birim** | Domain kuralları (R-xx), `PageContent`, `chunk_page`, `build_prompt`, atıf ayrıştırma, servisler (port'lar fake), Qdrant adaptörünün mantığı (bellek içi Qdrant) | pytest | Yok (milisaniyeler) | `backend/tests/unit/` |
 | **Entegrasyon** | SQL repository'leri, Qdrant adaptörü (`owner_id` filtresi!), indeksleme döngüsü (yeniden deneme, idempotency, eski parçaların silinmesi) | pytest + **Testcontainers** (PostgreSQL, Qdrant) | Gerçek PostgreSQL ve Qdrant, **fake** embedding | `backend/tests/integration/` |
 | **Kabul (API)** | Kabul kriterleri, HTTP üzerinden (kayıt → sayfa → indeks → arama → sohbet) | pytest + FastAPI `TestClient` | Gerçek DB'ler, **fake** yapay zeka | `backend/tests/acceptance/` |
 | **Frontend** | Otomatik kaydetme (debounce), 409 uyarısı, bağlantı gösterimi, API istemcisi | Vitest + Testing Library (API istemcisi mock'lanır) | Yok | `frontend/tests/` |

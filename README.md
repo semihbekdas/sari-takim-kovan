@@ -154,7 +154,7 @@ uv sync                              # Python 3.12 yoksa uv kendisi indirir
 uv run alembic upgrade head          # tabloları oluşturur/günceller
 uv run uvicorn kovan.main:create_app --factory --reload
 # API: http://localhost:8000/api/v1/health · Swagger: http://localhost:8000/api/docs
-# /api/v1/health/ready: PostgreSQL çalışıyorsa 200, ulaşılamazsa 503
+# /api/v1/health/ready: PostgreSQL ve Qdrant çalışıyorsa 200, biri ulaşılamazsa 503
 
 cd ../frontend                       # ikinci bir terminalde
 npm install
