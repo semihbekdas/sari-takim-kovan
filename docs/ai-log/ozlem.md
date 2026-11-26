@@ -49,5 +49,5 @@
 - **Prompt (özet):** "#12'yi kayıt dalının üstüne kur; katmanlara göre küçük commit'lerle yaz, JWT çerez yaklaşımı ADR-008'e uysun."
 - **Sonuç:** `infrastructure/security/jwt.py` (HS256, `sub = user_id`, 8 saat), `AuthService.login` / `current_user`, `api/deps.py`'de `CurrentUser`, `kovan_session` çerezi (`HttpOnly; SameSite=Strict; Path=/api`, ayarla `Secure`). `JWT_SECRET` boşsa veya 32 karakterden kısaysa uygulama açılmıyor. `pyjwt` bağımlılığı eklendi (karar: Özlem).
 - **Yapay zekanın hataları / eksikleri:** `JWT_SECRET` zorunlu olunca ayarları elle kuran bir test (`test_ai_factory`) kırıldı, düzeltildi. Servis ilk taslakta token hatasını gereksiz yere ikinci kez sarıyordu, sadeleştirildi.
-- **Bizim müdahalemiz:**JWT için PyJWT kütüphanesini kullanmaya ben karar verdim. Yanlış e-posta ve yanlış şifrede aynı hata mesajının döndüğünü ve çerezin 8 saat geçerli olduğunu kontrol ettim.
+- **Bizim müdahalemiz:** JWT için PyJWT kütüphanesini kullanmaya ben karar verdim. Yanlış e-posta ve yanlış şifrede aynı hata mesajının döndüğünü ve çerezin 8 saat geçerli olduğunu kontrol ettim.
 - **Ders çıkarımı:** Kayıtsız e-postada da şifre hash'i doğrulanmalı; yoksa yanıt süresinden e-postanın kayıtlı olup olmadığı anlaşılabilir.
