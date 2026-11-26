@@ -94,7 +94,7 @@ kovan/
 │   ├── src/kovan/
 │   │   ├── domain/          users.py, pages.py, content.py, links.py, errors.py
 │   │   ├── application/
-│   │   │   ├── ports/         system.py (ReadinessProbe), ai.py (EmbeddingProvider, ChatModel), vector.py (VectorIndex), ileride users.py, pages.py …
+│   │   │   ├── ports/         system.py (ReadinessProbe), ai.py (EmbeddingProvider, ChatModel), vector.py (VectorIndex), indexing.py (PendingPages, Chunker), ileride users.py, pages.py …
 │   │   │   ├── health.py      ReadinessService
 │   │   │   ├── errors.py      uygulama hataları (ör. ExternalServiceError → 503)
 │   │   │   ├── auth_service.py, page_service.py, indexing_service.py,

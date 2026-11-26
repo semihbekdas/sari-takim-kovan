@@ -95,3 +95,16 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslak sayfayı yeniden yazarken önce eski parçaları siliyordu; yazma başarısız olursa sayfa aramadan kayboluyordu. Kalıcı hatalar (400, 404) da "geçici kesinti" sayılıyordu. İkisi de kod incelemesinde bulundu.
 - **Düzeltme:** Önce yeni parçalar yazılıyor, sonra fazla kalan eski parçalar siliniyor. Yalnızca bağlantı hatası, 429 ve 5xx geçici sayılıyor. Her biri için test eklendi.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-26 — İndeksleme servisi ve döngüsü (İP-C, #15, 1. parça)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Sonuç:** `application/indexing_service.py`: düzenlemesi bitmiş sayfaları parçalar, embedding'e çevirir, Qdrant'a yazar ve "indekslendi" işaretler; silinmiş sayfaların vektörlerini siler; hata olursa `5 × 2^deneme` sn sonra yeniden denenmek üzere işaretler (R-10, R-11, ADR-005). `infrastructure/index_loop.py`: turu ~5 sn'de bir ayrı bir thread'de çalıştırır; uygulama kapanırken bekleme hemen kesilir. Testler: AC-06.2, AC-12.2, AC-12.4.
+- **Kararlar:** Sayfa tablosu ve parçalama fonksiyonu servise yalnızca `PendingPages` ve `Chunker` port'larıyla bağlanıyor; böylece servis `pages` tablosu ve parçalama (#13) gelmeden test edilebiliyor. Adı bilerek "kuyruk" değil: ADR-005'e göre ayrı bir kuyruk yok, bilgi sayfa satırında. SQL uygulaması ve döngünün uygulamaya bağlanması 2. parçada.
+- **Yapay zekanın hataları / eksikleri (inceleme ve testler yakaladı):**
+  1. Yalnızca dış servis hataları yakalanıyordu; yanlış ayar gibi beklenmeyen bir hatada sayfa işaretlenmiyor, her turda ücretli bir embedding çağrısıyla sonsuza kadar deneniyordu.
+  2. İndeksleme sürerken sayfa düzenlenirse eski sürümün hatası yeni sürümün deneme bilgisinin üstüne yazılıyordu.
+  3. Bekleme süresi turun başından sayılıyordu; uzun bir zaman aşımından sonra bekleme fiilen sıfıra iniyordu.
+  4. Log testi tek başına geçiyor, bütün testlerle birlikte düşüyordu: Başka testlerin ayarladığı log seviyesi genel kalıyordu.
+- **Düzeltme:** Beklenmeyen hatada da sayfa "başarısız" işaretleniyor ve hata loglanmak üzere döngüye iletiliyor. Hata bilgisi yalnızca sayfa hâlâ aynı sürümdeyse yazılıyor. Süre hatanın olduğu andan sayılıyor. Test modülü log ayarını kaydedip geri koyuyor. Her biri için test var.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
