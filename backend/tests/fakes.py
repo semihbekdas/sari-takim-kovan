@@ -12,6 +12,9 @@ from kovan.domain.users import User
 # Bağlanılamayan bir adres: Testler gerçek veritabanına ihtiyaç duymaz.
 UNREACHABLE_DATABASE_URL = "postgresql+psycopg://kovan:kovan@127.0.0.1:1/kovan"
 
+# Yalnızca testlerde kullanılan, gizli olmayan sabit anahtar.
+TEST_JWT_SECRET = "test-jwt-secret-yalnizca-testlerde-kullanilir"
+
 
 def make_test_settings(**overrides: Any) -> Settings:
     """Testler için ayarlar: Geliştiricinin `.env` dosyası okunmaz (`_env_file=None`).
@@ -26,6 +29,8 @@ def make_test_settings(**overrides: Any) -> Settings:
         "embedding_provider": "fake",
         "chat_api_key": None,
         "embedding_api_key": None,
+        "jwt_secret": TEST_JWT_SECRET,
+        "session_cookie_secure": False,
     }
     values.update(overrides)
     return Settings(_env_file=None, **values)

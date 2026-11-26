@@ -276,10 +276,11 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `RAG_TOP_K` / `SEARCH_MIN_SCORE` | `6` / `0.35` | Değerlendirme setiyle ayarlanır |
 | `CHAT_MAX_TOKENS` / `CHAT_EFFORT` / `AI_TIMEOUT_SECONDS` | `4096` / `low` / `30` | Cevap üst sınırı (Claude'da düşünme token'ları dahil), Claude effort seviyesi, istek zaman aşımı (SDK başarısız isteği bir kez yeniden dener; en kötü durumda ~2 × zaman aşımı) |
 | `INDEX_SETTLE_SECONDS` | `10` | Düzenleme bittikten sonra indeksleme beklemesi |
-| `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez; `.env.example`'da boş, herkes kendi değerini üretir |
+| `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez; `.env.example`'da boş, herkes kendi değerini üretir. Boşsa veya 32 karakterden kısaysa uygulama açılmaz |
+| `SESSION_COOKIE_SECURE` | `false` | Oturum çerezine `Secure` ekler; prod'da (HTTPS) `true` (ADR-008) |
 | `LOG_LEVEL` | `INFO` | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` |
 
-Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`, `INDEX_SETTLE_SECONDS`, `JWT_SECRET`) onları kullanan özellikle birlikte `config.py`'ye eklenir; o zamana kadar `.env`'de değiştirilmeleri etkisizdir.
+Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`, `INDEX_SETTLE_SECONDS`) onları kullanan özellikle birlikte `config.py`'ye eklenir; o zamana kadar `.env`'de değiştirilmeleri etkisizdir.
 
 ## 9. Güvenlik
 
