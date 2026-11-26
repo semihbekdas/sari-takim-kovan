@@ -11,6 +11,7 @@ from kovan.domain.users import User
 
 # Bağlanılamayan bir adres: Testler gerçek veritabanına ihtiyaç duymaz.
 UNREACHABLE_DATABASE_URL = "postgresql+psycopg://kovan:kovan@127.0.0.1:1/kovan"
+UNREACHABLE_QDRANT_URL = "http://127.0.0.1:1"
 
 
 def make_test_settings(**overrides: Any) -> Settings:
@@ -21,6 +22,7 @@ def make_test_settings(**overrides: Any) -> Settings:
     """
     values: dict[str, Any] = {
         "database_url": UNREACHABLE_DATABASE_URL,
+        "qdrant_url": UNREACHABLE_QDRANT_URL,
         "log_level": "WARNING",
         "chat_provider": "fake",
         "embedding_provider": "fake",

@@ -45,7 +45,7 @@ backend/src/kovan/
 ## Test kuralları
 
 - Her davranış değişikliği testle gelir. Testler ilgili kabul kriterini işaretler: `@pytest.mark.ac("AC-xx.y")`.
-- Domain/application için birim test; repository, Qdrant, indeksleme döngüsü ve API için Testcontainers ile entegrasyon/kabul testi.
+- Domain/application için birim test; repository, Qdrant, indeksleme döngüsü ve API için Testcontainers ile entegrasyon/kabul testi. Qdrant adaptörünün mantığı ayrıca Docker gerektirmeyen bellek içi Qdrant ile birim test edilir.
 - Testler **gerçek yapay zeka API'si çağırmaz**: `FakeEmbeddingProvider` ve `FakeChatModel` (`infrastructure/ai/fake.py`) kullanılır; hata senaryoları için testte `ExternalServiceError` fırlatan küçük bir fake yazılır. Test ayarları `tests/fakes.py`'deki `make_test_settings()` ile kurulur (geliştiricinin `.env` dosyası okunmaz).
 - Assert'siz test yazma, test silme/atlama, coverage'tan dosya hariç tutma **yasak**. (Sonar'ın kapsam koşulu yalnızca backend içindir; frontend'de mantık içeren kısımlar test edilir, ADR-010.)
 

@@ -8,6 +8,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from qdrant_client import QdrantClient
 
 from kovan.api.errors import register_error_handlers
 from kovan.api.middleware import register_middleware
@@ -20,6 +21,7 @@ from kovan.infrastructure.db.engine import create_db_engine
 from kovan.infrastructure.db.probe import DatabaseProbe
 from kovan.infrastructure.db.users import SqlUserRepository
 from kovan.infrastructure.security.argon2 import Argon2PasswordHasher
+from kovan.infrastructure.vector.qdrant_index import QdrantProbe
 from kovan.logging_config import configure_logging
 
 API_PREFIX = "/api/v1"
@@ -30,8 +32,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     configure_logging(settings.log_level)
 
     engine = create_db_engine(settings.database_url)
+    qdrant = QdrantClient(
+        url=settings.qdrant_url,
+        timeout=settings.qdrant_timeout_seconds,
+        check_compatibility=False,  # açılışta Qdrant'a bağlanmaya çalışmasın
+    )
     container = Container(
-        readiness=ReadinessService([DatabaseProbe(engine)]),
+        readiness=ReadinessService([DatabaseProbe(engine), QdrantProbe(qdrant)]),
         auth=AuthService(SqlUserRepository(engine), Argon2PasswordHasher()),
     )
 
@@ -40,7 +47,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
-            engine.dispose()
+            try:
+                engine.dispose()
+            finally:
+                qdrant.close()  # veritabanı kapanırken hata olsa bile Qdrant bağlantısı kapanır
 
     app = FastAPI(
         title="Kovan API",
