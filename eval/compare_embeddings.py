@@ -4,8 +4,9 @@ Betik her çalıştırmada tek bir modeli ölçer; iki modeli karşılaştırmak
 çalıştırılır.
 
 Her soru için sayfalar, bölümlerine olan en yüksek kosinüs benzerliğine göre sıralanır;
-Hit@1, Hit@5 ve MRR hesaplanır. "Notlarda yok" sorularının en yüksek skoru, arama eşiğini
-(SEARCH_MIN_SCORE) seçmek için raporlanır. Qdrant gerekmez; hesap bellekte yapılır.
+Hit@1, Hit@5 ve MRR hesaplanır. Arama eşiği (SEARCH_MIN_SCORE) için iki skor raporlanır:
+beklenen sayfaların en düşük skoru ve "notlarda yok" sorularının en yüksek skoru. Qdrant
+gerekmez; hesap bellekte yapılır.
 
 Kullanım:
     uv run --project backend python eval/compare_embeddings.py --provider fake
@@ -31,6 +32,10 @@ from kovan.infrastructure.ai.openai_compatible import OpenAICompatibleEmbeddingP
 EVAL_DIR = Path(__file__).resolve().parent
 TOP_K = 5
 QUESTION_TYPES = {"normal", "synonym", "not_found", "injection"}
+# Uygulama bir bölümü CHUNK_MAX_CHARS'tan (varsayılan 1000, ADR-009) uzunsa böler. Betik her
+# bölümü tek parça saydığı için daha uzun bölüm kabul etmez; böylece ölçülen parçalar
+# uygulamanın indeksleyeceği parçalarla aynı kalır.
+MAX_SECTION_CHARS = 1000
 
 
 @dataclass(frozen=True)
@@ -58,6 +63,12 @@ class Result:
         pages = [page for page, _ in self.ranking]
         ranks = [pages.index(p) + 1 for p in self.question.expected_pages if p in pages]
         return min(ranks) if ranks else None
+
+    @property
+    def expected_score(self) -> float | None:
+        """Beklenen sayfaların en yüksek skoru; arama eşiği bunun altında kalmalıdır."""
+        expected = self.question.expected_pages
+        return max((score for page, score in self.ranking if page in expected), default=None)
 
 
 def split_markdown(text: str) -> tuple[str, list[tuple[str, str]]]:
@@ -92,7 +103,13 @@ def load_sections(dataset_dir: Path) -> list[Section]:
     for path in sorted(dataset_dir.glob("*/*.md")):
         title, sections = split_markdown(path.read_text(encoding="utf-8"))
         page = f"{path.parent.name}/{path.stem}"
-        result += [Section(page, f"{title} › {head}\n\n{body}") for head, body in sections]
+        for head, body in sections:
+            if len(body) > MAX_SECTION_CHARS:
+                raise ValueError(
+                    f"{page}: '{head}' bölümü {len(body)} karakter; en fazla {MAX_SECTION_CHARS} "
+                    "olabilir. Bölümü '## ' başlıklarıyla ikiye ayırın."
+                )
+            result.append(Section(page, f"{title} › {head}\n\n{body}"))
     return result
 
 
@@ -116,7 +133,16 @@ def _parse_question(item: dict[str, object], *, owner: str) -> Question:
     if not isinstance(expected, list):
         raise ValueError(f"{question_id}: expected_pages bir liste olmalı (notlarda yoksa [])")
     pages = [page if "/" in page else f"{owner}/{page}" for page in map(str, expected)]
+    _check_pages_match_type(question_id, str(item["type"]), pages)
     return Question(question_id, str(item["type"]), str(item["question"]), tuple(pages))
+
+
+def _check_pages_match_type(question_id: str, question_type: str, pages: list[str]) -> None:
+    """Yanlış doldurulan soru sessizce öteki gruba sayılıp metrikleri bozmasın diye durur."""
+    if question_type == "not_found" and pages:
+        raise ValueError(f"{question_id}: not_found sorusunda expected_pages boş olmalı ([])")
+    if question_type != "not_found" and not pages:
+        raise ValueError(f"{question_id}: {question_type} sorusunda beklenen sayfa yazılmalı")
 
 
 def check_expected_pages(questions: list[Question], pages: set[str]) -> None:
@@ -153,7 +179,7 @@ def report(label: str, results: list[Result]) -> str:
     hit1 = sum(1 for rank in ranks if rank == 1) / len(ranks) if ranks else 0.0
     hit5 = sum(1 for rank in ranks if rank and rank <= TOP_K) / len(ranks) if ranks else 0.0
     mrr = sum(1 / rank for rank in ranks if rank) / len(ranks) if ranks else 0.0
-    best_answerable = [r.ranking[0][1] for r in answerable if r.ranking]
+    expected_scores = [r.expected_score for r in answerable if r.expected_score is not None]
     best_missing = [r.ranking[0][1] for r in unanswerable if r.ranking]
 
     lines = [
@@ -166,19 +192,23 @@ def report(label: str, results: list[Result]) -> str:
         f"| Hit@1 | {hit1:.2f} |",
         f"| Hit@{TOP_K} | {hit5:.2f} |",
         f"| MRR | {mrr:.2f} |",
-        f"| Cevaplanabilir soruların en iyi skor ortalaması | {_mean(best_answerable):.3f} |",
+        f"| Beklenen sayfaların skor ortalaması | {_mean(expected_scores):.3f} |",
+        f"| Beklenen sayfaların en düşük skoru | {min(expected_scores, default=0.0):.3f} |",
         f"| 'Notlarda yok' sorularının en yüksek skoru | {max(best_missing, default=0.0):.3f} |",
         "",
-        "| Soru | Tür | Beklenen sayfanın sırası | En yakın sayfa | Skor |",
-        "| --- | --- | --- | --- | --- |",
+        "| Soru | Tür | Beklenen sayfa: sıra | Beklenen sayfa: skor | En yakın sayfa | Skor |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
-    for r in results:
-        top_page, top_score = r.ranking[0] if r.ranking else ("-", 0.0)
-        rank = "-" if not r.question.expected_pages else (r.rank or "bulunamadı")
-        lines.append(
-            f"| {r.question.id} | {r.question.type} | {rank} | {top_page} | {top_score:.3f} |"
-        )
+    lines += [_question_row(r) for r in results]
     return "\n".join(lines)
+
+
+def _question_row(result: Result) -> str:
+    top_page, top_score = result.ranking[0] if result.ranking else ("-", 0.0)
+    rank = result.rank or "-"
+    expected = "-" if result.expected_score is None else f"{result.expected_score:.3f}"
+    cells = [result.question.id, result.question.type, rank, expected, top_page, f"{top_score:.3f}"]
+    return "| " + " | ".join(str(cell) for cell in cells) + " |"
 
 
 def _mean(values: list[float]) -> float:

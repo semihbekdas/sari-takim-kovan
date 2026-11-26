@@ -19,6 +19,7 @@ Herkes **kendi klasörüne ve kendi dosyasına** yazar; böylece aynı dosyada �
 
 - İlk satır sayfa başlığıdır: `# Başlık`
 - Bölümler `## Alt başlık` ile ayrılır. Ölçüm betiği her bölümü ayrı bir parça olarak kullanır.
+- Bir bölüm en fazla **1000 karakter** olabilir; betik daha uzun bölümde durur. Uygulama bu sınırı (`CHUNK_MAX_CHARS`, ADR-009) aşan bölümü böldüğü için, ölçülen parçalar ancak böyle uygulamanın indeksleyeceği parçalarla aynı kalır.
 - Sayfanın kimliği `klasör/dosya-adı`dır: `dataset/semih/otomobil-servis-notlari.md` → `semih/otomobil-servis-notlari`. Dosya adında Türkçe karakter ve boşluk kullanmayın.
 - Başlık yalnızca ilk `# ` satırıdır; gövdedeki `# ` satırları (ör. kod yorumu) metin sayılır.
 
@@ -45,7 +46,7 @@ note = "Açıklama"                       # isteğe bağlı
 
 Seçilen model OpenAI `text-embedding-3-small` (gerekçesi: ADR-006). Bu set o seçimi kendi verimizle doğrular; hedef Hit@5 ≥ 0,8. Hedef tutmazsa aynı betik yedek modelle bir kez daha çalıştırılır.
 
-Komutlar **repo kökünden** çalıştırılır. Betik, `type` veya `expected_pages` hatalı bir soruda açıklayıcı bir hatayla durur.
+Komutlar **repo kökünden** çalıştırılır. Betik, hatalı bir soruda açıklayıcı bir hatayla durur: bilinmeyen `type`, olmayan bir sayfa adı, `not_found` dışındaki bir türde boş `expected_pages` veya `not_found` sorusunda dolu `expected_pages`.
 
 ```bash
 # Anahtarsız deneme (betiğin çalıştığını görmek için; sonuçlar anlamlı değildir)
@@ -61,4 +62,6 @@ EMBEDDING_API_KEY=... uv run --project backend python eval/compare_embeddings.py
 | OpenAI (seçilen) | `https://api.openai.com/v1` | `text-embedding-3-small` | 1536 |
 | BAAI bge-m3 (yedek; OpenRouter) | `https://openrouter.ai/api/v1` | `baai/bge-m3` | 1024 |
 
-Çıktı, Markdown tablosu halinde **Hit@1, Hit@5, MRR** değerlerini ve "notlarda yok" sorularının en yüksek benzerlik skorunu verir. Bu skor, `SEARCH_MIN_SCORE` eşiğini seçmek için kullanılır. Sonuçlar ADR-006'ya ve README'ye eklenir.
+Çıktı, Markdown tablosu halinde **Hit@1, Hit@5, MRR** değerlerini ve arama eşiği için iki skoru verir: beklenen sayfaların en düşük skoru ve "notlarda yok" sorularının en yüksek skoru. `SEARCH_MIN_SCORE` bu ikisinin arasında seçilir; eşik beklenen sayfanın skorundan yüksek olursa doğru sonuç da elenir. Sonuçlar ADR-006'ya ve README'ye eklenir.
+
+Betiği değiştirirseniz `backend/` içinde `uv run ruff check . ../eval`, `uv run ruff format --check . ../eval` ve `uv run mypy` temiz olmalıdır; CI aynılarını çalıştırır.
