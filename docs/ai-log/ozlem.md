@@ -31,3 +31,13 @@
 - **Yapay zekanın hataları / eksikleri:** Autogenerate fonksiyon tabanlı indeksi (`lower(email)`) üretmedi; migration'a elle eklendi. Tablo testleri önce kendi temizleme fixture'ını kullanıyordu, register testleri gelince ortak `conftest.py`'ye taşındı.
 - **Bizim müdahalemiz:** İşi iki PR'a bölmeye ben karar verdim: önce users tablosu, sonra kayıt uç noktası. Migration'daki lower(email) benzersiz indeksini ve testleri kontrol ettim, büyük/küçük harf farklı aynı e-postanın reddedildiğini doğruladım.
 - **Ders çıkarımı:** Autogenerate çıktısı her zaman gözden geçirilmeli; `tables.py` ↔ migration uyumu testi bunu yakalıyor.
+
+### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** Semih'in PR #21 review notu: blok/satır içi `type` veya başlık `level`'ı liste ya da nesne gelirse `in frozenset` kontrolü `TypeError` verip 500 dönüyordu.
+- **Prompt (özet):** "Semih'in #21 notunu düzelt: isinstance kontrolü ve testler."
+- **Sonuç:** `domain/content.py`'ye `_is_one_of` yardımcı fonksiyonu; üç kontrol (blok türü, satır içi tür, başlık seviyesi) bunu kullanıyor. 5 yeni test, düzeltmeden önce hepsi düşüyordu.
+- **Yapay zekanın hataları / eksikleri:** #21'deki ilk sürümde değerin tipine bakılmadan `in` kullanılmıştı. Test yazarken ek bir hata çıktı: Python'da `True == 1` olduğu için `level: true` geçerli başlık sayılıyordu; o da düzeltildi.
+- **Bizim müdahalemiz:** Semih'in review notunu takip ettim; level: true hatasını testte görünce onun da düzeltilmesini istedim.
+- **Ders çıkarımı:** JSON'dan gelen her alanın tipi, kullanılmadan önce kontrol edilmeli; `bool`'un `int` sayılması gibi Python özellikleri test edilmeli.
