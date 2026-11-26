@@ -21,3 +21,13 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslakta dosya sonu satırı eksikti (`ruff`). Bozuk şekilli girdi (ör. `props: null`) 500 veriyordu, link içeriği kontrol edilmiyordu, çok derin iç içe blok `RecursionError` veriyordu. "İzin verilir" testlerinde assert yoktu. Davranışlar sınıf yerine ayrı fonksiyonlardı.
 - **Bizim müdahalemiz:** `ruff format`'ı her commit öncesi çalıştırmayı alışkanlık yaptım. Review'da Umut ve Semih'in bulduklarını düzelttim: şekil kontrolü, link içeriği, iç içe sınırı (20, R-06'ya eklendi), assert'li testler ve `PageContent` değer nesnesi.
 - **Ders çıkarımı:** Bozuk girdi ve uç durumları ayrıca denemek gerekiyor. Görev kartındaki tasarımı (değer nesnesi) baştan izlemek sonradan yeniden yazmayı önlüyor.
+
+### 2026-11-23 — Özlem: users tablosu ve migration'ı (#11)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** `users` tablosu (domain-design § 9), `lower(email)` üzerinde benzersiz indeks (R-01) ve ilk Alembic migration'ı.
+- **Prompt (özet):** "#11'i iki PR'a böl; önce `users` tablosunu, migration'ını ve tablo testlerini hazırla."
+- **Sonuç:** `infrastructure/db/tables.py`, migration `08ffb3ff6603`, `tests/integration/test_users_table.py`. #9 ve #12 bu tabloya bağlı olduğu için ayrı PR yapıldı.
+- **Yapay zekanın hataları / eksikleri:** Autogenerate fonksiyon tabanlı indeksi (`lower(email)`) üretmedi; migration'a elle eklendi. Tablo testleri önce kendi temizleme fixture'ını kullanıyordu, register testleri gelince ortak `conftest.py`'ye taşındı.
+- **Bizim müdahalemiz:** İşi iki PR'a bölmeye ben karar verdim: önce users tablosu, sonra kayıt uç noktası. Migration'daki lower(email) benzersiz indeksini ve testleri kontrol ettim, büyük/küçük harf farklı aynı e-postanın reddedildiğini doğruladım.
+- **Ders çıkarımı:** Autogenerate çıktısı her zaman gözden geçirilmeli; `tables.py` ↔ migration uyumu testi bunu yakalıyor.
