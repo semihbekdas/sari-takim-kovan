@@ -51,3 +51,13 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslakta `PageRepository` port'unu da ekledi; ama port'u kullanan servis henüz yok ("kullanılmayan kod commit'lenmez") ve aynı satırı Semih'in #30'u da değiştiriyordu. Port 3. parçaya, servisle birlikte bırakıldı. Ayrıca Özlem'in dalının #31'den önceki `main`'e dayandığını ilk denemede atladı (import hatası); dala `main` merge edilerek çözüldü.
 - **Bizim müdahalemiz:** Testleri kendi bilgisayarımda Docker ile çalıştırdım; PR'ı #34'e bağlı olduğunu belirterek açtım.
 - **Ders çıkarımı:** Başkasının dalının üstüne çalışırken önce o dalın hangi `main`'e dayandığına bakmak gerekiyor.
+
+### 2026-11-27 — Umut: sayfa oluşturma ve görüntüleme API'si (#9, 3/4)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** Özlem'in giriş PR'ı (#38) gelince `POST /pages` ve `GET /pages/{id}`'yi `CurrentUser` üzerine kurmak; breadcrumb'ı (AC-05.2) eklemek.
+- **Prompt (özet):** "#9'un API kısmını hazırla; her adımı neden yaptığımızla anlat."
+- **Sonuç:** `PageRepository` ve `PageTransactions` port'ları, `PageService` (R-04: başkasının sayfası ve başkasının üst sayfası 404), istek başına tek veritabanı işlemi (`SqlPageTransactions`), breadcrumb için özyinelemeli sorgu (recursive CTE), 7 kabul + 2 entegrasyon testi.
+- **Yapay zekanın hataları / eksikleri:** İlk taslak `PUT`'u da içeriyordu ve 495 satırdı (sınır 400); kaydetme 4. parçaya ayrıldı. Ayrıca önce kodu henüz PR'ı olmayan ve `main` ile çakışan giriş dalının üstüne kurmayı önerdi; Özlem'e PR'ı ne zaman açacağını GitHub'da sorup #38'i bekledik.
+- **Bizim müdahalemiz:** #37 ve #38'i Claude ile birlikte inceledim; #37'de Sonar'ı düşüren aynı ifade karşılaştırmasını (S1764) Özlem'e yazdım. Testleri kendi bilgisayarımda Docker ile çalıştırdım.
+- **Ders çıkarımı:** PR'ı baştan uç nokta bazında küçük planlamak, sonradan bölmekten kolay.
