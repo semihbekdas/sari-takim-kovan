@@ -39,12 +39,12 @@ class PendingPages(Protocol):
         (`index_retry_at`) `now`'a gelmiş sayfalar; en eski düzenlenen önce."""
         ...
 
-    def mark_indexed(self, *, page_id: UUID, version: int) -> None:
+    def mark_indexed(self, *, owner_id: UUID, page_id: UUID, version: int) -> None:
         """`indexed_version = version`; deneme sayacı, hata ve bekleme zamanı temizlenir."""
         ...
 
     def mark_failed(
-        self, *, page_id: UUID, version: int, error_code: str, retry_at: datetime
+        self, *, owner_id: UUID, page_id: UUID, version: int, error_code: str, retry_at: datetime
     ) -> None:
         """Deneme sayacı 1 artar; hata kodu ve bir sonraki deneme zamanı yazılır.
 

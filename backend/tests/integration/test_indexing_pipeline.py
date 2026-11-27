@@ -235,8 +235,22 @@ def test_failure_of_an_old_version_does_not_touch_the_new_version(
 
     # Sürüm 1'in indekslemesi, sayfa sürüm 2'ye kaydedildikten sonra hata verdi.
     SqlPendingPages(db_engine).mark_failed(
-        page_id=page.id, version=1, error_code="AI_SERVICE_UNAVAILABLE", retry_at=T0
+        owner_id=owner, page_id=page.id, version=1, error_code="AI_SERVICE_UNAVAILABLE", retry_at=T0
     )
 
     current = page_service.get(owner_id=owner, page_id=page.id).page
     assert (current.version, current.index_attempts, current.index_error) == (2, 0, None)
+
+
+def test_index_state_is_written_only_with_the_pages_owner(
+    db_engine: Engine, owner: UUID, page_service: PageService
+) -> None:
+    page = new_page(page_service, owner, "Not", "metin")
+    pending = SqlPendingPages(db_engine)
+    stranger = uuid4()
+
+    pending.mark_indexed(owner_id=stranger, page_id=page.id, version=1)
+    pending.mark_failed(owner_id=stranger, page_id=page.id, version=1, error_code="X", retry_at=T0)
+
+    unchanged = page_service.get(owner_id=owner, page_id=page.id).page
+    assert (unchanged.indexed_version, unchanged.index_attempts) == (None, 0)

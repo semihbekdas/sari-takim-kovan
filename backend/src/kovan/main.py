@@ -10,6 +10,7 @@ from functools import partial
 
 from fastapi import FastAPI
 from qdrant_client import QdrantClient
+from sqlalchemy import Engine
 
 from kovan.api.errors import register_error_handlers
 from kovan.api.middleware import register_middleware
@@ -56,13 +57,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         pages=PageService(SqlPageTransactions(engine)),
         session_cookie_secure=settings.session_cookie_secure,
     )
-    indexing = IndexingService(
-        SqlPendingPages(engine),
-        partial(chunk_page, max_chars=settings.chunk_max_chars),
-        build_embedding_provider(settings),
-        QdrantVectorIndex(qdrant, dimension=settings.embedding_dim),
-        settle_seconds=settings.index_settle_seconds,
-    )
+    # Kapalıyken embedding sağlayıcısı da kurulmaz; böylece API anahtarı istenmez.
+    indexing = _build_indexing(settings, engine, qdrant) if settings.indexing_enabled else None
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -71,7 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         async with AsyncExitStack() as on_shutdown:
             on_shutdown.callback(qdrant.close)
             on_shutdown.callback(engine.dispose)
-            if settings.indexing_enabled:
+            if indexing is not None:
                 await on_shutdown.enter_async_context(running_index_loop(indexing.run_once))
             yield
 
@@ -90,3 +86,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth.router, prefix=API_PREFIX)
     app.include_router(pages.router, prefix=API_PREFIX)
     return app
+
+
+def _build_indexing(settings: Settings, engine: Engine, qdrant: QdrantClient) -> IndexingService:
+    """Arka plan indeksleme servisi (ADR-005): veritabanı → parçalama → embedding → Qdrant."""
+    return IndexingService(
+        SqlPendingPages(engine),
+        partial(chunk_page, max_chars=settings.chunk_max_chars),
+        build_embedding_provider(settings),
+        QdrantVectorIndex(qdrant, dimension=settings.embedding_dim),
+        settle_seconds=settings.index_settle_seconds,
+    )

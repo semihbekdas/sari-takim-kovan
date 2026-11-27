@@ -3,7 +3,8 @@
 Ayrı bir kuyruk tablosu yoktur: Sayfanın indekslenmeyi bekleyip beklemediği kendi satırındaki
 `version` ve `indexed_version` alanlarından anlaşılır. Her çağrı kendi işlemini (transaction) açar;
 böylece bir sayfanın işaretlenmesi, aynı turdaki diğer sayfaların sonucuna bağlı kalmaz.
-`updated_at`'e dokunulmaz: O alan kullanıcının son düzenleme zamanıdır.
+İşaretlemeler sayfayı sahibiyle birlikte bulur (`id` ve `owner_id`): Her veri erişimi `owner_id` ile
+filtrelenir (AGENTS.md). `updated_at`'e dokunulmaz: O alan kullanıcının son düzenleme zamanıdır.
 """
 
 from datetime import datetime
@@ -59,23 +60,23 @@ class SqlPendingPages:
             for row in rows
         ]
 
-    def mark_indexed(self, *, page_id: UUID, version: int) -> None:
+    def mark_indexed(self, *, owner_id: UUID, page_id: UUID, version: int) -> None:
         self._execute(
             update(pages)
-            .where(pages.c.id == page_id)
+            .where(pages.c.id == page_id, pages.c.owner_id == owner_id)
             .values(
                 indexed_version=version, index_attempts=0, index_error=None, index_retry_at=None
             )
         )
 
     def mark_failed(
-        self, *, page_id: UUID, version: int, error_code: str, retry_at: datetime
+        self, *, owner_id: UUID, page_id: UUID, version: int, error_code: str, retry_at: datetime
     ) -> None:
         # Sürüm koşulu: İndeksleme sürerken sayfa yeniden kaydedildiyse yeni sürümün sıfırlanmış
         # deneme sayacı, eski sürümün hatasıyla bozulmaz.
         self._execute(
             update(pages)
-            .where(pages.c.id == page_id, pages.c.version == version)
+            .where(pages.c.id == page_id, pages.c.owner_id == owner_id, pages.c.version == version)
             .values(
                 index_attempts=pages.c.index_attempts + 1,
                 index_error=error_code,

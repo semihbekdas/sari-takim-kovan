@@ -82,7 +82,9 @@ class IndexingService:
                 failed += 1
                 unexpected.append(error)
             else:
-                self._pending_pages.mark_indexed(page_id=page.page_id, version=page.version)
+                self._pending_pages.mark_indexed(
+                    owner_id=page.owner_id, page_id=page.page_id, version=page.version
+                )
                 if page.deleted:
                     removed += 1
                 else:
@@ -125,5 +127,9 @@ class IndexingService:
         # zamanı kullanılsaydı yeniden deneme anı çoktan geçmiş olurdu.
         retry_at = self._clock() + timedelta(seconds=BASE_RETRY_SECONDS * 2**page.attempts)
         self._pending_pages.mark_failed(
-            page_id=page.page_id, version=page.version, error_code=error_code, retry_at=retry_at
+            owner_id=page.owner_id,
+            page_id=page.page_id,
+            version=page.version,
+            error_code=error_code,
+            retry_at=retry_at,
         )

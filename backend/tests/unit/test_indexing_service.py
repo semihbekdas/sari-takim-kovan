@@ -36,12 +36,14 @@ class FakePendingPages:
         self.requests.append((now, settled_before, limit))
         return self.pages[:limit]
 
-    def mark_indexed(self, *, page_id: UUID, version: int) -> None:
+    def mark_indexed(self, *, owner_id: UUID, page_id: UUID, version: int) -> None:
+        assert owner_id == OWNER
         self.indexed.append((page_id, version))
 
     def mark_failed(
-        self, *, page_id: UUID, version: int, error_code: str, retry_at: datetime
+        self, *, owner_id: UUID, page_id: UUID, version: int, error_code: str, retry_at: datetime
     ) -> None:
+        assert owner_id == OWNER
         self.failed.append((page_id, version, error_code, retry_at))
 
 

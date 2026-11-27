@@ -150,3 +150,13 @@ def test_app_runs_the_index_loop_until_shutdown() -> None:
 
 def _has_event(logs: list[MutableMapping[str, Any]], event: str) -> bool:
     return any(entry["event"] == event for entry in logs)
+
+
+def test_app_without_indexing_needs_no_embedding_key() -> None:
+    # Gerçek embedding sağlayıcısı seçili ama anahtar yok: Döngü kapalıyken uygulama yine açılır.
+    settings = make_test_settings(
+        indexing_enabled=False, embedding_provider="openai_compatible", embedding_api_key=None
+    )
+
+    with TestClient(create_app(settings)) as client:
+        assert client.get("/api/v1/health").status_code == 200
