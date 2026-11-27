@@ -8,11 +8,13 @@ from dataclasses import dataclass
 
 from kovan.application.auth_service import AuthService
 from kovan.application.health import ReadinessService
+from kovan.application.page_service import PageService
 
 
 @dataclass(frozen=True)
 class Container:
     readiness: ReadinessService
     auth: AuthService
+    pages: PageService
     # Oturum çerezine `Secure` eklensin mi (ADR-008: prod'da evet).
     session_cookie_secure: bool = False
