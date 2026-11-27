@@ -1,9 +1,13 @@
 """Testlerde kullanılan fake port uygulamaları, sabitler ve test ayarları."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any
+from uuid import UUID
 
 from kovan.config import Settings
+from kovan.domain.errors import ConflictError
+from kovan.domain.users import User
 
 # Bağlanılamayan bir adres: Testler gerçek veritabanına ihtiyaç duymaz.
 UNREACHABLE_DATABASE_URL = "postgresql+psycopg://kovan:kovan@127.0.0.1:1/kovan"
@@ -38,3 +42,24 @@ class FakeProbe:
 
     def is_ready(self) -> bool:
         return self.ready
+
+
+class FakePasswordHasher:
+    """`PasswordHasher` port'unun test karşılığı: Hash'i okunabilir tutar."""
+
+    def hash(self, password: str) -> str:
+        return f"hashed:{password}"
+
+
+@dataclass
+class InMemoryUserRepository:
+    """`UserRepository` port'unun bellekte çalışan test karşılığı."""
+
+    users: list[User] = field(default_factory=list)
+
+    def add(self, *, user_id: UUID, email: str, display_name: str, password_hash: str) -> User:
+        if any(user.email == email for user in self.users):
+            raise ConflictError("Bu e-posta zaten kayıtlı.", code="EMAIL_TAKEN")
+        user = User(user_id, email, display_name, password_hash, datetime.now(UTC))
+        self.users.append(user)
+        return user

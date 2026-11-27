@@ -7,6 +7,7 @@ from typing import Annotated, cast
 
 from fastapi import Depends, Request
 
+from kovan.application.auth_service import AuthService
 from kovan.application.health import ReadinessService
 from kovan.container import Container
 
@@ -19,3 +20,9 @@ def get_readiness_service(
     container: Annotated[Container, Depends(get_container)],
 ) -> ReadinessService:
     return container.readiness
+
+
+def get_auth_service(
+    container: Annotated[Container, Depends(get_container)],
+) -> AuthService:
+    return container.auth

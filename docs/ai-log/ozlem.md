@@ -32,6 +32,16 @@
 - **Bizim müdahalemiz:** İşi iki PR'a bölmeye ben karar verdim: önce users tablosu, sonra kayıt uç noktası. Migration'daki lower(email) benzersiz indeksini ve testleri kontrol ettim, büyük/küçük harf farklı aynı e-postanın reddedildiğini doğruladım.
 - **Ders çıkarımı:** Autogenerate çıktısı her zaman gözden geçirilmeli; `tables.py` ↔ migration uyumu testi bunu yakalıyor.
 
+### 2026-11-24 — Özlem: kayıt olma uç noktası (#11)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** `POST /auth/register`: R-01 e-posta kontrolü, R-02 şifre uzunluğu, Argon2id ile hash (ADR-008), 409 `EMAIL_TAKEN`; AC-01.1–01.4 testleri.
+- **Prompt (özet):** "#11'in ikinci kısmını katmanlara göre küçük commit'lerle yaz: domain → servis → altyapı → API."
+- **Sonuç:** `domain/users.py`, `application/auth_service.py`, `application/ports/users.py`, `infrastructure/security/argon2.py`, `infrastructure/db/users.py`, `api/routers/auth.py`; birim, entegrasyon ve kabul testleri. `argon2-cffi` bağımlılığı eklendi (ADR-008).
+- **Yapay zekanın hataları / eksikleri:** Serviste görünen ad `strip()` ediliyordu; şemadaki 2–50 kontrolünden sonra ad 1 karaktere düşebilirdi, kaldırıldı. Repository her `IntegrityError`'ı "e-posta kayıtlı" sayabilirdi; yalnızca `ux_users_email` ihlalinin 409 olması sağlandı ve testi eklendi.
+- **Bizim müdahalemiz:** Kodu katmanlara göre küçük commit'lerle ilerletmeye ben karar verdim. Testleri çalıştırıp büyük harfli e-postayla kayıt olunca 409 döndüğünü ve şifrenin veritabanında Argon2 hash olarak durduğunu kontrol ettim.
+- **Ders çıkarımı:** Aynı kural iki katmanda (şema ve servis) farklı uygulanırsa tutarsızlık çıkıyor; kuralın tek yeri olmalı.
+
 ### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
 - **Kim:** Özlem
 - **Araç / model:** Claude Code
