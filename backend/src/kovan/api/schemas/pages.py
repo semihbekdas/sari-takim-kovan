@@ -14,6 +14,12 @@ class CreatePageRequest(BaseModel):
     content: Any = None  # verilmezse boş sayfa
 
 
+class UpdatePageRequest(BaseModel):
+    title: str
+    content: Any
+    version: int  # istemcinin elindeki sürüm (R-07)
+
+
 class BreadcrumbResponse(BaseModel):
     id: UUID
     title: str

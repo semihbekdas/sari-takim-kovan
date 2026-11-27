@@ -1,4 +1,4 @@
-"""Sayfa oluşturma ve görüntüleme kabul testleri (US-03, US-05; #9).
+"""Sayfa oluşturma, görüntüleme ve kaydetme kabul testleri (US-03, US-04, US-05; #9).
 
 Gerçek PostgreSQL ve gerçek oturum. `clean_users` kullanıcıları (ve CASCADE ile sayfaları) siler.
 """
@@ -112,6 +112,58 @@ def test_create_page_under_other_users_parent_returns_404(
     response = mehmet.post(PAGES_URL, json={"title": "Alt", "parent_id": parent["id"]})
 
     assert response.status_code == 404
+
+
+@pytest.mark.ac("AC-04.5")
+def test_update_increments_version_and_keeps_new_content(ayse: TestClient) -> None:
+    page = create(ayse, title="Taslak")
+    url = f"{PAGES_URL}/{page['id']}"
+
+    response = ayse.put(url, json={"title": "Son hali", "content": PARAGRAPH, "version": 1})
+
+    assert response.status_code == 200
+    assert response.json()["version"] == 2
+    assert response.json()["index_status"] == "PENDING"
+    saved = ayse.get(url).json()
+    assert (saved["title"], saved["content"], saved["version"]) == ("Son hali", PARAGRAPH, 2)
+
+
+@pytest.mark.ac("AC-04.3")
+def test_update_with_stale_version_returns_409_and_keeps_content(ayse: TestClient) -> None:
+    page = create(ayse, title="Taslak")
+    url = f"{PAGES_URL}/{page['id']}"
+    ayse.put(url, json={"title": "Sekme 1", "content": PARAGRAPH, "version": 1})
+
+    response = ayse.put(url, json={"title": "Sekme 2", "content": [], "version": 1})
+
+    assert response.status_code == 409
+    error = response.json()["error"]
+    assert (error["code"], error["rule"]) == ("VERSION_CONFLICT", "R-07")
+    assert ayse.get(url).json()["title"] == "Sekme 1"
+
+
+@pytest.mark.ac("AC-04.4")
+def test_update_with_disallowed_block_type_returns_422(ayse: TestClient) -> None:
+    page = create(ayse)
+
+    response = ayse.put(
+        f"{PAGES_URL}/{page['id']}",
+        json={"title": "Tablo", "content": [{"type": "table"}], "version": 1},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CONTENT_INVALID"
+
+
+def test_other_user_cannot_update_the_page(ayse: TestClient, mehmet: TestClient) -> None:
+    page = create(ayse, title="Ayşe'nin")
+
+    response = mehmet.put(
+        f"{PAGES_URL}/{page['id']}", json={"title": "Ele geçirildi", "content": [], "version": 1}
+    )
+
+    assert response.status_code == 404
+    assert ayse.get(f"{PAGES_URL}/{page['id']}").json()["title"] == "Ayşe'nin"
 
 
 @pytest.mark.ac("AC-02.4")
