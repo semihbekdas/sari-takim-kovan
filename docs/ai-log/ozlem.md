@@ -61,3 +61,13 @@
 - **Yapay zekanın hataları / eksikleri:** #21'deki ilk sürümde değerin tipine bakılmadan `in` kullanılmıştı. Test yazarken ek bir hata çıktı: Python'da `True == 1` olduğu için `level: true` geçerli başlık sayılıyordu; o da düzeltildi.
 - **Bizim müdahalemiz:** Semih'in review notunu takip ettim; level: true hatasını testte görünce onun da düzeltilmesini istedim.
 - **Ders çıkarımı:** JSON'dan gelen her alanın tipi, kullanılmadan önce kontrol edilmeli; `bool`'un `int` sayılması gibi Python özellikleri test edilmeli.
+
+### 2026-11-27 — Özlem: başlığa göre parçalama (#13)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** `PageContent.to_sections()` ve `application/chunking.py` içinde `chunk_page(title, content)` (ADR-009); `CHUNK_MAX_CHARS` ayarı (varsayılan 1000).
+- **Prompt (özet):** "#13'ün asıl parçalama modülünü ADR-009'a göre yaz: başlık bölümleri, 1000 karakter sınırı, uzun blok bölme; birim testleriyle küçük commit'ler."
+- **Sonuç:** Bölümleme domain'de (`to_sections`), parçalara doldurma application'da (`chunk_page`). Başlıksız sayfa, boş sayfa, çok uzun blok ve Türkçe karakter testleri eklendi.
+- **Yapay zekanın hataları / eksikleri:** <!-- Özlem dolduracak -->
+- **Bizim müdahalemiz:** <!-- Özlem dolduracak -->
+- **Ders çıkarımı:** Bölümlemeyi (ne nereye ait) ve boyut sınırını (ne kadar büyük) ayırmak, iki kuralı ayrı ayrı test etmeyi kolaylaştırdı.
