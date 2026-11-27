@@ -37,11 +37,13 @@ jobs:
       - name: Bağımlılıkları kur
         run: uv sync --locked --no-build --no-install-project
 
+      # ../eval: değerlendirme betiği backend/ dışında durur ama aynı kurallarla denetlenir
+      # (mypy için pyproject.toml'daki `files` listesinde).
       - name: Lint (ruff)
-        run: uv run --frozen --no-sync ruff check .
+        run: uv run --frozen --no-sync ruff check . ../eval
 
       - name: Biçim (ruff format)
-        run: uv run --frozen --no-sync ruff format --check .
+        run: uv run --frozen --no-sync ruff format --check . ../eval
 
       - name: Tip kontrolü (mypy)
         run: uv run --frozen --no-sync mypy
@@ -51,6 +53,9 @@ jobs:
 
       - name: Testler + kapsam
         run: uv run --frozen --no-sync pytest --cov --cov-report=xml:coverage.xml --cov-report=term
+
+      - name: Değerlendirme betiği çalışıyor mu (fake mod)
+        run: uv run --frozen --no-sync python ../eval/compare_embeddings.py --provider fake
 
       # Fork'tan veya Dependabot'tan açılan PR'larda GitHub secret'ları paylaşmaz; token olmadan
       # analiz yapılamaz. Bu yüzden analiz main'e push'ta ve repo içinden açılan PR'larda çalışır.
