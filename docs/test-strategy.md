@@ -100,7 +100,7 @@ Tablo, kod dondurmadan önce `grep -rn 'pytest.mark.ac' backend/tests` çıktıs
 | AC-07.3 | Frontend | `page-mention.test.tsx › shows deleted page` (başlıklar sayfa ağacından) |
 | AC-08.1–08.4 🟧 | Birim + Kabul | `test_backlinks_*` |
 | AC-09.1–09.3 🟧 | Kabul | `test_keyword_search_*` |
-| AC-10.1 | RAG değerlendirme | `eval/questions.yaml` (eşanlamlı sorular) |
+| AC-10.1 | RAG değerlendirme | `eval/questions/*.toml` (`synonym` soruları) |
 | AC-10.2 | Entegrasyon + Kabul | `test_semantic_search_never_returns_other_users_chunks` |
 | AC-10.3 | Kabul | `test_search_reflects_updated_content_after_indexing` |
 | AC-10.4 | Kabul | `test_semantic_search_hides_deleted_page_immediately` |
@@ -123,8 +123,8 @@ Tablo, kod dondurmadan önce `grep -rn 'pytest.mark.ac' backend/tests` çıktıs
 - `eval/dataset/<isim>/*.md`: Her üyenin 5 kurgusal sayfası (toplam ~15). **Gerçek kişisel veri kullanılmaz.** Biçim: `eval/README.md`.
 - `eval/questions/<isim>.toml`: Her üyenin 7 sorusu (toplam ~21), her biri için beklenen kaynak sayfa(lar). Türler: `normal`, `synonym` (AC-10.1), `not_found` (AC-11.2), `injection` (AC-11.4).
 - Metrikler: **Hit@5**, **MRR**, "bulamadım" doğruluğu. Seçilen embedding modeli (ADR-006) `eval/compare_embeddings.py` ile ölçülür; hedef tutmazsa aynı betikle ikinci bir model denenir.
-- Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K`, `SEARCH_MIN_SCORE` ve parça boyutu bu sete göre ayarlanır; sonuç tablosu README'ye yazılır.
-- Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez).
+- Hedef: Hit@5 ≥ 0.8. `RAG_TOP_K` ve `SEARCH_MIN_SCORE` bu sete göre ayarlanır; parça boyutu varsayılanında kalır ve sayfaların bölümleri bu sınırı aşmaz (ADR-009). Sonuç tablosu README'ye yazılır.
+- Gerçek API kullandığı için elle ve seyrek çalıştırılır (her sprint sonunda bir kez). Betik CI'da `ruff` ve `mypy` ile denetlenir ve fake modda çalıştırılır; fake modun sonuçları kaliteyi göstermez. `eval/` Sonar analizinin dışındadır.
 
 ## 7. CI'da çalışan kontroller
 

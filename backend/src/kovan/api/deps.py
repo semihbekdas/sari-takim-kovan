@@ -9,6 +9,7 @@ from fastapi import Depends, Request
 
 from kovan.application.auth_service import AuthService
 from kovan.application.health import ReadinessService
+from kovan.application.page_service import PageService
 from kovan.container import Container
 from kovan.domain.users import User
 
@@ -30,6 +31,12 @@ def get_auth_service(
     container: Annotated[Container, Depends(get_container)],
 ) -> AuthService:
     return container.auth
+
+
+def get_page_service(
+    container: Annotated[Container, Depends(get_container)],
+) -> PageService:
+    return container.pages
 
 
 def get_current_user(

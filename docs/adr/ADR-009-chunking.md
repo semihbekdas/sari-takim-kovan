@@ -20,7 +20,7 @@ Kabul Edildi *(Accepted)* — 2026-11-13
 3. İndeksleme sırasında embedding'e giden metnin başına bağlam başlığı eklenir (`chunk_page` ham metni döndürür): `"{heading_path}\n\n{metin}"`. Böylece "3NF" geçen bir paragraf "Veritabanı › Normalizasyon" bağlamını da taşır.
 4. Boş sayfa → parça yok (indeks temizlenir).
 
-`CHUNK_MAX_CHARS` RAG değerlendirme setiyle ayarlanır; seçilen değer ve ölçüm sonucu README'ye yazılır.
+`CHUNK_MAX_CHARS` varsayılan değeriyle (1000) kullanılır. Değerlendirme setinin bölümleri bu sınırı aşmaz (`eval/README.md`); böylece ölçülen parçalar uygulamanın indekslediği parçalarla aynıdır. Değer ancak ölçüm hedefi (Hit@5 ≥ 0,8) tutmazsa yeniden ele alınır; ölçüm sonucu README'ye yazılır.
 
 ## Değerlendirilen alternatifler
 

@@ -1,4 +1,4 @@
-"""`SqlPageRepository` gerçek PostgreSQL'e karşı (#9; R-04, R-07, R-08).
+"""`SqlPageRepository` gerçek PostgreSQL'e karşı (#9; R-04, R-07, R-08, breadcrumb).
 
 Her test geri alınan bir işlem içinde çalışır (`db_connection`, conftest.py).
 """
@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy import Connection, insert
 from sqlalchemy.exc import IntegrityError
 
+from kovan.application.ports.pages import PageRef
 from kovan.domain.content import PageContent
 from kovan.domain.errors import ConflictError
 from kovan.domain.pages import Page
@@ -140,3 +141,29 @@ def test_other_user_cannot_update_the_page(
     found = repo.get(owner_id=owner, page_id=page.id)
     assert found is not None
     assert found.title == "Dersler"
+
+
+@pytest.mark.ac("AC-05.2")
+def test_breadcrumbs_list_ancestors_from_the_top(repo: SqlPageRepository, owner: UUID) -> None:
+    root = new_page(owner)
+    child = replace(new_page(owner, parent_id=root.id), title="Veritabanı")
+    grandchild = replace(new_page(owner, parent_id=child.id), title="Normalizasyon")
+    for page in (root, child, grandchild):
+        repo.add(page)
+
+    assert repo.breadcrumbs(owner_id=owner, page_id=grandchild.id) == [
+        PageRef(root.id, "Dersler"),
+        PageRef(child.id, "Veritabanı"),
+    ]
+    assert repo.breadcrumbs(owner_id=owner, page_id=root.id) == []
+
+
+def test_breadcrumbs_of_other_users_page_are_empty(
+    repo: SqlPageRepository, owner: UUID, db_connection: Connection
+) -> None:
+    root = new_page(owner)
+    child = new_page(owner, parent_id=root.id)
+    repo.add(root)
+    repo.add(child)
+
+    assert repo.breadcrumbs(owner_id=add_user(db_connection), page_id=child.id) == []
