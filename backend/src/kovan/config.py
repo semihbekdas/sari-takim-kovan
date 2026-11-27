@@ -12,6 +12,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # src/kovan/config.py -> repo kökü
 _REPO_ROOT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
+# HS256 anahtarı için önerilen en kısa uzunluk (RFC 7518 § 3.2: en az 256 bit).
+MIN_JWT_SECRET_LENGTH = 32
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -43,6 +46,11 @@ class Settings(BaseSettings):
     embedding_api_key: SecretStr | None = None
     ai_timeout_seconds: PositiveFloat = 30.0
 
+    # Oturum (ADR-008). JWT_SECRET zorunludur: Boşsa veya kısaysa uygulama açılmaz.
+    jwt_secret: SecretStr
+    # Prod'da (HTTPS) true olmalı; yerelde http üzerinden çalışmak için varsayılan false.
+    session_cookie_secure: bool = False
+
     @field_validator(
         "chat_base_url",
         "chat_effort",
@@ -54,6 +62,16 @@ class Settings(BaseSettings):
     def _empty_means_unset(cls, value: object) -> object:
         # .env'de "CHAT_EFFORT=" gibi boş bırakılan değerler "ayarlanmamış" sayılır.
         return None if value == "" else value
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def _jwt_secret_long_enough(cls, value: SecretStr) -> SecretStr:
+        if len(value.get_secret_value().strip()) < MIN_JWT_SECRET_LENGTH:
+            raise ValueError(
+                f"JWT_SECRET en az {MIN_JWT_SECRET_LENGTH} karakter olmalı. Üretmek için: "
+                'python3 -c "import secrets; print(secrets.token_urlsafe(32))"'
+            )
+        return value
 
 
 def load_settings() -> Settings:

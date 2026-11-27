@@ -18,3 +18,15 @@ def test_same_password_gets_different_hashes() -> None:
     second = hasher.hash("gizli-sifre")
 
     assert first != second
+
+
+def test_verify_accepts_correct_password_only() -> None:
+    hasher = Argon2PasswordHasher()
+    hashed = hasher.hash("gizli-sifre")
+
+    assert hasher.verify(hashed, "gizli-sifre")
+    assert not hasher.verify(hashed, "yanlis-sifre")
+
+
+def test_verify_with_broken_hash_returns_false() -> None:
+    assert not Argon2PasswordHasher().verify("bozuk-hash", "gizli-sifre")

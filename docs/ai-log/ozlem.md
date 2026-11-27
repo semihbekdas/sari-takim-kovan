@@ -42,6 +42,16 @@
 - **Bizim müdahalemiz:** Kodu katmanlara göre küçük commit'lerle ilerletmeye ben karar verdim. Testleri çalıştırıp büyük harfli e-postayla kayıt olunca 409 döndüğünü ve şifrenin veritabanında Argon2 hash olarak durduğunu kontrol ettim.
 - **Ders çıkarımı:** Aynı kural iki katmanda (şema ve servis) farklı uygulanırsa tutarsızlık çıkıyor; kuralın tek yeri olmalı.
 
+### 2026-11-26 — Özlem: giriş, çıkış ve `/auth/me` (#12)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` ve korumalı uç noktalar için `current_user` bağımlılığı (US-02, ADR-008); AC-02.1–02.4 testleri.
+- **Prompt (özet):** "#12'yi kayıt dalının üstüne kur; katmanlara göre küçük commit'lerle yaz, JWT çerez yaklaşımı ADR-008'e uysun."
+- **Sonuç:** `infrastructure/security/jwt.py` (HS256, `sub = user_id`, 8 saat), `AuthService.login` / `current_user`, `api/deps.py`'de `CurrentUser`, `kovan_session` çerezi (`HttpOnly; SameSite=Strict; Path=/api`, ayarla `Secure`). `JWT_SECRET` boşsa veya 32 karakterden kısaysa uygulama açılmıyor. `pyjwt` bağımlılığı eklendi (karar: Özlem).
+- **Yapay zekanın hataları / eksikleri:** `JWT_SECRET` zorunlu olunca ayarları elle kuran bir test (`test_ai_factory`) kırıldı, düzeltildi. Servis ilk taslakta token hatasını gereksiz yere ikinci kez sarıyordu, sadeleştirildi.
+- **Bizim müdahalemiz:** JWT için PyJWT kütüphanesini kullanmaya ben karar verdim. Yanlış e-posta ve yanlış şifrede aynı hata mesajının döndüğünü ve çerezin 8 saat geçerli olduğunu kontrol ettim.
+- **Ders çıkarımı:** Kayıtsız e-postada da şifre hash'i doğrulanmalı; yoksa yanıt süresinden e-postanın kayıtlı olup olmadığı anlaşılabilir.
+
 ### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
 - **Kim:** Özlem
 - **Araç / model:** Claude Code

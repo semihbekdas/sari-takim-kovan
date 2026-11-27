@@ -15,6 +15,7 @@ dependencies = [
     "qdrant-client>=1.12",
     "alembic>=1.13",
     "argon2-cffi>=25.1.0",
+    "pyjwt>=2.10",
 ]
 
 [dependency-groups]
@@ -118,4 +119,5 @@ type = "forbidden"
 source_modules = ["kovan.domain", "kovan.application"]
 forbidden_modules = [
     "fastapi", "pydantic", "sqlalchemy", "structlog", "anthropic", "openai", "qdrant_client",
+    "jwt",
 ]

@@ -14,3 +14,5 @@ from kovan.application.health import ReadinessService
 class Container:
     readiness: ReadinessService
     auth: AuthService
+    # Oturum çerezine `Secure` eklensin mi (ADR-008: prod'da evet).
+    session_cookie_secure: bool = False
