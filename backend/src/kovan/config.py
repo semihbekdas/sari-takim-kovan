@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     # Prod'da (HTTPS) true olmalı; yerelde http üzerinden çalışmak için varsayılan false.
     session_cookie_secure: bool = False
 
+    # Parçalama (ADR-009). Değişirse tüm sayfalar yeniden indekslenir (ADR-005).
+    chunk_max_chars: PositiveInt = 1000
+
     @field_validator(
         "chat_base_url",
         "chat_effort",
