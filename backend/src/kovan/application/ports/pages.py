@@ -28,6 +28,15 @@ class PageRepository(Protocol):
         """Kullanıcının silinmemiş sayfası; yoksa, başkasınınsa ya da silinmişse `None`."""
         ...
 
+    def update(self, page: Page, *, expected_version: int) -> None:
+        """Sayfayı yalnızca veritabanındaki sürüm hâlâ `expected_version` ise yazar (R-07).
+
+        Sürüm değişmişse (ör. başka bir sekmede kaydedildiyse) `ConflictError` fırlatır.
+        Kontrol `UPDATE … WHERE version = :beklenen` ile tek adımda yapılır; böylece aynı anda
+        gelen iki kayıttan yalnızca biri geçer.
+        """
+        ...
+
     def breadcrumbs(self, *, owner_id: UUID, page_id: UUID) -> list[PageRef]:
         """Üst sayfalar, en üstteki önce (AC-05.2); sayfanın kendisi listede yoktur."""
         ...

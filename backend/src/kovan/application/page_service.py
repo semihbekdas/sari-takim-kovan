@@ -1,4 +1,4 @@
-"""Sayfa oluşturma ve görüntüleme (US-03, US-05).
+"""Sayfa oluşturma, görüntüleme ve kaydetme (US-03, US-04, US-05).
 
 R-04: Başkasının, silinmiş ya da olmayan sayfa için hep aynı 404; varlığı belli olmaz (AC-03.4).
 """
@@ -58,6 +58,19 @@ class PageService:
         with self._pages.begin() as repository:
             page = _get_owned(repository, owner_id, page_id, PAGE_NOT_FOUND_MESSAGE)
             return _details(repository, page)
+
+    def update(
+        self, *, owner_id: UUID, page_id: UUID, title: str | None, content: Any, version: int
+    ) -> PageDetails:
+        """Kaydeder: Sürüm eskiyse 409 (R-07, AC-04.3); sürüm artar ve indeks bekler (AC-04.5)."""
+        page_content = PageContent(content)  # R-06
+        with self._pages.begin() as repository:
+            current = _get_owned(repository, owner_id, page_id, PAGE_NOT_FOUND_MESSAGE)
+            edited = current.edit(
+                title=title, content=page_content, expected_version=version, now=self._clock()
+            )
+            repository.update(edited, expected_version=version)
+            return _details(repository, edited)
 
 
 def _get_owned(repository: PageRepository, owner_id: UUID, page_id: UUID, message: str) -> Page:

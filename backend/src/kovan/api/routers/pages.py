@@ -6,7 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 
 from kovan.api.deps import CurrentUser, get_page_service
-from kovan.api.schemas.pages import CreatePageRequest, PageResponse
+from kovan.api.schemas.pages import CreatePageRequest, PageResponse, UpdatePageRequest
 from kovan.application.page_service import PageService
 
 router = APIRouter(prefix="/pages", tags=["pages"])
@@ -27,3 +27,18 @@ def create_page(body: CreatePageRequest, user: CurrentUser, service: Service) ->
 def get_page(page_id: UUID, user: CurrentUser, service: Service) -> PageResponse:
     """Kendi sayfası; başkasınınsa veya yoksa 404 (AC-03.3, AC-03.4)."""
     return PageResponse.from_details(service.get(owner_id=user.id, page_id=page_id))
+
+
+@router.put("/{page_id}")
+def update_page(
+    page_id: UUID, body: UpdatePageRequest, user: CurrentUser, service: Service
+) -> PageResponse:
+    """Kaydetme (US-04): Sürüm eskiyse 409 VERSION_CONFLICT (R-07)."""
+    details = service.update(
+        owner_id=user.id,
+        page_id=page_id,
+        title=body.title,
+        content=body.content,
+        version=body.version,
+    )
+    return PageResponse.from_details(details)

@@ -61,3 +61,13 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslak `PUT`'u da içeriyordu ve 495 satırdı (sınır 400); kaydetme 4. parçaya ayrıldı. Ayrıca önce kodu henüz PR'ı olmayan ve `main` ile çakışan giriş dalının üstüne kurmayı önerdi; Özlem'e PR'ı ne zaman açacağını GitHub'da sorup #38'i bekledik.
 - **Bizim müdahalemiz:** #37 ve #38'i Claude ile birlikte inceledim; #37'de Sonar'ı düşüren aynı ifade karşılaştırmasını (S1764) Özlem'e yazdım. Testleri kendi bilgisayarımda Docker ile çalıştırdım.
 - **Ders çıkarımı:** PR'ı baştan uç nokta bazında küçük planlamak, sonradan bölmekten kolay.
+
+### 2026-11-27 — Umut: sayfa kaydetme API'si (#9, 4/4)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** 3. parçadan 400 satır sınırı yüzünden ayrılan `PUT /pages/{id}`'yi eklemek.
+- **Prompt (özet):** "#9'un son parçasını hazırla."
+- **Sonuç:** `PageService.update`: R-06 içerik kontrolü, R-07 sürüm kontrolü (eski sürümle 409, içerik ezilmez), kayıtta sürüm artar ve indeks durumu PENDING olur (AC-04.5). 4 kabul testi (AC-04.3, AC-04.4, AC-04.5, başka kullanıcı 404).
+- **Yapay zekanın hataları / eksikleri:** Kodu ayırırken 3. parçada kısalttığı açıklama satırları bu parçada eski uzun hallerine geri geldi; fark edip düzeltti.
+- **Bizim müdahalemiz:** 409 testinin "ikinci sekme" senaryosunu (aynı sürümle iki kayıt) okuyup gerçek kullanımla karşılaştırdım; testleri kendi bilgisayarımda çalıştırdım.
+- **Ders çıkarımı:** Küçük PR'lar review'u da hızlandırıyor: 3. parça birkaç dakikada onaylandı.
