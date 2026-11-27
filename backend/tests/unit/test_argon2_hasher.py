@@ -14,7 +14,10 @@ def test_hash_is_argon2id_and_does_not_contain_password() -> None:
 def test_same_password_gets_different_hashes() -> None:
     hasher = Argon2PasswordHasher()
 
-    assert hasher.hash("gizli-sifre") != hasher.hash("gizli-sifre")
+    first = hasher.hash("gizli-sifre")
+    second = hasher.hash("gizli-sifre")
+
+    assert first != second
 
 
 def test_verify_accepts_correct_password_only() -> None:

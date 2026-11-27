@@ -10,7 +10,18 @@ def test_email_is_trimmed_and_lowercased() -> None:
 
 @pytest.mark.ac("AC-01.3")
 @pytest.mark.parametrize(
-    "email", ["", "ayse", "ayse@", "@ornek.com", "ayse@ornek", "a b@ornek.com"]
+    "email",
+    [
+        "",
+        "ayse",
+        "ayse@",
+        "@ornek.com",
+        "ayse@ornek",
+        "a b@ornek.com",
+        "a@b@ornek.com",
+        "ayse@.com",
+        "ayse@ornek.",
+    ],
 )
 def test_invalid_email_is_rejected_with_r01(email: str) -> None:
     with pytest.raises(DomainRuleError) as error:
