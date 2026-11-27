@@ -128,3 +128,12 @@
   5. Betik her bölümü tek parça sayıyor; uygulama ise 1000 karakteri aşan bölümü bölüyor. Uzun bir bölümde ölçüm uygulamayı yansıtmazdı.
 - **Düzeltme:** Dışlamalar tek satırda. Soru türü ile `expected_pages` uyumu kontrol ediliyor. Rapor beklenen sayfaların ortalama ve en düşük skorunu, her soru için de beklenen sayfanın skorunu veriyor. CI'da `ruff` ve `mypy` betiği de denetliyor. 1000 karakteri aşan bölümde betik duruyor; parça boyutunu bu setle ayarlama iddiası ADR-009 ve test stratejisinden çıkarıldı.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-27 — İndeksleme veritabanına ve uygulamaya bağlandı (İP-C, #15, 2. parça)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Amaç:** 1. parçadaki indeksleme servisini Umut'un `pages` tablosuna (#36) ve Özlem'in parçalama fonksiyonuna (#39) bağlamak; döngüyü uygulama açılınca başlatmak.
+- **Sonuç:** `infrastructure/db/pending_pages.py` (`SqlPendingPages`: bekleyen sayfaları bulan sorgu, "indekslendi" ve "başarısız" işaretleri), `main.py`'de döngünün başlatılıp kapanışta durdurulması, `INDEXING_ENABLED` ve `INDEX_SETTLE_SECONDS` ayarları. Uçtan uca entegrasyon testleri gerçek PostgreSQL ile: düzenleme bitince tek embedding çağrısı (AC-12.4), artan beklemeyle 5 deneme ve "Hata" durumu (AC-12.2), silinen sayfanın vektörlerinin temizlenmesi (AC-06.2).
+- **Kararlar:** Sayfa içeriği `PageContent`'e sorgu sırasında değil servis içinde, sayfa sayfa çevriliyor: Kurallar sonradan sıkılaşırsa eski bir sayfa yalnızca kendisini "başarısız" yapar, bütün indekslemeyi durdurmaz. Qdrant koleksiyonu açılışta değil ilk turda kuruluyor; Qdrant kapalıyken de uygulama açılıyor. Testlerde döngü kapalı (`INDEXING_ENABLED=false`), testler turu kendisi çalıştırıyor.
+- **Yapay zekanın hataları / eksikleri:** İlk planda sorgu, satırları doğrudan `PageContent`'e çevirecekti; tek bir geçersiz sayfa her turda hata verip bütün indekslemeyi durdururdu. Kod yazılmadan önce fark edildi; bu durumun testi eklendi.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
