@@ -21,3 +21,9 @@ def test_jwt_secret_is_hidden_when_settings_are_printed() -> None:
     settings = make_test_settings()
 
     assert settings.jwt_secret.get_secret_value() not in repr(settings)
+
+
+def test_chunk_max_chars_defaults_to_1000_and_must_be_positive() -> None:
+    assert make_test_settings().chunk_max_chars == 1000
+    with pytest.raises(ValidationError, match="chunk_max_chars"):
+        make_test_settings(chunk_max_chars=0)

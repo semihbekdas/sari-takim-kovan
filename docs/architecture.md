@@ -274,6 +274,7 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `EMBEDDING_BASE_URL` / `EMBEDDING_MODEL` / `EMBEDDING_DIM` | `https://api.openai.com/v1` / `text-embedding-3-small` / `1536` | Model değişirse indeks yeniden üretilir (ADR-005, "Kurtarma") |
 | `CHAT_API_KEY` / `EMBEDDING_API_KEY` | *(gizli)* | Asla commit'lenmez. Her anahtar yalnızca kendi sağlayıcısına gönderilir (sohbet: `CHAT_PROVIDER` / `CHAT_BASE_URL`, embedding: `EMBEDDING_BASE_URL`); biri boşsa diğerine düşülmez |
 | `RAG_TOP_K` / `SEARCH_MIN_SCORE` | `6` / `0.35` | Değerlendirme setiyle ayarlanır |
+| `CHUNK_MAX_CHARS` | `1000` | Parça üst sınırı, karakter (ADR-009). Değişirse tüm sayfalar yeniden indekslenir (ADR-005) |
 | `CHAT_MAX_TOKENS` / `CHAT_EFFORT` / `AI_TIMEOUT_SECONDS` | `4096` / `low` / `30` | Cevap üst sınırı (Claude'da düşünme token'ları dahil), Claude effort seviyesi, istek zaman aşımı (SDK başarısız isteği bir kez yeniden dener; en kötü durumda ~2 × zaman aşımı) |
 | `INDEX_SETTLE_SECONDS` | `10` | Düzenleme bittikten sonra indeksleme beklemesi |
 | `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez; `.env.example`'da boş, herkes kendi değerini üretir. Boşsa veya 32 karakterden kısaysa uygulama açılmaz |
