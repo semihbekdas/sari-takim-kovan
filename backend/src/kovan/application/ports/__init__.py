@@ -5,5 +5,6 @@ Bir port, onu ilk kullanan özellikle birlikte eklenir (kullanılmayan kod commi
 - `system`: sağlık kontrolü (`ReadinessProbe`)
 - `ai`: embedding ve sohbet modeli (`EmbeddingProvider`, `ChatModel`; ADR-006)
 - `users`: kullanıcı deposu ve şifre hash'leme (`UserRepository`, `PasswordHasher`)
-- ileride: `pages`, `links`, `vector` (ADR-004) …
+- `vector`: vektör indeksi (`VectorIndex`; ADR-004)
+- ileride: `pages`, `links` …
 """

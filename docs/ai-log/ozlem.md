@@ -51,3 +51,13 @@
 - **Yapay zekanın hataları / eksikleri:** `JWT_SECRET` zorunlu olunca ayarları elle kuran bir test (`test_ai_factory`) kırıldı, düzeltildi. Servis ilk taslakta token hatasını gereksiz yere ikinci kez sarıyordu, sadeleştirildi.
 - **Bizim müdahalemiz:** JWT için PyJWT kütüphanesini kullanmaya ben karar verdim. Yanlış e-posta ve yanlış şifrede aynı hata mesajının döndüğünü ve çerezin 8 saat geçerli olduğunu kontrol ettim.
 - **Ders çıkarımı:** Kayıtsız e-postada da şifre hash'i doğrulanmalı; yoksa yanıt süresinden e-postanın kayıtlı olup olmadığı anlaşılabilir.
+
+### 2026-11-26 — Özlem: içerik doğrulamada tür kontrolü (#13)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** Semih'in PR #21 review notu: blok/satır içi `type` veya başlık `level`'ı liste ya da nesne gelirse `in frozenset` kontrolü `TypeError` verip 500 dönüyordu.
+- **Prompt (özet):** "Semih'in #21 notunu düzelt: isinstance kontrolü ve testler."
+- **Sonuç:** `domain/content.py`'ye `_is_one_of` yardımcı fonksiyonu; üç kontrol (blok türü, satır içi tür, başlık seviyesi) bunu kullanıyor. 5 yeni test, düzeltmeden önce hepsi düşüyordu.
+- **Yapay zekanın hataları / eksikleri:** #21'deki ilk sürümde değerin tipine bakılmadan `in` kullanılmıştı. Test yazarken ek bir hata çıktı: Python'da `True == 1` olduğu için `level: true` geçerli başlık sayılıyordu; o da düzeltildi.
+- **Bizim müdahalemiz:** Semih'in review notunu takip ettim; level: true hatasını testte görünce onun da düzeltilmesini istedim.
+- **Ders çıkarımı:** JSON'dan gelen her alanın tipi, kullanılmadan önce kontrol edilmeli; `bool`'un `int` sayılması gibi Python özellikleri test edilmeli.
