@@ -5,14 +5,29 @@ bitirmek çağıranın işidir (API'de istek başına bir işlem). Böylece test
 alınan tek bir işlem içinde çalıştırabilir.
 """
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Connection, RowMapping, insert, select, update
+from sqlalchemy import Connection, Engine, RowMapping, insert, literal, select, update
 
+from kovan.application.ports.pages import PageRef
 from kovan.domain.content import PageContent
 from kovan.domain.pages import Page, version_conflict
 from kovan.infrastructure.db.tables import pages
+
+
+class SqlPageTransactions:
+    """`PageTransactions` port'u: Her `begin()` çağrısı ayrı bir veritabanı işlemi açar."""
+
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+
+    @contextmanager
+    def begin(self) -> Iterator["SqlPageRepository"]:
+        with self._engine.begin() as connection:  # hatasız biterse commit, hata olursa rollback
+            yield SqlPageRepository(connection)
 
 
 class SqlPageRepository:
@@ -51,6 +66,27 @@ class SqlPageRepository:
         )
         if result.rowcount == 0:
             raise version_conflict()
+
+    def breadcrumbs(self, *, owner_id: UUID, page_id: UUID) -> list[PageRef]:
+        # Özyinelemeli sorgu (recursive CTE): Sayfadan başlayıp `parent_id` ile yukarı çıkar.
+        # `depth` 0 sayfanın kendisidir; üst sayfalar en üstteki önce gelecek şekilde sıralanır.
+        start = (
+            select(pages.c.id, pages.c.parent_id, pages.c.title, literal(0).label("depth"))
+            .where(pages.c.id == page_id, pages.c.owner_id == owner_id)
+            .cte("ancestors", recursive=True)
+        )
+        parent = pages.alias("parent")
+        ancestors = start.union_all(
+            select(parent.c.id, parent.c.parent_id, parent.c.title, start.c.depth + 1).where(
+                parent.c.id == start.c.parent_id, parent.c.owner_id == owner_id
+            )
+        )
+        rows = self._connection.execute(
+            select(ancestors.c.id, ancestors.c.title)
+            .where(ancestors.c.depth > 0)
+            .order_by(ancestors.c.depth.desc())
+        )
+        return [PageRef(id=row.id, title=row.title) for row in rows]
 
 
 def _to_row(page: Page) -> dict[str, Any]:
