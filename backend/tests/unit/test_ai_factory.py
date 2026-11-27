@@ -17,7 +17,7 @@ from kovan.infrastructure.ai.openai_compatible import (
     OpenAICompatibleChatModel,
     OpenAICompatibleEmbeddingProvider,
 )
-from tests.fakes import UNREACHABLE_DATABASE_URL, make_test_settings
+from tests.fakes import TEST_JWT_SECRET, UNREACHABLE_DATABASE_URL, make_test_settings
 
 
 def _settings(**overrides: object) -> Settings:
@@ -105,7 +105,9 @@ def test_empty_env_values_mean_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in ("CHAT_EFFORT", "CHAT_BASE_URL", "CHAT_API_KEY"):
         monkeypatch.setenv(name, "")
 
-    settings = Settings(_env_file=None, database_url=UNREACHABLE_DATABASE_URL)
+    settings = Settings(
+        _env_file=None, database_url=UNREACHABLE_DATABASE_URL, jwt_secret=TEST_JWT_SECRET
+    )
 
     assert settings.chat_effort is None
     assert settings.chat_base_url is None

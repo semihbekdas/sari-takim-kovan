@@ -4,11 +4,12 @@ import pytest
 from alembic import command
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine
+from sqlalchemy import Connection, Engine, delete
 from testcontainers.community.postgres import PostgresContainer
 
 from kovan.config import Settings
 from kovan.infrastructure.db.engine import create_db_engine
+from kovan.infrastructure.db.tables import users
 from kovan.main import create_app
 from tests.fakes import make_test_settings
 from tests.integration.containers import require_docker
@@ -54,3 +55,26 @@ def db_engine(postgres_url: str) -> Iterator[Engine]:
         yield engine
     finally:
         engine.dispose()
+
+
+@pytest.fixture
+def db_connection(db_engine: Engine) -> Iterator[Connection]:
+    """Test sonunda geri alınan (rollback) bir işlem içindeki bağlantı.
+
+    Testin yazdığı her şey test bitince silinir; testler birbirini etkilemez ve sırası önemsizdir.
+    Repository'ler işlem açmadığı için bu bağlantıyla doğrudan kullanılabilir.
+    """
+    with db_engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            yield connection
+        finally:
+            transaction.rollback()
+
+
+@pytest.fixture
+def clean_users(db_engine: Engine) -> Engine:
+    """Testten önce `users` tablosunu boşaltır; böylece testler birbirini etkilemez."""
+    with db_engine.begin() as connection:
+        connection.execute(delete(users))
+    return db_engine

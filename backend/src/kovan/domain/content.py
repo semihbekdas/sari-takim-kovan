@@ -66,6 +66,14 @@ def _as_dict(value: object, name: str) -> dict[str, Any]:
     return value
 
 
+def _is_one_of(value: object, allowed: frozenset[Any]) -> bool:
+    """Değer izinli listede mi? Yalnızca metin ve sayı kabul edilir.
+
+    Liste veya nesne `in` ile aranırsa TypeError (500) çıkar; `True` da 1'e eşit sayılır.
+    """
+    return isinstance(value, str | int) and not isinstance(value, bool) and value in allowed
+
+
 def _check_blocks(blocks: object, depth: int) -> list[Any]:
     block_list = _as_list(blocks, "Blok listesi")
     for block in block_list:
@@ -77,10 +85,10 @@ def _check_block(block: dict[str, Any], depth: int) -> None:
     if depth > MAX_BLOCK_DEPTH:
         raise _invalid(f"Bloklar en fazla {MAX_BLOCK_DEPTH} kat iç içe olabilir.")
     block_type = block.get("type")
-    if block_type not in ALLOWED_BLOCK_TYPES:
+    if not _is_one_of(block_type, ALLOWED_BLOCK_TYPES):
         raise _invalid(f"İzin verilmeyen blok türü: {block_type}")
     props = _as_dict(block.get("props", {}), "Blok özellikleri")
-    if block_type == "heading" and props.get("level") not in ALLOWED_HEADING_LEVELS:
+    if block_type == "heading" and not _is_one_of(props.get("level"), ALLOWED_HEADING_LEVELS):
         raise _invalid("Başlık seviyesi 1, 2 veya 3 olmalı.")
     for item in _as_list(block.get("content", []), "Blok içeriği"):
         _check_inline(_as_dict(item, "Satır içi öğe"))
@@ -89,7 +97,7 @@ def _check_block(block: dict[str, Any], depth: int) -> None:
 
 def _check_inline(item: dict[str, Any]) -> None:
     item_type = item.get("type")
-    if item_type not in ALLOWED_INLINE_TYPES:
+    if not _is_one_of(item_type, ALLOWED_INLINE_TYPES):
         raise _invalid(f"İzin verilmeyen satır içi tür: {item_type}")
     if item_type == "link":
         _check_link(item)
