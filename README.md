@@ -147,6 +147,8 @@ Ders şartı: *"Kullanım şekli proje dokümantasyonunda açıkça belirtilmeli
 ```bash
 git clone https://github.com/semihbekdas/sari-takim-kovan.git && cd sari-takim-kovan
 cp .env.example .env                 # varsayılan: fake yapay zeka modu (anahtarsız)
+# .env içindeki JWT_SECRET'ı doldurun (boşsa backend açılmaz):
+#   python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 docker compose up -d                 # PostgreSQL + Qdrant (durum: docker compose ps)
 
 cd backend
