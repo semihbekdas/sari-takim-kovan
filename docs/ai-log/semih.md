@@ -95,3 +95,36 @@
 - **Yapay zekanın hataları / eksikleri:** İlk taslak sayfayı yeniden yazarken önce eski parçaları siliyordu; yazma başarısız olursa sayfa aramadan kayboluyordu. Kalıcı hatalar (400, 404) da "geçici kesinti" sayılıyordu. İkisi de kod incelemesinde bulundu.
 - **Düzeltme:** Önce yeni parçalar yazılıyor, sonra fazla kalan eski parçalar siliniyor. Yalnızca bağlantı hatası, 429 ve 5xx geçici sayılıyor. Her biri için test eklendi.
 - **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-25 — Değerlendirme seti (Semih'in payı) ve ölçüm betiği (Ortak, #17)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Sonuç:** `eval/README.md` (herkesin kullanacağı biçim), `eval/dataset/semih/` (5 kurgusal sayfa), `eval/questions/semih.toml` (7 soru: 3 normal, 2 eşanlamlı, 1 notlarda yok, 1 prompt injection), `eval/compare_embeddings.py` (Hit@1, Hit@5, MRR ve "notlarda yok" eşiği için skor). Sayfa kimliği `üye/dosya-adı` (farklı üyelerin aynı adlı dosyaları karışmaz); hatalı soru dosyası açıklayıcı hatayla durur.
+- **Gözlem:** Sahte (kelime tabanlı) embedding ile Hit@1 = 0.33; Türkçe ekler ("3NF'de", "değişti/yenilendi") kelime eşleşmesini bozuyor. Gerçek embedding modelinin neden gerekli olduğunu gösteren somut bir ölçüm.
+- **Yapay zekanın hataları / eksikleri:** İlk taslak üç modeli üç ayrı hesapla karşılaştırmayı planlıyordu; ödev ölçeğinde gereksiz bulundu (PR #28). Betik artık tek modeli ölçüyor.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-26 — İndeksleme servisi ve döngüsü (İP-C, #15, 1. parça)
+- **Kim:** Semih
+- **Araç / model:** Claude Code (Claude Opus 5.5)
+- **Sonuç:** `application/indexing_service.py`: düzenlemesi bitmiş sayfaları parçalar, embedding'e çevirir, Qdrant'a yazar ve "indekslendi" işaretler; silinmiş sayfaların vektörlerini siler; hata olursa `5 × 2^deneme` sn sonra yeniden denenmek üzere işaretler (R-10, R-11, ADR-005). `infrastructure/index_loop.py`: turu ~5 sn'de bir ayrı bir thread'de çalıştırır; uygulama kapanırken bekleme hemen kesilir. Testler: AC-06.2, AC-12.2, AC-12.4.
+- **Kararlar:** Sayfa tablosu ve parçalama fonksiyonu servise yalnızca `PendingPages` ve `Chunker` port'larıyla bağlanıyor; böylece servis `pages` tablosu ve parçalama (#13) gelmeden test edilebiliyor. Adı bilerek "kuyruk" değil: ADR-005'e göre ayrı bir kuyruk yok, bilgi sayfa satırında. SQL uygulaması ve döngünün uygulamaya bağlanması 2. parçada.
+- **Yapay zekanın hataları / eksikleri (inceleme ve testler yakaladı):**
+  1. Yalnızca dış servis hataları yakalanıyordu; yanlış ayar gibi beklenmeyen bir hatada sayfa işaretlenmiyor, her turda ücretli bir embedding çağrısıyla sonsuza kadar deneniyordu.
+  2. İndeksleme sürerken sayfa düzenlenirse eski sürümün hatası yeni sürümün deneme bilgisinin üstüne yazılıyordu.
+  3. Bekleme süresi turun başından sayılıyordu; uzun bir zaman aşımından sonra bekleme fiilen sıfıra iniyordu.
+  4. Log testi tek başına geçiyor, bütün testlerle birlikte düşüyordu: Başka testlerin ayarladığı log seviyesi genel kalıyordu.
+- **Düzeltme:** Beklenmeyen hatada da sayfa "başarısız" işaretleniyor ve hata loglanmak üzere döngüye iletiliyor. Hata bilgisi yalnızca sayfa hâlâ aynı sürümdeyse yazılıyor. Süre hatanın olduğu andan sayılıyor. Test modülü log ayarını kaydedip geri koyuyor. Her biri için test var.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK
+
+### 2026-11-27 — PR #29 review'u: Özlem'in 2 notu ve Codex'in 4 uyarısı (#17)
+- **Kim:** Semih (review: Özlem ve Codex otomatik review'u)
+- **Araç / model:** Claude Code (Claude Fable 5.2)
+- **Yapay zekanın hataları (review yakaladı):**
+  1. `sonar.exclusions` iki ayrı satırda kalıyordu; yalnızca sonuncusu geçerli olduğu için `backend/migrations/**` dışlaması kayboluyordu (Özlem).
+  2. Türüyle uyuşmayan soru (ör. `normal` ama `expected_pages = []`) hata vermiyor, sessizce öteki gruba sayılıp metrikleri bozuyordu (Özlem ve Codex).
+  3. Arama eşiği için raporlanan skor beklenen sayfanın değil, en yakın sayfanın skoruydu; beklenen sayfa 2.–5. sıradayken eşik yanlış seçilebilirdi.
+  4. Betik `backend/` dışında durduğu için `ruff` ve `mypy` kapsamına girmiyordu.
+  5. Betik her bölümü tek parça sayıyor; uygulama ise 1000 karakteri aşan bölümü bölüyor. Uzun bir bölümde ölçüm uygulamayı yansıtmazdı.
+- **Düzeltme:** Dışlamalar tek satırda. Soru türü ile `expected_pages` uyumu kontrol ediliyor. Rapor beklenen sayfaların ortalama ve en düşük skorunu, her soru için de beklenen sayfanın skorunu veriyor. CI'da `ruff` ve `mypy` betiği de denetliyor. 1000 karakteri aşan bölümde betik duruyor; parça boyutunu bu setle ayarlama iddiası ADR-009 ve test stratejisinden çıkarıldı.
+- **Bizim müdahalemiz:** ✍️ DOLDURULACAK

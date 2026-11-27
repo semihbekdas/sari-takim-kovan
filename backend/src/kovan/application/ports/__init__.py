@@ -7,5 +7,6 @@ Bir port, onu ilk kullanan özellikle birlikte eklenir (kullanılmayan kod commi
 - `users`: kullanıcı deposu ve şifre hash'leme (`UserRepository`, `PasswordHasher`)
 - `vector`: vektör indeksi (`VectorIndex`; ADR-004)
 - `pages`: sayfa deposu ve işlem (`PageRepository`, `PageTransactions`)
+- `indexing`: indekslenmeyi bekleyen sayfalar ve parçalama (`PendingPages`, `Chunker`; ADR-005)
 - ileride: `links` …
 """
