@@ -6,7 +6,7 @@ istekleri beklemez. Uygulama kapanırken `stop` olayı, turlar arasındaki bekle
 
 import asyncio
 import contextlib
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from datetime import UTC, datetime
 
 import structlog
@@ -20,6 +20,24 @@ RunOnce = Callable[[datetime], IndexRunReport]
 
 def _utc_now() -> datetime:
     return datetime.now(UTC)
+
+
+@contextlib.asynccontextmanager
+async def running_index_loop(
+    run_once: RunOnce, *, interval_seconds: float = 5
+) -> AsyncIterator[asyncio.Task[None]]:
+    """Döngüyü arka planda başlatır; çıkışta durdurur ve bitmesini bekler.
+
+    Uygulama kapanırken o an süren tur yarıda kesilmez, bitmesi beklenir (en kötü durumda bir
+    yapay zeka isteğinin zaman aşımı kadar).
+    """
+    stop = asyncio.Event()
+    task = asyncio.create_task(run_index_loop(run_once, stop, interval_seconds=interval_seconds))
+    try:
+        yield task
+    finally:
+        stop.set()
+        await task
 
 
 async def run_index_loop(
