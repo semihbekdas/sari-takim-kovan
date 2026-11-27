@@ -2,6 +2,7 @@
 
 import copy
 import json
+from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -26,6 +27,14 @@ MAX_CONTENT_BYTES = 512 * 1024
 MAX_BLOCK_DEPTH = 20
 
 
+@dataclass(frozen=True)
+class Section:
+    """Başlık hiyerarşisinin bir bölümü: üstteki başlıklar ve bölümün blok metinleri."""
+
+    headings: tuple[str, ...]
+    texts: tuple[str, ...]
+
+
 class PageContent:
     """Editörün blok dizisi. Oluşturulurken doğrulanır (R-06), sonra değişmez."""
 
@@ -48,6 +57,24 @@ class PageContent:
 
     def mentioned_page_ids(self) -> set[UUID]:
         return _mentioned_page_ids(self._blocks)
+
+    def to_sections(self) -> list[Section]:
+        """İçeriği başlıklara (H1–H3) göre bölümlere ayırır (ADR-009). Boş bölümler atlanır."""
+        sections: list[Section] = []
+        headings: list[tuple[int, str]] = []
+        texts: list[str] = []
+        for block in _flatten(self._blocks):
+            text = _inline_text(block.get("content", [])).strip()
+            if block["type"] != "heading":
+                texts.extend([text] if text else [])
+                continue
+            _add_section(sections, headings, texts)
+            texts = []
+            level = int(block.get("props", {})["level"])
+            headings = [(lvl, name) for lvl, name in headings if lvl < level]
+            headings.append((level, text))
+        _add_section(sections, headings, texts)
+        return sections
 
 
 def _invalid(message: str) -> DomainRuleError:
@@ -112,6 +139,23 @@ def _check_link(link: dict[str, Any]) -> None:
     for part in _as_list(link.get("content", []), "Bağlantı içeriği"):
         if _as_dict(part, "Bağlantı metni").get("type") != "text":
             raise _invalid("Bağlantının içinde yalnızca metin olabilir.")
+
+
+def _flatten(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """İç içe blokları belge sırasıyla düz bir listeye çevirir."""
+    flat: list[dict[str, Any]] = []
+    for block in blocks:
+        flat.append(block)
+        flat.extend(_flatten(block.get("children", [])))
+    return flat
+
+
+def _add_section(
+    sections: list[Section], headings: list[tuple[int, str]], texts: list[str]
+) -> None:
+    if texts:
+        names = tuple(name for _, name in headings if name)
+        sections.append(Section(headings=names, texts=tuple(texts)))
 
 
 def _plain_text(blocks: list[dict[str, Any]]) -> str:

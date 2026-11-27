@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytest
 
-from kovan.domain.content import PageContent
+from kovan.domain.content import PageContent, Section
 from kovan.domain.errors import DomainRuleError
 
 A_PAGE = "3f1c2b6e-8d4a-4c1e-9b2f-1a2b3c4d5e6f"
@@ -194,3 +194,53 @@ def test_mentioned_page_ids_ignores_invalid_ids() -> None:
     content = PageContent([{"type": "paragraph", "content": [mention("bozuk")]}])
 
     assert content.mentioned_page_ids() == set()
+
+
+# --- Bölümler (to_sections, ADR-009) ---------------------------------------
+
+
+def heading(level: int, value: str) -> dict[str, Any]:
+    return {"type": "heading", "props": {"level": level}, "content": [text(value)]}
+
+
+def paragraph(value: str) -> dict[str, Any]:
+    return {"type": "paragraph", "content": [text(value)]}
+
+
+def test_sections_follow_heading_hierarchy() -> None:
+    content = PageContent(
+        [
+            paragraph("giriş"),
+            heading(1, "Veritabanı"),
+            paragraph("tablolar"),
+            heading(2, "Normalizasyon"),
+            heading(3, "3NF"),
+            paragraph("geçişli bağımlılık yok"),
+            heading(2, "İndeks"),
+            paragraph("B-ağacı"),
+        ]
+    )
+
+    assert content.to_sections() == [
+        Section(headings=(), texts=("giriş",)),
+        Section(headings=("Veritabanı",), texts=("tablolar",)),
+        Section(headings=("Veritabanı", "Normalizasyon", "3NF"), texts=("geçişli bağımlılık yok",)),
+        Section(headings=("Veritabanı", "İndeks"), texts=("B-ağacı",)),
+    ]
+
+
+def test_sections_skip_empty_blocks_and_headings_without_text() -> None:
+    content = PageContent([heading(1, "Boş"), paragraph("  "), heading(1, "Dolu"), paragraph("x")])
+
+    assert content.to_sections() == [Section(headings=("Dolu",), texts=("x",))]
+
+
+def test_sections_include_nested_children_in_order() -> None:
+    item = {"type": "bulletListItem", "content": [text("madde")], "children": [paragraph("alt")]}
+    content = PageContent([heading(2, "Liste"), item])
+
+    assert content.to_sections() == [Section(headings=("Liste",), texts=("madde", "alt"))]
+
+
+def test_sections_of_empty_content_are_empty() -> None:
+    assert PageContent([]).to_sections() == []
