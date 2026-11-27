@@ -1,7 +1,8 @@
 """İndeksleme port'ları (ADR-005, ADR-009).
 
-- `PendingPages`: İndekslenmeyi bekleyen sayfalar. PostgreSQL'deki `pages` tablosuyla uygulanır;
-  ayrı bir kuyruk tablosu yoktur, bilgi sayfanın kendi satırındadır.
+- `PendingPages`: İndekslenmeyi bekleyen sayfalar. PostgreSQL'deki `pages` tablosuyla uygulanır
+  (`infrastructure/db/pending_pages.py`); ayrı bir kuyruk tablosu yoktur, bilgi sayfanın kendi
+  satırındadır.
 - `Chunker`: Sayfayı parçalara bölen fonksiyon (`application/chunking.py`, ADR-009).
 """
 
@@ -11,13 +12,17 @@ from datetime import datetime
 from typing import Any, Protocol
 from uuid import UUID
 
+from kovan.domain.content import PageContent
+
 
 @dataclass(frozen=True)
 class PageToIndex:
     page_id: UUID
     owner_id: UUID
     title: str
-    content: Any  # BlockNote blok dizisi (JSON); yorumlamak parçalama fonksiyonunun işi
+    # Veritabanındaki blok dizisi (JSON). `PageContent`'e servis çevirir: Bozuk bir sayfa yalnızca
+    # kendisini "başarısız" yapar, diğer sayfaların okunmasını engellemez.
+    content: Any
     version: int
     deleted: bool
     attempts: int  # şimdiye kadarki başarısız deneme sayısı
@@ -26,10 +31,12 @@ class PageToIndex:
 class PendingPages(Protocol):
     """İndekslenmeyi bekleyen sayfalar (R-10, R-11)."""
 
-    def pages_to_index(self, *, settled_before: datetime, limit: int) -> Sequence[PageToIndex]:
+    def pages_to_index(
+        self, *, now: datetime, settled_before: datetime, limit: int
+    ) -> Sequence[PageToIndex]:
         """`indexed_version IS DISTINCT FROM version`, `updated_at ≤ settled_before`,
         `index_attempts < MAX_INDEX_ATTEMPTS` (`domain/pages.py`, R-11) ve yeniden deneme zamanı
-        gelmiş sayfalar."""
+        (`index_retry_at`) `now`'a gelmiş sayfalar; en eski düzenlenen önce."""
         ...
 
     def mark_indexed(self, *, page_id: UUID, version: int) -> None:
@@ -61,4 +68,4 @@ class TextChunk(Protocol):
 
 
 class Chunker(Protocol):
-    def __call__(self, title: str, content: Any) -> Sequence[TextChunk]: ...
+    def __call__(self, title: str, content: PageContent) -> Sequence[TextChunk]: ...

@@ -17,6 +17,7 @@ from kovan.application.errors import ExternalServiceError
 from kovan.application.ports.ai import EmbeddingProvider
 from kovan.application.ports.indexing import Chunker, PageToIndex, PendingPages
 from kovan.application.ports.vector import VectorIndex, VectorPoint
+from kovan.domain.content import PageContent
 
 BASE_RETRY_SECONDS = 5
 UNEXPECTED_ERROR_CODE = "INDEXING_FAILED"
@@ -55,6 +56,7 @@ class IndexingService:
         self._settle = timedelta(seconds=settle_seconds)
         self._batch_size = batch_size
         self._clock = clock
+        self._collection_ready = False
 
     def run_once(self, now: datetime) -> IndexRunReport:
         """Bekleyen sayfalardan bir grubu işler; arka plan döngüsü birkaç saniyede bir çağırır.
@@ -63,10 +65,11 @@ class IndexingService:
         işaretlenir; böylece deneme sınırı (R-11) işler ve sayfa sonsuza kadar denenmez.
         Beklenmeyen hatalar (ör. yanlış ayar) raporla döngüye iletilir ve orada loglanır.
         """
+        self._ensure_collection()
         indexed = removed = failed = 0
         unexpected: list[Exception] = []
         pages = self._pending_pages.pages_to_index(
-            settled_before=now - self._settle, limit=self._batch_size
+            now=now, settled_before=now - self._settle, limit=self._batch_size
         )
         for page in pages:
             try:
@@ -86,6 +89,13 @@ class IndexingService:
                     indexed += 1
         return IndexRunReport(indexed, removed, failed, unexpected_errors=tuple(unexpected))
 
+    def _ensure_collection(self) -> None:
+        """Qdrant koleksiyonu ilk turda kurulur. Qdrant o an kapalıysa hata turu durdurur (döngü
+        loglar) ve bir sonraki turda yeniden denenir; uygulamanın açılması Qdrant'ı beklemez."""
+        if not self._collection_ready:
+            self._vector_index.ensure_collection()
+            self._collection_ready = True
+
     def _process(self, page: PageToIndex) -> None:
         if page.deleted:
             self._vector_index.delete_page(page_id=page.page_id)
@@ -93,7 +103,7 @@ class IndexingService:
             self._index(page)
 
     def _index(self, page: PageToIndex) -> None:
-        chunks = list(self._chunker(page.title, page.content))
+        chunks = list(self._chunker(page.title, PageContent(page.content)))  # R-06
         # ADR-009: Embedding'e giden metnin başına bağlam başlığı eklenir.
         vectors = self._embeddings.embed([f"{c.heading_path}\n\n{c.text}" for c in chunks])
         points = [

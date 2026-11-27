@@ -32,6 +32,10 @@ class VectorHit:
 
 
 class VectorIndex(Protocol):
+    def ensure_collection(self) -> None:
+        """Koleksiyon yoksa oluşturur, varsa boyutunu doğrular. Tekrar çağrılabilir."""
+        ...
+
     def replace_page(
         self,
         *,
