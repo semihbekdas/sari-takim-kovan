@@ -68,6 +68,6 @@
 - **Amaç:** `PageContent.to_sections()` ve `application/chunking.py` içinde `chunk_page(title, content)` (ADR-009); `CHUNK_MAX_CHARS` ayarı (varsayılan 1000).
 - **Prompt (özet):** "#13'ün asıl parçalama modülünü ADR-009'a göre yaz: başlık bölümleri, 1000 karakter sınırı, uzun blok bölme; birim testleriyle küçük commit'ler."
 - **Sonuç:** Bölümleme domain'de (`to_sections`), parçalara doldurma application'da (`chunk_page`). Başlıksız sayfa, boş sayfa, çok uzun blok ve Türkçe karakter testleri eklendi.
-- **Yapay zekanın hataları / eksikleri:** <!-- Özlem dolduracak -->
-- **Bizim müdahalemiz:** <!-- Özlem dolduracak -->
+- **Yapay zekanın hataları / eksikleri:** Şimdilik bulunmadı; review'da çıkarsa eklenecek.
+- **Bizim müdahalemiz:** Başlıksız içeriğin sayfa başlığı altında tek bölüm olduğunu ve yalnız başlıktan oluşan bölümün parça üretmediğini testlerde kontrol ettim.
 - **Ders çıkarımı:** Bölümlemeyi (ne nereye ait) ve boyut sınırını (ne kadar büyük) ayırmak, iki kuralı ayrı ayrı test etmeyi kolaylaştırdı.
