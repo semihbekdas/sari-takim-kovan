@@ -81,3 +81,13 @@
 - **Yapay zekanın hataları / eksikleri:** 4. parçayı "4/4" diye adlandırdı; issue'daki listeyi kontrol etmeden #9'un bittiğini varsaymıştı. Issue'yu birlikte okuyunca ağacın eksik olduğu çıktı.
 - **Bizim müdahalemiz:** #9'u açıp yapılacaklar listesini PR'larla karşılaştırdım; Türkçe sıralamanın (Cam < Çay < Işık < İz) testte gerçekten denendiğini kontrol ettim; testleri kendi bilgisayarımda çalıştırdım.
 - **Ders çıkarımı:** "Bitti" demeden önce issue'daki "Bitti sayılır" listesine madde madde bakmak gerekiyor.
+
+### 2026-11-28 — Umut: değerlendirme seti sayfaları ve soruları (#17)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** Ortak RAG değerlendirme setine (`eval/`, #29) kendi 5 kurgusal sayfamı ve 7 sorumu eklemek.
+- **Prompt (özet):** "Alanıma yakın, gerçek kişisel bilgi içermeyen 5 konu öner; sayfaları ve soruları taslak olarak hazırla."
+- **Sonuç:** `eval/dataset/umut/`: ESP32 sıcaklık projesi, Thevenin/Norton, op-amp devreleri, güneş paneli kurulumu ve kurgusal bir firmada staj notları. `eval/questions/umut.toml`: 3 normal, 2 eş anlamlı, 1 talimat sızdırma (staj sayfasına gizlendi), 1 "bulunamadı" (asenkron motor; hiçbir sayfada geçmiyor, kontrol edildi). `--provider fake` ile betik hatasız çalıştı; her bölüm 350 karakterin altında (sınır 1000).
+- **Yapay zekanın hataları / eksikleri:** Sayfaları yapay zeka taslak olarak yazdı; konu seçimi ve teknik doğruluk benim kontrolümde. Sahte (fake) sağlayıcıyla eş anlamlı sorular bulunamadı; bu beklenen bir durum (sahte model kelime benzerliğine bakıyor), gerçek ölçüm Semih'in betiğiyle yapılacak.
+- **Bizim müdahalemiz:** Konuları alanımdan (EEM) seçtim; formülleri (Av = −Rf/Rin, Pmax = Vth²/4Rth, RL = Rth) derslerimden kontrol ettim; eş anlamlı soruların sayfadaki kelimelerden gerçekten farklı olduğuna baktım.
+- **Ders çıkarımı:** "Bulunamadı" sorusunun konusu başka üyelerin sayfalarında da geçmemeli; tüm sete aranarak seçildi.
