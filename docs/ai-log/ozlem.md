@@ -71,3 +71,13 @@
 - **Yapay zekanın hataları / eksikleri:** Şimdilik bulunmadı; review'da çıkarsa eklenecek.
 - **Bizim müdahalemiz:** Başlıksız içeriğin sayfa başlığı altında tek bölüm olduğunu ve yalnız başlıktan oluşan bölümün parça üretmediğini testlerde kontrol ettim.
 - **Ders çıkarımı:** Bölümlemeyi (ne nereye ait) ve boyut sınırını (ne kadar büyük) ayırmak, iki kuralı ayrı ayrı test etmeyi kolaylaştırdı.
+
+### 2026-11-27 — Özlem: değerlendirme seti payım (#17)
+- **Kim:** Özlem
+- **Araç / model:** Claude Code
+- **Amaç:** Ortak RAG değerlendirme setine (eval/README.md) 5 kurgusal not sayfası ve 7 soru eklemek: 3 normal, 2 eşanlamlı, 1 "notlarda yok", 1 prompt injection.
+- **Prompt (özet):** "Seçtiğim 5 konuda (İstanbul'daki tarihi yerler, Türkiye ekonomisi, üniversite eğitim sistemi, İngilizce öğrenme yöntemleri, toplu taşımanın faydaları) sayfalar ve bunlara uygun 7 soru hazırla; her bölüm 1000 karakterden kısa olsun."
+- **Sonuç:** `eval/dataset/ozlem/` altında 5 sayfa (her biri 8–9 bölüm, yaklaşık 2.300 karakter), `eval/questions/ozlem.toml` içinde 7 soru. En uzun bölüm 365 karakter (ADR-009 sınırının altında). Betik `--provider fake` ile hatasız çalışıyor.
+- **Yapay zekanın hataları / eksikleri:** İlk taslak "ben" diliyle kişisel not gibi yazılmıştı ve sayfalar çok kısaydı; nesnel dile çevrildi ve uzatıldı. "Biraz kısalar" isteği önce yanlış anlaşılıp sayfalar daha da kısaltılmıştı. Ekonomi sayfasında güncel gerçek rakam yanıltıcı olabileceği için rakamlar ders örneği olarak işaretlendi.
+- **Bizim müdahalemiz:** Konuları ben seçtim. İlk taslak 'ben' diliyle ve kısa yazılmıştı; nesnel dile çevrilmesini ve sayfaların uzatılmasını istedim. Son metni okuyup onayladım.
+- **Ders çıkarımı:** Soruların cevabı yalnızca notlarda olan, sayfaya özgü ayrıntılara (kişisel rakamlar, gün ve saatler) dayanmalı; yoksa model genel bilgisiyle cevap verip aramayı ölçmemizi bozar.
