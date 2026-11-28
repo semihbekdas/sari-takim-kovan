@@ -29,6 +29,10 @@ export function getPageTree(signal?: AbortSignal): Promise<TreeNode[]> {
   return apiRequest<TreeNode[]>("/pages/tree", { signal });
 }
 
+export function getPage(pageId: string, signal?: AbortSignal): Promise<Page> {
+  return apiRequest<Page>(`/pages/${pageId}`, { signal });
+}
+
 /** Yeni sayfa; `parentId` verilirse alt sayfa olur. Başlık boşsa backend "Adsız" yapar (R-03). */
 export function createPage(parentId: string | null): Promise<Page> {
   return apiRequest<Page>("/pages", { method: "POST", body: { parent_id: parentId } });
