@@ -1,4 +1,4 @@
-"""`SqlPageRepository` gerçek PostgreSQL'e karşı (#9; R-04, R-07, R-08, breadcrumb).
+"""`SqlPageRepository` gerçek PostgreSQL'e karşı (#9; R-04, R-07, R-08, breadcrumb, ağaç).
 
 Her test geri alınan bir işlem içinde çalışır (`db_connection`, conftest.py).
 """
@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy import Connection, insert
 from sqlalchemy.exc import IntegrityError
 
-from kovan.application.ports.pages import PageRef
+from kovan.application.ports.pages import PageRef, TreeNode
 from kovan.domain.content import PageContent
 from kovan.domain.errors import ConflictError
 from kovan.domain.pages import Page
@@ -167,3 +167,35 @@ def test_breadcrumbs_of_other_users_page_are_empty(
     repo.add(child)
 
     assert repo.breadcrumbs(owner_id=add_user(db_connection), page_id=child.id) == []
+
+
+@pytest.mark.ac("AC-05.1")
+def test_tree_sorts_titles_in_turkish_alphabetical_order(
+    repo: SqlPageRepository, owner: UUID
+) -> None:
+    # Bayt sırasıyla "Zil" < "Çay" ve "İz" < "Işık" olurdu; Türkçe alfabede tersi doğru.
+    for title in ["Zil", "Öykü", "Ocak", "İz", "Işık", "Çay", "Cam"]:
+        repo.add(replace(new_page(owner), title=title))
+
+    titles = [node.title for node in repo.tree(owner_id=owner, limit=1000)]
+
+    assert titles == ["Cam", "Çay", "Işık", "İz", "Ocak", "Öykü", "Zil"]
+
+
+def test_tree_has_only_own_live_pages_and_has_children_ignores_deleted(
+    repo: SqlPageRepository, owner: UUID, db_connection: Connection
+) -> None:
+    parent = new_page(owner)
+    child = replace(new_page(owner, parent_id=parent.id), title="Veritabanı")
+    leaf = replace(new_page(owner), title="Yalnız")
+    deleted_child = replace(new_page(owner, parent_id=leaf.id), title="Silinen", deleted_at=NOW)
+    others = new_page(add_user(db_connection))
+    for page in (parent, child, leaf, deleted_child, others):
+        repo.add(page)
+
+    assert repo.tree(owner_id=owner, limit=1000) == [
+        TreeNode(parent.id, None, "Dersler", has_children=True),
+        TreeNode(child.id, parent.id, "Veritabanı", has_children=False),
+        TreeNode(leaf.id, None, "Yalnız", has_children=False),
+    ]
+    assert len(repo.tree(owner_id=owner, limit=2)) == 2

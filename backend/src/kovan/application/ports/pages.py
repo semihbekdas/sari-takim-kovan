@@ -19,6 +19,16 @@ class PageRef:
     title: str
 
 
+@dataclass(frozen=True)
+class TreeNode:
+    """Sol menüdeki bir sayfa (AC-05.1)."""
+
+    id: UUID
+    parent_id: UUID | None
+    title: str
+    has_children: bool
+
+
 class PageRepository(Protocol):
     def add(self, page: Page) -> None:
         """Yeni sayfayı kaydeder."""
@@ -35,6 +45,10 @@ class PageRepository(Protocol):
         Kontrol `UPDATE … WHERE version = :beklenen` ile tek adımda yapılır; böylece aynı anda
         gelen iki kayıttan yalnızca biri geçer.
         """
+        ...
+
+    def tree(self, *, owner_id: UUID, limit: int) -> list[TreeNode]:
+        """Kullanıcının silinmemiş sayfaları; kardeşler başlığa göre Türkçe alfabetik (AC-05.1)."""
         ...
 
     def breadcrumbs(self, *, owner_id: UUID, page_id: UUID) -> list[PageRef]:

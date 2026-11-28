@@ -10,9 +10,9 @@ from contextlib import contextmanager
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Connection, Engine, RowMapping, insert, literal, select, update
+from sqlalchemy import Connection, Engine, RowMapping, exists, insert, literal, select, update
 
-from kovan.application.ports.pages import PageRef
+from kovan.application.ports.pages import PageRef, TreeNode
 from kovan.domain.content import PageContent
 from kovan.domain.pages import Page, version_conflict
 from kovan.infrastructure.db.tables import pages
@@ -66,6 +66,18 @@ class SqlPageRepository:
         )
         if result.rowcount == 0:
             raise version_conflict()
+
+    def tree(self, *, owner_id: UUID, limit: int) -> list[TreeNode]:
+        child = pages.alias("child")
+        has_children = exists().where(child.c.parent_id == pages.c.id, child.c.deleted_at.is_(None))
+        rows = self._connection.execute(
+            select(pages.c.id, pages.c.parent_id, pages.c.title, has_children.label("has_children"))
+            .where(pages.c.owner_id == owner_id, pages.c.deleted_at.is_(None))
+            # ICU harmanlaması: Ç, Ğ, I/İ, Ö, Ş, Ü Türkçe alfabedeki yerinde (domain-design § 3).
+            .order_by(pages.c.title.collate("tr-x-icu"), pages.c.id)
+            .limit(limit)
+        )
+        return [TreeNode(row.id, row.parent_id, row.title, row.has_children) for row in rows]
 
     def breadcrumbs(self, *, owner_id: UUID, page_id: UUID) -> list[PageRef]:
         # Özyinelemeli sorgu (recursive CTE): Sayfadan başlayıp `parent_id` ile yukarı çıkar.
