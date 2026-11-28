@@ -71,3 +71,13 @@
 - **Yapay zekanın hataları / eksikleri:** Kodu ayırırken 3. parçada kısalttığı açıklama satırları bu parçada eski uzun hallerine geri geldi; fark edip düzeltti.
 - **Bizim müdahalemiz:** 409 testinin "ikinci sekme" senaryosunu (aynı sürümle iki kayıt) okuyup gerçek kullanımla karşılaştırdım; testleri kendi bilgisayarımda çalıştırdım.
 - **Ders çıkarımı:** Küçük PR'lar review'u da hızlandırıyor: 3. parça birkaç dakikada onaylandı.
+
+### 2026-11-28 — Umut: sayfa ağacı (#9, 5/5)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** #9'un son maddesi `GET /pages/tree`: sol menü için kullanıcının silinmemiş sayfaları, `has_children` ve kardeşlerin Türkçe alfabetik sırası (AC-05.1).
+- **Prompt (özet):** "#9'da başka ne kaldı? Ağacı hazırla."
+- **Sonuç:** `PageRepository.tree` (`ORDER BY title COLLATE "tr-x-icu"`, alt sayfa kontrolü `EXISTS` ile, en fazla 1000 sayfa), `PageService.tree`, `/pages/tree` uç noktası (`/{page_id}`'den önce tanımlı). 2 entegrasyon + 1 kabul testi; 401 testine ağaç da eklendi.
+- **Yapay zekanın hataları / eksikleri:** 4. parçayı "4/4" diye adlandırdı; issue'daki listeyi kontrol etmeden #9'un bittiğini varsaymıştı. Issue'yu birlikte okuyunca ağacın eksik olduğu çıktı.
+- **Bizim müdahalemiz:** #9'u açıp yapılacaklar listesini PR'larla karşılaştırdım; Türkçe sıralamanın (Cam < Çay < Işık < İz) testte gerçekten denendiğini kontrol ettim; testleri kendi bilgisayarımda çalıştırdım.
+- **Ders çıkarımı:** "Bitti" demeden önce issue'daki "Bitti sayılır" listesine madde madde bakmak gerekiyor.
