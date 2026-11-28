@@ -88,6 +88,25 @@ body {
   color: #91918e;
 }
 
+.breadcrumbs ol {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: #91918e;
+}
+
+.breadcrumbs li + li::before {
+  content: "›";
+  margin-right: 6px;
+}
+
+.breadcrumbs a {
+  color: inherit;
+}
+
 .backend-status {
   margin: 0;
   font-size: 12px;

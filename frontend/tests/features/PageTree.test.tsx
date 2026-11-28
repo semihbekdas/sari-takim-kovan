@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../../src/api/client";
 import { getHealth } from "../../src/api/health";
-import { createPage, getPageTree, type Page } from "../../src/api/pages";
+import { createPage, getPage, getPageTree, type Page } from "../../src/api/pages";
 import { renderApp } from "./renderApp";
 
 vi.mock("../../src/api/health");
@@ -47,6 +47,7 @@ describe("PageTree", () => {
       .mockResolvedValueOnce([])
       .mockResolvedValue([{ id: "yeni", parent_id: null, title: "Adsız", has_children: false }]);
     vi.mocked(createPage).mockResolvedValue(page("yeni", "Adsız"));
+    vi.mocked(getPage).mockResolvedValue(page("yeni", "Adsız"));
     const router = renderApp("/");
 
     await userEvent.click(await screen.findByRole("button", { name: "+ Yeni sayfa" }));
@@ -60,6 +61,7 @@ describe("PageTree", () => {
     vi.mocked(getHealth).mockResolvedValue({ status: "ok" });
     vi.mocked(getPageTree).mockResolvedValue([ZIL]);
     vi.mocked(createPage).mockResolvedValue(page("alt", "Adsız"));
+    vi.mocked(getPage).mockResolvedValue(page("alt", "Adsız"));
     renderApp("/");
 
     await userEvent.click(await screen.findByRole("button", { name: "Zil altına sayfa ekle" }));

@@ -101,3 +101,13 @@
 - **Yapay zekanın hataları / eksikleri:** Önce "bugünlük iş kalmadı" dedi; #10'un da Sprint 2'de bana atanmış olduğunu kontrol etmemişti, "emin misin" diye sorunca fark etti. İlk taslak 454 satırdı; breadcrumb 2. parçaya ayrıldı. Ayrıca aynı klasörde yalnızca büyük/küçük harfle ayrılan `PageTree.tsx` ve `pageTree.ts` dosyalarını oluşturdu; Windows bunları aynı dosya saydığı için testler benim bilgisayarımda 7 hatayla düştü. Yardımcı dosya `groupPages.ts` olarak yeniden adlandırıldı.
 - **Bizim müdahalemiz:** Sprint 2'de bana atanmış issue'ları kontrol ettirdim; testleri kendi bilgisayarımda çalıştırdım ve menünün tarayıcıda göründüğünü kontrol ettim.
 - **Ders çıkarımı:** "İş bitti" demeden önce sprintte bana atanmış tüm issue'lara bakmak gerekiyor.
+
+### 2026-11-28 — Umut: breadcrumb ve sayfa görünümü (#10, 2/2)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** `/pages/:pageId` adresinde açık sayfanın üstünde breadcrumb göstermek (AC-05.2); 1. parçada eklenen sayfaya gidince "bulunamadı" yerine sayfanın açılması.
+- **Prompt (özet):** "#10'un 2. parçasını hazırla."
+- **Sonuç:** `PageView` bileşeni (`GET /pages/{id}`; breadcrumb'daki üst sayfalar tıklanabilir bağlantı, açık sayfa `aria-current`), 404'te "Bu sayfa bulunamadı." (başkasının sayfası da aynı mesajı alır, R-04). 2 yeni Vitest testi. Editör (BlockNote) Sprint 3'te bu sayfaya eklenecek.
+- **Yapay zekanın hataları / eksikleri:** Bu parçada yeni bir hata çıkmadı; 1. parçadaki dosya adı hatasından sonra yeni dosya adlarının Windows'ta çakışmadığı kontrol edildi.
+- **Bizim müdahalemiz:** Testleri, lint ve tip kontrolünü kendi bilgisayarımda çalıştırdım.
+- **Ders çıkarımı:** Bir özelliği ikiye bölerken ilk parçanın tek başına da tutarlı çalışması gerekiyor (1. parçada yeni sayfa "bulunamadı" ekranına gidiyordu; bu parça onu tamamlıyor).
