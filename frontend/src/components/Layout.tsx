@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from "react-router";
 
+import { PageTree } from "../features/pages/PageTree";
 import { BackendStatus } from "./BackendStatus";
 
 /**
- * Ana yerleşim: solda menü, sağda içerik. Her sayfa `<Outlet />` içine çizilir.
- * Sayfa ağacı ve breadcrumb #10'da sol menüye eklenecek.
+ * Ana yerleşim: solda menü (sayfa ağacı), sağda içerik. Her ekran `<Outlet />` içine çizilir.
  */
 export function Layout() {
   return (
@@ -13,9 +13,7 @@ export function Layout() {
         <NavLink to="/" className="sidebar__brand">
           Kovan
         </NavLink>
-        <nav className="sidebar__nav" aria-label="Sayfalar">
-          <p className="sidebar__empty">Henüz sayfa yok.</p>
-        </nav>
+        <PageTree />
         <BackendStatus />
       </aside>
       <main className="content">
