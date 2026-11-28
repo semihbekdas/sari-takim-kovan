@@ -79,5 +79,5 @@
 - **Prompt (özet):** "Seçtiğim 5 konuda (İstanbul'daki tarihi yerler, Türkiye ekonomisi, üniversite eğitim sistemi, İngilizce öğrenme yöntemleri, toplu taşımanın faydaları) sayfalar ve bunlara uygun 7 soru hazırla; her bölüm 1000 karakterden kısa olsun."
 - **Sonuç:** `eval/dataset/ozlem/` altında 5 sayfa (her biri 8–9 bölüm, yaklaşık 2.300 karakter), `eval/questions/ozlem.toml` içinde 7 soru. En uzun bölüm 365 karakter (ADR-009 sınırının altında). Betik `--provider fake` ile hatasız çalışıyor.
 - **Yapay zekanın hataları / eksikleri:** İlk taslak "ben" diliyle kişisel not gibi yazılmıştı ve sayfalar çok kısaydı; nesnel dile çevrildi ve uzatıldı. "Biraz kısalar" isteği önce yanlış anlaşılıp sayfalar daha da kısaltılmıştı. Ekonomi sayfasında güncel gerçek rakam yanıltıcı olabileceği için rakamlar ders örneği olarak işaretlendi.
-- **Bizim müdahalemiz:** 
+- **Bizim müdahalemiz:** Konuları ben seçtim. İlk taslak 'ben' diliyle ve kısa yazılmıştı; nesnel dile çevrilmesini ve sayfaların uzatılmasını istedim. Son metni okuyup onayladım.
 - **Ders çıkarımı:** Soruların cevabı yalnızca notlarda olan, sayfaya özgü ayrıntılara (kişisel rakamlar, gün ve saatler) dayanmalı; yoksa model genel bilgisiyle cevap verip aramayı ölçmemizi bozar.
