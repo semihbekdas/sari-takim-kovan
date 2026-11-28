@@ -34,6 +34,7 @@ def make_test_settings(**overrides: Any) -> Settings:
         "embedding_api_key": None,
         "jwt_secret": TEST_JWT_SECRET,
         "session_cookie_secure": False,
+        "indexing_enabled": False,  # arka plan döngüsü testleri etkilemesin
     }
     values.update(overrides)
     return Settings(_env_file=None, **values)

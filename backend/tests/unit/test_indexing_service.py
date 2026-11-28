@@ -12,8 +12,9 @@ from qdrant_client import QdrantClient
 from kovan.application.errors import ExternalServiceError
 from kovan.application.indexing_service import UNEXPECTED_ERROR_CODE, IndexingService
 from kovan.application.ports.indexing import PageToIndex
+from kovan.domain.content import PageContent
 from kovan.infrastructure.ai.fake import FakeEmbeddingProvider
-from kovan.infrastructure.vector.qdrant_index import QdrantVectorIndex
+from kovan.infrastructure.vector.qdrant_index import DEFAULT_COLLECTION, QdrantVectorIndex
 
 NOW = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 DIM = 64
@@ -25,20 +26,24 @@ class FakePendingPages:
     """`PendingPages` port'unun test karşılığı: verilen sayfaları döner, işaretlemeleri kaydeder."""
 
     pages: list[PageToIndex]
-    requests: list[tuple[datetime, int]] = field(default_factory=list)
+    requests: list[tuple[datetime, datetime, int]] = field(default_factory=list)
     indexed: list[tuple[UUID, int]] = field(default_factory=list)
     failed: list[tuple[UUID, int, str, datetime]] = field(default_factory=list)
 
-    def pages_to_index(self, *, settled_before: datetime, limit: int) -> Sequence[PageToIndex]:
-        self.requests.append((settled_before, limit))
+    def pages_to_index(
+        self, *, now: datetime, settled_before: datetime, limit: int
+    ) -> Sequence[PageToIndex]:
+        self.requests.append((now, settled_before, limit))
         return self.pages[:limit]
 
-    def mark_indexed(self, *, page_id: UUID, version: int) -> None:
+    def mark_indexed(self, *, owner_id: UUID, page_id: UUID, version: int) -> None:
+        assert owner_id == OWNER
         self.indexed.append((page_id, version))
 
     def mark_failed(
-        self, *, page_id: UUID, version: int, error_code: str, retry_at: datetime
+        self, *, owner_id: UUID, page_id: UUID, version: int, error_code: str, retry_at: datetime
     ) -> None:
+        assert owner_id == OWNER
         self.failed.append((page_id, version, error_code, retry_at))
 
 
@@ -50,9 +55,10 @@ class Part:
     text: str
 
 
-def split_lines(title: str, content: Any) -> Sequence[Part]:
-    """Test parçalayıcısı: içerik bir metin listesi, her eleman bir parça."""
-    return [Part(heading_path=f"{title} › {i}", text=text) for i, text in enumerate(content)]
+def split_lines(title: str, content: PageContent) -> Sequence[Part]:
+    """Test parçalayıcısı: her paragraf bir parça."""
+    lines = content.to_plain_text().splitlines()
+    return [Part(heading_path=f"{title} › {i}", text=text) for i, text in enumerate(lines)]
 
 
 class FailingEmbeddings:
@@ -80,9 +86,14 @@ def vector_index() -> Iterator[QdrantVectorIndex]:
     client.close()
 
 
-def _page(content: list[str], *, deleted: bool = False, attempts: int = 0) -> PageToIndex:
+def _paragraphs(lines: list[str]) -> list[dict[str, Any]]:
+    """Veritabanındaki biçimde içerik: her satır bir paragraf bloğu."""
+    return [{"type": "paragraph", "content": [{"type": "text", "text": line}]} for line in lines]
+
+
+def _page(lines: list[str], *, deleted: bool = False, attempts: int = 0) -> PageToIndex:
     return PageToIndex(
-        uuid4(), OWNER, "Not", content, version=3, deleted=deleted, attempts=attempts
+        uuid4(), OWNER, "Not", _paragraphs(lines), version=3, deleted=deleted, attempts=attempts
     )
 
 
@@ -114,7 +125,17 @@ def test_only_pages_whose_editing_settled_are_requested(vector_index: QdrantVect
 
     _service(queue, vector_index).run_once(NOW)
 
-    assert queue.requests == [(NOW - timedelta(seconds=10), 10)]
+    assert queue.requests == [(NOW, NOW - timedelta(seconds=10), 10)]
+
+
+def test_collection_is_created_on_the_first_round() -> None:
+    client = QdrantClient(":memory:")
+    index = QdrantVectorIndex(client, dimension=DIM)  # koleksiyon henüz yok
+
+    _service(FakePendingPages([]), index).run_once(NOW)
+
+    assert client.collection_exists(DEFAULT_COLLECTION)
+    client.close()
 
 
 def test_page_is_chunked_embedded_stored_and_marked_indexed(
@@ -219,3 +240,19 @@ def test_retry_delay_counts_from_the_moment_of_failure(vector_index: QdrantVecto
     _service(queue, vector_index, FailingEmbeddings(), failure_time=failed_at).run_once(NOW)
 
     assert queue.failed[0][3] == failed_at + timedelta(seconds=20)
+
+
+def test_page_with_invalid_stored_content_fails_alone(vector_index: QdrantVectorIndex) -> None:
+    # Kurallar sonradan sıkılaşırsa eski bir sayfa artık geçersiz olabilir (R-06). O sayfa
+    # "başarısız" işaretlenir; turdaki diğer sayfalar işlenmeye devam eder.
+    broken = replace(_page([]), content=[{"type": "table"}])
+    healthy = _page(["metin"])
+    queue = FakePendingPages([broken, healthy])
+
+    report = _service(queue, vector_index).run_once(NOW)
+
+    assert [(page_id, code) for page_id, _, code, _ in queue.failed] == [
+        (broken.page_id, UNEXPECTED_ERROR_CODE)
+    ]
+    assert queue.indexed == [(healthy.page_id, 3)]
+    assert report.indexed == 1

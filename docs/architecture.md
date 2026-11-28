@@ -171,7 +171,7 @@ sequenceDiagram
             else
                 L->>L: chunk_page() (ADR-009)
                 L->>E: embed(parçalar)
-                L->>Q: page_id'nin noktalarını sil + yeni noktaları yaz
+                L->>Q: yeni noktaları yaz, sayfanın fazla kalan eski noktalarını sil
             end
             alt başarılı
                 L->>DB: indexed_version = okunan sürüm, index_attempts = 0,<br/>index_error = NULL, index_retry_at = NULL
@@ -187,6 +187,7 @@ sequenceDiagram
 - **Kilit tutulmaz:** Dış API çağrısı sırasında satır kilitlenmez; otomatik kayıt beklemez. İndeksleme sırasında yeni bir kayıt gelirse sayfa yine "bekliyor" kalır ve sonraki turda tekrar işlenir (nihai tutarlılık).
 - **İdempotent:** Nokta kimlikleri `uuid5(page_id:chunk_no)`; aynı sürümün iki kez işlenmesi aynı sonucu verir.
 - **Kalıcı silme** *(çöp kutusu, Should)*: Satır silinmeden önce sayfanın ve alt sayfalarının Qdrant noktaları silinir; Qdrant'a ulaşılamazsa satır silinmez ve istek 503 döner. Döngü yalnızca `pages` satırlarını gördüğü için, aksi halde vektörler Qdrant'ta öksüz kalırdı.
+- **Başlatma ve durdurma:** Döngü uygulamayla birlikte başlar (`main.py`, `INDEXING_ENABLED`); bekleyen sayfaları `SqlPendingPages` (`infrastructure/db/pending_pages.py`) bulur. Qdrant koleksiyonu ilk turda kurulur; Qdrant o an kapalıysa uygulama yine açılır, kurulum sonraki turda denenir. Kapanırken süren tur bitirilir, sonra döngü durur.
 - **Tek döngü** varsayımı: Backend tek kopya çalışır. Birden çok kopya gerekirse satır kilitleme (`FOR UPDATE SKIP LOCKED`) eklenir (bilinen sınır).
 
 ### 5.3 Anlamsal arama
@@ -274,14 +275,15 @@ Tüm ayarlar ortam değişkenlerinden (`pydantic-settings`); örnekler `.env.exa
 | `EMBEDDING_BASE_URL` / `EMBEDDING_MODEL` / `EMBEDDING_DIM` | `https://api.openai.com/v1` / `text-embedding-3-small` / `1536` | Model değişirse indeks yeniden üretilir (ADR-005, "Kurtarma") |
 | `CHAT_API_KEY` / `EMBEDDING_API_KEY` | *(gizli)* | Asla commit'lenmez. Her anahtar yalnızca kendi sağlayıcısına gönderilir (sohbet: `CHAT_PROVIDER` / `CHAT_BASE_URL`, embedding: `EMBEDDING_BASE_URL`); biri boşsa diğerine düşülmez |
 | `RAG_TOP_K` / `SEARCH_MIN_SCORE` | `6` / `0.35` | Değerlendirme setiyle ayarlanır |
-| `CHUNK_MAX_CHARS` | `1000` | Parça üst sınırı, karakter (ADR-009). Değişirse tüm sayfalar yeniden indekslenir (ADR-005) |
+| `CHUNK_MAX_CHARS` | `1000` | Parça üst sınırı, karakter (ADR-009). Değişirse tüm sayfalar yeniden indekslenmeli (ADR-005, "Kurtarma") |
 | `CHAT_MAX_TOKENS` / `CHAT_EFFORT` / `AI_TIMEOUT_SECONDS` | `4096` / `low` / `30` | Cevap üst sınırı (Claude'da düşünme token'ları dahil), Claude effort seviyesi, istek zaman aşımı (SDK başarısız isteği bir kez yeniden dener; en kötü durumda ~2 × zaman aşımı) |
 | `INDEX_SETTLE_SECONDS` | `10` | Düzenleme bittikten sonra indeksleme beklemesi |
+| `INDEXING_ENABLED` | `true` | Arka plan indeksleme döngüsü. Testlerde kapalıdır; testler turu kendisi çalıştırır |
 | `JWT_SECRET` | *(rastgele 32+ bayt)* | Asla commit'lenmez; `.env.example`'da boş, herkes kendi değerini üretir. Boşsa veya 32 karakterden kısaysa uygulama açılmaz |
 | `SESSION_COOKIE_SECURE` | `false` | Oturum çerezine `Secure` ekler; prod'da (HTTPS) `true` (ADR-008) |
 | `LOG_LEVEL` | `INFO` | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` |
 
-Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`, `INDEX_SETTLE_SECONDS`) onları kullanan özellikle birlikte `config.py`'ye eklenir; o zamana kadar `.env`'de değiştirilmeleri etkisizdir.
+Tablodaki bazı değişkenler (`RAG_TOP_K`, `SEARCH_MIN_SCORE`) onları kullanan özellikle birlikte `config.py`'ye eklenir; o zamana kadar `.env`'de değiştirilmeleri etkisizdir.
 
 ## 9. Güvenlik
 

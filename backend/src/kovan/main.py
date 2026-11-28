@@ -5,26 +5,33 @@
 """
 
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
+from functools import partial
 
 from fastapi import FastAPI
 from qdrant_client import QdrantClient
+from sqlalchemy import Engine
 
 from kovan.api.errors import register_error_handlers
 from kovan.api.middleware import register_middleware
 from kovan.api.routers import auth, health, pages
 from kovan.application.auth_service import SESSION_LIFETIME, AuthService
+from kovan.application.chunking import chunk_page
 from kovan.application.health import ReadinessService
+from kovan.application.indexing_service import IndexingService
 from kovan.application.page_service import PageService
 from kovan.config import Settings, load_settings
 from kovan.container import Container
+from kovan.infrastructure.ai.factory import build_embedding_provider
 from kovan.infrastructure.db.engine import create_db_engine
 from kovan.infrastructure.db.page_repository import SqlPageTransactions
+from kovan.infrastructure.db.pending_pages import SqlPendingPages
 from kovan.infrastructure.db.probe import DatabaseProbe
 from kovan.infrastructure.db.users import SqlUserRepository
+from kovan.infrastructure.index_loop import running_index_loop
 from kovan.infrastructure.security.argon2 import Argon2PasswordHasher
 from kovan.infrastructure.security.jwt import JwtTokenService
-from kovan.infrastructure.vector.qdrant_index import QdrantProbe
+from kovan.infrastructure.vector.qdrant_index import QdrantProbe, QdrantVectorIndex
 from kovan.logging_config import configure_logging
 
 API_PREFIX = "/api/v1"
@@ -50,16 +57,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         pages=PageService(SqlPageTransactions(engine)),
         session_cookie_secure=settings.session_cookie_secure,
     )
+    # Kapalıyken embedding sağlayıcısı da kurulmaz; böylece API anahtarı istenmez.
+    indexing = _build_indexing(settings, engine, qdrant) if settings.indexing_enabled else None
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        try:
+        # Kapanışta adımlar ters sırayla çalışır: önce indeksleme döngüsü durur, sonra veritabanı
+        # ve Qdrant bağlantıları kapanır. Biri hata verse bile diğerleri yine çalışır.
+        async with AsyncExitStack() as on_shutdown:
+            on_shutdown.callback(qdrant.close)
+            on_shutdown.callback(engine.dispose)
+            if indexing is not None:
+                await on_shutdown.enter_async_context(running_index_loop(indexing.run_once))
             yield
-        finally:
-            try:
-                engine.dispose()
-            finally:
-                qdrant.close()  # veritabanı kapanırken hata olsa bile Qdrant bağlantısı kapanır
 
     app = FastAPI(
         title="Kovan API",
@@ -76,3 +86,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth.router, prefix=API_PREFIX)
     app.include_router(pages.router, prefix=API_PREFIX)
     return app
+
+
+def _build_indexing(settings: Settings, engine: Engine, qdrant: QdrantClient) -> IndexingService:
+    """Arka plan indeksleme servisi (ADR-005): veritabanı → parçalama → embedding → Qdrant."""
+    return IndexingService(
+        SqlPendingPages(engine),
+        partial(chunk_page, max_chars=settings.chunk_max_chars),
+        build_embedding_provider(settings),
+        QdrantVectorIndex(qdrant, dimension=settings.embedding_dim),
+        settle_seconds=settings.index_settle_seconds,
+    )

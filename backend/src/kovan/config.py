@@ -51,8 +51,12 @@ class Settings(BaseSettings):
     # Prod'da (HTTPS) true olmalı; yerelde http üzerinden çalışmak için varsayılan false.
     session_cookie_secure: bool = False
 
-    # Parçalama (ADR-009). Değişirse tüm sayfalar yeniden indekslenir (ADR-005).
+    # Parçalama (ADR-009). Değişirse tüm sayfalar yeniden indekslenmeli (ADR-005, "Kurtarma").
     chunk_max_chars: PositiveInt = 1000
+
+    # Arka plan indeksleme döngüsü (ADR-005). Testlerde kapatılır; testler turu kendisi çalıştırır.
+    indexing_enabled: bool = True
+    index_settle_seconds: PositiveInt = 10  # düzenleme bittikten sonra bekleme (AC-12.4)
 
     @field_validator(
         "chat_base_url",

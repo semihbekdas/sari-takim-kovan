@@ -1,15 +1,20 @@
 """İndeksleme döngüsü: sahte tur fonksiyonu, gerçek asyncio zamanlayıcısı ve stop olayıyla."""
 
 import asyncio
-from collections.abc import Iterator
+import time
+from collections.abc import Iterator, MutableMapping
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 import structlog
+from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
 from kovan.application.indexing_service import IndexRunReport
-from kovan.infrastructure.index_loop import run_index_loop
+from kovan.infrastructure.index_loop import run_index_loop, running_index_loop
+from kovan.main import create_app
+from tests.fakes import make_test_settings
 
 NOW = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 NOTHING_DONE = IndexRunReport()
@@ -112,3 +117,46 @@ def test_unexpected_page_errors_are_logged_with_details() -> None:
     assert len(failures) == 1
     assert failures[0]["exc_info"] is error
     assert failures[0]["log_level"] == "error"
+
+
+def test_running_index_loop_starts_in_background_and_stops_on_exit() -> None:
+    rounds = FakeRounds()
+
+    async def scenario() -> asyncio.Task[None]:
+        async with running_index_loop(rounds, interval_seconds=60) as task:
+            while not rounds.calls:
+                await asyncio.sleep(0.001)
+            assert not task.done()
+        return task
+
+    task = asyncio.run(asyncio.wait_for(scenario(), timeout=2))
+
+    assert task.done()
+    assert len(rounds.calls) == 1
+
+
+def test_app_runs_the_index_loop_until_shutdown() -> None:
+    # Veritabanı ve Qdrant adresleri bilerek ulaşılamaz: İlk tur hata verir ve loglanır, uygulama
+    # ayakta kalır, kapanırken döngü durur (durmasaydı test bitmezdi).
+    app = create_app(make_test_settings(indexing_enabled=True))
+
+    with capture_logs() as logs, TestClient(app):
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and not _has_event(logs, "index_round_failed"):
+            time.sleep(0.01)
+
+    assert _has_event(logs, "index_round_failed")
+
+
+def _has_event(logs: list[MutableMapping[str, Any]], event: str) -> bool:
+    return any(entry["event"] == event for entry in logs)
+
+
+def test_app_without_indexing_needs_no_embedding_key() -> None:
+    # Gerçek embedding sağlayıcısı seçili ama anahtar yok: Döngü kapalıyken uygulama yine açılır.
+    settings = make_test_settings(
+        indexing_enabled=False, embedding_provider="openai_compatible", embedding_api_key=None
+    )
+
+    with TestClient(create_app(settings)) as client:
+        assert client.get("/api/v1/health").status_code == 200
