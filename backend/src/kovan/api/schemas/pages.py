@@ -20,6 +20,13 @@ class UpdatePageRequest(BaseModel):
     version: int  # istemcinin elindeki sürüm (R-07)
 
 
+class TreeNodeResponse(BaseModel):
+    id: UUID
+    parent_id: UUID | None
+    title: str
+    has_children: bool
+
+
 class BreadcrumbResponse(BaseModel):
     id: UUID
     title: str

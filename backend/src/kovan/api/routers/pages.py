@@ -6,12 +6,29 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 
 from kovan.api.deps import CurrentUser, get_page_service
-from kovan.api.schemas.pages import CreatePageRequest, PageResponse, UpdatePageRequest
+from kovan.api.schemas.pages import (
+    CreatePageRequest,
+    PageResponse,
+    TreeNodeResponse,
+    UpdatePageRequest,
+)
 from kovan.application.page_service import PageService
 
 router = APIRouter(prefix="/pages", tags=["pages"])
 
 Service = Annotated[PageService, Depends(get_page_service)]
+
+
+# Sabit yol, `/{page_id}`'den önce tanımlanmalı; yoksa "tree" sayfa kimliği sanılıp 422 döner.
+@router.get("/tree")
+def get_tree(user: CurrentUser, service: Service) -> list[TreeNodeResponse]:
+    """Sol menü ağacı (US-05): kardeşler başlığa göre Türkçe alfabetik (AC-05.1)."""
+    return [
+        TreeNodeResponse(
+            id=node.id, parent_id=node.parent_id, title=node.title, has_children=node.has_children
+        )
+        for node in service.tree(owner_id=user.id)
+    ]
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
