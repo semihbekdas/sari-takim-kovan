@@ -1,17 +1,17 @@
 # Toplu Taşımanın Faydaları
 
-## Neden toplu taşıma?
+## Trafiğe etkisi
 
-Bu notları "Sürdürülebilir Kentler" seçmeli dersindeki sunumum için hazırladım. Toplu taşıma, aynı sayıda insanı özel araçlardan çok daha az yer ve yakıtla taşır. Hocanın örneğine göre dolu bir otobüs yaklaşık 40 otomobili trafikten çeker. Daha az araç, daha az trafik sıkışıklığı ve daha az park sorunu demek.
+Toplu taşıma, aynı sayıda insanı özel araçlardan çok daha az yer ve yakıtla taşır. Dolu bir otobüs yaklaşık 40 otomobili trafikten çeker. Daha az araç, daha az trafik sıkışıklığı ve park sorunu demektir.
 
 ## Çevreye etkisi
 
-Yolcu başına düşen karbon salımı toplu taşımada özel araca göre çok daha düşüktür. Raylı sistemler elektrikle çalıştığı için şehir içinde egzoz gazı ve gürültü oluşturmaz. Sunumda hava kirliliğinin astım gibi hastalıklarla ilişkisini de anlattım.
+Yolcu başına düşen karbon salımı toplu taşımada özel araca göre çok daha düşüktür. Elektrikle çalışan raylı sistemler şehir içinde egzoz gazı ve gürültü oluşturmaz.
 
-## Kendi hesabım
+## Örnek maliyet hesabı
 
-Kendi hesabıma göre okula toplu taşımayla gidip gelmek ayda yaklaşık 900 TL tutuyor. Arkadaşım Can aynı yola arabayla gidiyor ve yakıt ile otopark için ayda 4.000 TL'den fazla harcıyor. Yani toplu taşıma sayesinde ayda 3.000 TL'den fazla tasarruf ediyorum. Öğrenci kartıyla aktarmalar da indirimli.
+Örnek hesap: Bir öğrencinin okula toplu taşımayla gidip gelmesi ayda yaklaşık 900 TL tutar. Aynı yolu otomobille gidenin yakıt ve otopark gideri ayda 4.000 TL'yi geçer. Böylece toplu taşıma ayda 3.000 TL'den fazla tasarruf sağlar. Öğrenci kartıyla aktarmalar indirimlidir.
 
-## Zamanı iyi kullanmak
+## Zamanın kullanımı
 
-Metroda geçen 40 dakikalık yolculukta kitap okuyorum ya da İngilizce podcast dinliyorum. Araba kullanırken bunları yapmak mümkün değil. Sabah 08.00–09.00 arası çok kalabalık olduğu için mümkünse 07.30'daki seferi yakalamaya çalışıyorum.
+Toplu taşımada yolculuk sırasında kitap okunabilir veya podcast dinlenebilir; araba kullanırken bu mümkün değildir.

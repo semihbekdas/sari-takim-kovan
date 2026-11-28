@@ -1,21 +1,17 @@
-# Türkiye Ekonomisi Ders Notlarım
+# Türkiye Ekonomisi: Temel Kavramlar
 
-## Bu notlar hakkında
+## Not
 
-Bu notlar İktisada Giriş dersinde aldığım kişisel notlardır. Rakamların çoğu hocanın konuyu anlatmak için uydurduğu örneklerdir; gerçek istatistik değildir. Güncel veriler için TÜİK ve Merkez Bankası sayfalarına bakmak gerekiyor.
+Bu sayfa İktisada Giriş dersinin özetidir. Sayfadaki rakamlar konuyu anlatmak için verilmiş örneklerdir; gerçek istatistik değildir. Güncel veriler TÜİK ve Merkez Bankası'ndan alınmalıdır.
 
 ## Enflasyon
 
-Enflasyon, fiyatlar genel düzeyinin sürekli artmasıdır. Hocanın örneği: bir yıl önce 10 TL olan simit bugün 15 TL olursa simitteki artış yüzde 50 olur. Enflasyon yüksek olduğunda maaşı aynı kalan kişinin alım gücü düşer. Hoca, ücretlerin fiyatlardan yavaş artmasının dar gelirliyi en çok etkileyen durum olduğunu söyledi.
+Enflasyon, fiyatlar genel düzeyinin sürekli artmasıdır. Örnek: 10 TL olan simit bir yıl sonra 15 TL olursa artış yüzde 50'dir. Ücretler fiyatlardan yavaş artarsa alım gücü düşer; bu durum en çok dar gelirlileri etkiler.
 
 ## Faiz ve kur
 
-Merkez Bankası politika faizini artırınca kredi pahalılaşır, harcama azalır ve enflasyon yavaşlamaya başlar. Türk lirası değer kaybettiğinde ithal ürünler pahalanır; Türkiye enerjinin büyük kısmını ithal ettiği için bu, akaryakıt fiyatlarına hızla yansır. Sınavda "kur geçişkenliği" kavramı soruldu.
+Merkez Bankası politika faizini artırınca kredi pahalılaşır, harcama azalır ve enflasyon yavaşlamaya başlar. Türk lirası değer kaybettiğinde ithal ürünler pahalanır. Türkiye enerjinin büyük kısmını ithal ettiği için kurdaki artış akaryakıt fiyatlarına hızla yansır. Buna kur geçişkenliği denir.
 
 ## Cari açık ve ihracat
 
-Cari açık, bir ülkenin dışarıya ödediğinin dışarıdan kazandığından fazla olmasıdır. Türkiye'nin önemli ihracat kalemleri otomotiv, tekstil ve beyaz eşyadır. Turizm gelirleri açığı kapatmaya yardım eder. Ödev için turizm konusunu seçtim; teslim tarihi 15 Aralık.
-
-## Kendi bütçem
-
-Enflasyon konusunu işledikten sonra kendi aylık bütçemi tutmaya başladım. En büyük kalemlerim yurt ücreti ve yemek. Her ayın başında harçlığımın beşte birini ayrı bir hesaba koyuyorum.
+Cari açık, bir ülkenin dışarıya ödediğinin dışarıdan kazandığından fazla olmasıdır. Türkiye'nin önemli ihracat kalemleri otomotiv, tekstil ve beyaz eşyadır. Turizm gelirleri cari açığın kapanmasına yardım eder.
