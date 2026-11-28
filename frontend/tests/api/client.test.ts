@@ -46,7 +46,7 @@ describe("apiRequest", () => {
       "/api/v1/pages",
       expect.objectContaining({
         method: "POST",
-        credentials: "include",
+        credentials: "same-origin",
         body: JSON.stringify({ title: "Notlar" }),
         headers: expect.objectContaining({ "Content-Type": "application/json" }) as unknown,
       }),

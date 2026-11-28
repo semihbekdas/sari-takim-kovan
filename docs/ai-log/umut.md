@@ -91,3 +91,13 @@
 - **Yapay zekanın hataları / eksikleri:** Sayfaları yapay zeka taslak olarak yazdı; konu seçimi ve teknik doğruluk benim kontrolümde. Sahte (fake) sağlayıcıyla eş anlamlı sorular bulunamadı; bu beklenen bir durum (sahte model kelime benzerliğine bakıyor), gerçek ölçüm Semih'in betiğiyle yapılacak.
 - **Bizim müdahalemiz:** Konuları alanımdan (EEM) seçtim; formülleri (Av = −Rf/Rin, Pmax = Vth²/4Rth, RL = Rth) derslerimden kontrol ettim; eş anlamlı soruların sayfadaki kelimelerden gerçekten farklı olduğuna baktım.
 - **Ders çıkarımı:** "Bulunamadı" sorusunun konusu başka üyelerin sayfalarında da geçmemeli; tüm sete aranarak seçildi.
+
+### 2026-11-28 — Umut: sol menü sayfa ağacı (#10, 1/2)
+- **Kim:** Umut
+- **Araç / model:** Claude (claude.ai)
+- **Amaç:** Sol menüyü `GET /pages/tree` (#44) ile doldurmak; yeni sayfa ve alt sayfa eklemek (AC-03.1, AC-05.1). Breadcrumb 2. parçada.
+- **Prompt (özet):** "#10'u hazırla; 400 satırı geçerse böl."
+- **Sonuç:** `api/pages.ts` (`getPageTree`, `createPage`), `PageTree` bileşeni (TanStack Query; sayfa eklenince ağaç yenilenir ve yeni sayfa açılır; oturum yoksa "giriş yap" mesajı), `groupByParent` yardımcısı (`groupPages.ts`) (backend'in Türkçe alfabetik sırasını korur), Semih'in #24'te önerdiği `credentials: "same-origin"` düzeltmesi. 6 yeni Vitest testi.
+- **Yapay zekanın hataları / eksikleri:** Önce "bugünlük iş kalmadı" dedi; #10'un da Sprint 2'de bana atanmış olduğunu kontrol etmemişti, "emin misin" diye sorunca fark etti. İlk taslak 454 satırdı; breadcrumb 2. parçaya ayrıldı. Ayrıca aynı klasörde yalnızca büyük/küçük harfle ayrılan `PageTree.tsx` ve `pageTree.ts` dosyalarını oluşturdu; Windows bunları aynı dosya saydığı için testler benim bilgisayarımda 7 hatayla düştü. Yardımcı dosya `groupPages.ts` olarak yeniden adlandırıldı.
+- **Bizim müdahalemiz:** Sprint 2'de bana atanmış issue'ları kontrol ettirdim; testleri kendi bilgisayarımda çalıştırdım ve menünün tarayıcıda göründüğünü kontrol ettim.
+- **Ders çıkarımı:** "İş bitti" demeden önce sprintte bana atanmış tüm issue'lara bakmak gerekiyor.

@@ -74,7 +74,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
-      credentials: "include", // oturum çerezi (`kovan_session`) her istekte gider
+      credentials: "same-origin", // oturum çerezi (`kovan_session`) aynı adresteki isteklerde gider
       signal,
     });
   } catch (error) {

@@ -38,7 +38,51 @@ body {
   flex: 1;
 }
 
-.sidebar__empty {
+.page-tree {
+  margin: 0;
+  padding-left: 12px;
+  list-style: none;
+}
+
+.sidebar__nav > .page-tree {
+  padding-left: 0;
+}
+
+.page-tree__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-tree__link {
+  flex: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-tree__link:hover,
+.page-tree__link.active {
+  background: #ebebea;
+}
+
+.page-tree__add,
+.page-tree__new {
+  border: none;
+  background: none;
+  color: #91918e;
+  cursor: pointer;
+}
+
+.page-tree__new {
+  margin-bottom: 8px;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+
+.page-tree__message {
   margin: 0;
   font-size: 14px;
   color: #91918e;

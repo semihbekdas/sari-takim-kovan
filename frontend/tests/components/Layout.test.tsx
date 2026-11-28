@@ -5,11 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, NETWORK_ERROR } from "../../src/api/client";
 import { getHealth } from "../../src/api/health";
+import { getPageTree } from "../../src/api/pages";
 import { routes } from "../../src/routes";
 
 vi.mock("../../src/api/health");
+vi.mock("../../src/api/pages");
 
 function renderAt(path: string) {
+  vi.mocked(getPageTree).mockResolvedValue([]);
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   render(
