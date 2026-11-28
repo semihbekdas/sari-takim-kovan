@@ -1,4 +1,4 @@
-"""Sayfa oluşturma, görüntüleme ve kaydetme kabul testleri (US-03, US-04, US-05; #9).
+"""Sayfa oluşturma, görüntüleme, kaydetme ve ağaç kabul testleri (US-03, US-04, US-05; #9).
 
 Gerçek PostgreSQL ve gerçek oturum. `clean_users` kullanıcıları (ve CASCADE ile sayfaları) siler.
 """
@@ -166,8 +166,31 @@ def test_other_user_cannot_update_the_page(ayse: TestClient, mehmet: TestClient)
     assert ayse.get(f"{PAGES_URL}/{page['id']}").json()["title"] == "Ayşe'nin"
 
 
+@pytest.mark.ac("AC-05.1")
+def test_tree_shows_child_under_parent_and_hides_other_users_pages(
+    ayse: TestClient, mehmet: TestClient
+) -> None:
+    parent = create(ayse, title="Dersler")
+    child = create(ayse, title="Veritabanı", parent_id=parent["id"])
+    create(mehmet, title="Mehmet'in notu")
+
+    response = ayse.get(f"{PAGES_URL}/tree")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"id": parent["id"], "parent_id": None, "title": "Dersler", "has_children": True},
+        {
+            "id": child["id"],
+            "parent_id": parent["id"],
+            "title": "Veritabanı",
+            "has_children": False,
+        },
+    ]
+
+
 @pytest.mark.ac("AC-02.4")
 def test_pages_without_session_return_401(app: FastAPI) -> None:
     with TestClient(app, raise_server_exceptions=False) as anonymous:
         assert anonymous.post(PAGES_URL, json={}).status_code == 401
         assert anonymous.get(f"{PAGES_URL}/{MISSING_ID}").status_code == 401
+        assert anonymous.get(f"{PAGES_URL}/tree").status_code == 401

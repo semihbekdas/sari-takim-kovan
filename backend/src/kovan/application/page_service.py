@@ -9,11 +9,12 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from kovan.application.ports.pages import PageRef, PageRepository, PageTransactions
+from kovan.application.ports.pages import PageRef, PageRepository, PageTransactions, TreeNode
 from kovan.domain.content import PageContent
 from kovan.domain.errors import NotFoundError
 from kovan.domain.pages import Page
 
+TREE_LIMIT = 1000  # docs/api-contract.md: ağaç en fazla 1000 sayfa döndürür
 PAGE_NOT_FOUND_MESSAGE = "Sayfa bulunamadı."
 PARENT_NOT_FOUND_MESSAGE = "Üst sayfa bulunamadı."
 
@@ -52,6 +53,11 @@ class PageService:
             )
             repository.add(page)
             return _details(repository, page)
+
+    def tree(self, *, owner_id: UUID) -> list[TreeNode]:
+        """Sol menü için kullanıcının sayfaları (AC-05.1); başkasının sayfası hiç gelmez (R-04)."""
+        with self._pages.begin() as repository:
+            return repository.tree(owner_id=owner_id, limit=TREE_LIMIT)
 
     def get(self, *, owner_id: UUID, page_id: UUID) -> PageDetails:
         """Kullanıcının kendi sayfası; değilse 404 (AC-03.3, AC-03.4)."""
